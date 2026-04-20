@@ -39,11 +39,11 @@ const Contact = ({ t }) => {
 
         <div className="contact-grid">
           <div className="contact-channels">
-            <a href="https://wa.me/33699660181" target="_blank" rel="noopener" className="contact-channel">
+            <a href="https://wa.me/41794368112" target="_blank" rel="noopener" className="contact-channel">
               <div className="contact-channel-icon"><Icons.Whatsapp /></div>
               <div className="contact-channel-text">
                 <span className="mono">{t.contact.whatsapp}</span>
-                <span className="val">+33 6 99 66 01 81</span>
+                <span className="val">+41 79 436 81 12</span>
               </div>
             </a>
             <a href="tel:+41794368112" className="contact-channel">

@@ -4,7 +4,7 @@
 const WhatsAppChat = ({ t }) => {
   const [open, setOpen] = React.useState(false);
   const [msg, setMsg] = React.useState('');
-  const PHONE = '33699660181'; // E.164 without the +
+  const PHONE = '41794368112'; // E.164 without the +
   const BUSINESS_NAME = 'Nicholas · Bulles en Valais';
 
   const send = () => {
