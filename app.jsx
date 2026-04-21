@@ -34,13 +34,17 @@ function App() {
   }, [state.hero, state.agencyLayout, lang]);
 
   React.useEffect(() => {
+    const isEmbedded = window.self !== window.top;
+    if (!isEmbedded) return;
+    const ALLOWED_ORIGINS = ['https://bullesenvalais.ch', 'https://www.bullesenvalais.ch'];
     const handler = (e) => {
+      if (!ALLOWED_ORIGINS.includes(e.origin)) return;
       if (!e.data || !e.data.type) return;
       if (e.data.type === '__activate_edit_mode') setEditMode(true);
       if (e.data.type === '__deactivate_edit_mode') setEditMode(false);
     };
     window.addEventListener('message', handler);
-    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    window.parent.postMessage({ type: '__edit_mode_available' }, window.location.ancestorOrigins?.[0] || '*');
     return () => window.removeEventListener('message', handler);
   }, []);
 
@@ -48,8 +52,8 @@ function App() {
     setState(next);
     const edits = {};
     Object.keys(next).forEach(k => { if (next[k] !== state[k]) edits[k] = next[k]; });
-    if (Object.keys(edits).length) {
-      window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    if (Object.keys(edits).length && window.self !== window.top) {
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, window.location.ancestorOrigins?.[0] || '*');
     }
   };
 
@@ -70,7 +74,7 @@ function App() {
       <Footer lang={lang} />
 
       <WhatsAppChat t={t} />
-      <Tweaks state={state} setState={updateState} open={editMode} lang={lang} />
+      {editMode && <Tweaks state={state} setState={updateState} open={editMode} lang={lang} />}
     </>
   );
 }
