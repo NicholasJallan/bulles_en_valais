@@ -63,9 +63,13 @@ const Contact = ({ t }) => {
 
             <div style={{marginTop: 40, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: 13, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7}}>
               <span className="mono" style={{display:'block', marginBottom: 10, letterSpacing: '0.14em'}}>{t.contact.certs}</span>
+              DEJEPS{' '}<a href="https://recherche-educateur.sports.gouv.fr/CartePro/07425ED0350" target="_blank" rel="noopener noreferrer" style={{color:'inherit', textDecoration:'underline', textUnderlineOffset:3}}>07425ED0350</a><br/>
+              <br/>
               FFESSM E3 #28663<br/>
               PADI MSDT #525399<br/>
-              SDI-TDI #35812
+              SDI-TDI #35812<br/>
+              <br/>
+              CAH 2B
             </div>
           </div>
 
