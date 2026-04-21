@@ -19,16 +19,20 @@ The Pi serves the site from `/var/www/html/dive` via nginx. There is no git repo
 
 ```bash
 # Single file
-rsync -av --rsync-path="sudo rsync" --chown=www-data:www-data \
+rsync -av --rsync-path="sudo rsync" \
+  --exclude='.git' --exclude='.venv' --exclude='.idea' \
   path/to/file.jsx pi@bullesenvalais.ch:/var/www/html/dive/path/to/
 
 # Whole project (excluding git/venv/idea)
-rsync -av --rsync-path="sudo rsync" --chown=www-data:www-data \
+rsync -av --rsync-path="sudo rsync" \
   --exclude='.git' --exclude='.venv' --exclude='.idea' \
   /Users/nicholas/projects/bulles_en_valais/ pi@bullesenvalais.ch:/var/www/html/dive/
+
+# Toujours corriger les permissions après rsync (macOS rsync ne supporte pas --chown)
+ssh pi@bullesenvalais.ch "sudo chown -R www-data:www-data /var/www/html/dive"
 ```
 
-> `--chown=www-data:www-data` est obligatoire : sans lui, les fichiers sont copiés avec le propriétaire Mac (uid 501) et nginx (`www-data`) ne peut pas les lire → 403.
+> Le `chown` est obligatoire après chaque rsync : sans lui, les fichiers sont copiés avec le propriétaire Mac (uid 501) et nginx (`www-data`) ne peut pas les lire → 403.
 
 After nginx config changes: `ssh pi@bullesenvalais.ch "sudo nginx -t && sudo systemctl reload nginx"`
 
