@@ -40,6 +40,8 @@ After nginx config changes: `ssh pi@bullesenvalais.ch "sudo nginx -t && sudo sys
 
 Lives at `/etc/nginx/sites-available/bullesenvalais` on the Pi. The `dive` server block serves `dive.bullesenvalais.ch` from `/var/www/html/dive` with `index index.html` (static, no PHP).
 
+Security headers are set in the `dive` server block only. The `script-src` directive includes both `'unsafe-inline'` and `'unsafe-eval'` because Babel Standalone (no-build architecture) fetches JSX files via XHR, compiles them, and injects the result as inline scripts into the DOM — both flags are required for this to work.
+
 ## Architecture
 
 ### No-build stack
