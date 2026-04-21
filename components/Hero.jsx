@@ -1,6 +1,6 @@
 const Hero = ({ mode, t }) => {
-  const HERO_IMG = 'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=2400&q=85';
-  const HERO_MIN = 'https://images.unsplash.com/photo-1551789897-da88ee0a7b4d?w=1400&q=85';
+  const HERO_IMG = 'images/rosel-2400.jpg';
+  const HERO_MIN = 'images/rosel-1400.jpg';
 
   if (mode === 'split') {
     return (
