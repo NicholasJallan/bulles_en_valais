@@ -143,7 +143,7 @@ const TRANSLATIONS = {
       eyebrow: '08 — Témoignages',
       title_1: 'Ils sont passés',
       title_em: 'par ici.',
-      lead: "Les retours d'élèves sont en cours de collecte. Cette section évoluera à mesure que les formations se succèdent.",
+      lead: "Ils ont plongé avec moi — leurs mots valent mieux que les miens.",
       cta: 'Partager un retour',
       items: [
         {
@@ -364,7 +364,7 @@ const TRANSLATIONS = {
       eyebrow: '08 — Testimonials',
       title_1: 'They came',
       title_em: 'through here.',
-      lead: 'Student feedback is currently being collected. This section will grow as more courses run.',
+      lead: "They dived with me — their words say it better than mine.",
       cta: 'Share feedback',
       items: [
         {
