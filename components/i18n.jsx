@@ -166,6 +166,11 @@ const TRANSLATIONS = {
           course: 'Nitrox · Deep · Étanche · Niveau 3 · RIFAP · Rescue',
           text: "J'ai passé plusieurs certifications avec Nicholas (Nitrox, Deep, étanche, ainsi que Niveau 3, RIFAP et Rescue), et l'expérience a été vraiment top du début à la fin.\n\nTrès pédagogue et à l'écoute, il sait s'adapter à chacun, ce qui permet de progresser rapidement tout en prenant plaisir à plonger.\n\nOn se sent en confiance, bien encadré, et on progresse rapidement.\n\nJe recommande sans hésiter.",
         },
+        {
+          author: 'Guillaume Lejeune',
+          course: 'PADI Open Water',
+          text: "Open water fait avec Nicholas, au top 👌\nUne super approche de la plongée, qui donne envie de continuer ! …",
+        },
       ],
     },
     faq: {
@@ -381,6 +386,11 @@ const TRANSLATIONS = {
           author: 'Marthe Triolet',
           course: 'Nitrox · Deep · Étanche · Niveau 3 · RIFAP · Rescue',
           text: "J'ai passé plusieurs certifications avec Nicholas (Nitrox, Deep, étanche, ainsi que Niveau 3, RIFAP et Rescue), et l'expérience a été vraiment top du début à la fin.\n\nTrès pédagogue et à l'écoute, il sait s'adapter à chacun, ce qui permet de progresser rapidement tout en prenant plaisir à plonger.\n\nOn se sent en confiance, bien encadré, et on progresse rapidement.\n\nJe recommande sans hésiter.",
+        },
+        {
+          author: 'Guillaume Lejeune',
+          course: 'PADI Open Water',
+          text: "Open water fait avec Nicholas, au top 👌\nUne super approche de la plongée, qui donne envie de continuer ! …",
         },
       ],
     },
