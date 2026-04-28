@@ -156,6 +156,11 @@ const TRANSLATIONS = {
           course: 'PADI Open Water · CMAS Niveau 1',
           text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
         },
+        {
+          author: 'Alexandre Fosty',
+          course: 'PADI Open Water',
+          text: "Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘",
+        },
       ],
     },
     faq: {
@@ -361,6 +366,11 @@ const TRANSLATIONS = {
           author: 'Florent Quesnel',
           course: 'PADI Open Water · CMAS Niveau 1',
           text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
+        },
+        {
+          author: 'Alexandre Fosty',
+          course: 'PADI Open Water',
+          text: "Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘",
         },
       ],
     },
