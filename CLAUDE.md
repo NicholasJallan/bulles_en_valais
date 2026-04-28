@@ -58,6 +58,8 @@ Each `.jsx` file in `components/` is a self-contained React component that recei
 
 All copy lives in `components/i18n.jsx` as a single `TRANSLATIONS` object (`fr` / `en`). The `useT(lang)` hook (defined in `i18n.jsx`, exposed as `window.useT`) returns the correct sub-tree. To add or change any visible text, edit only `i18n.jsx`.
 
+**FR/EN parity is mandatory.** Every change to `i18n.jsx` must be applied to both the `fr` and `en` subtrees — same keys, same values (translated), same structure. Never update one language without updating the other.
+
 ### Design tokens
 
 CSS custom properties defined in the `<style>` block of `index.html`:
