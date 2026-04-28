@@ -132,7 +132,8 @@ const TRANSLATIONS = {
           items: [
             { num: '01', name: 'Enriched Air Nitrox', sub: 'EANx ≤ 40 %', desc: "Mélanges suroxygénés jusqu'à 40 % d'O₂ pour des plongées sans déco plus longues. Prérequis : certification OW.", price: 'CHF 290' },
             { num: '02', name: 'Advanced Nitrox', sub: 'EANx 21–100 %', desc: "Utilisation de mélanges enrichis jusqu'à 100 % pour les paliers de décompression. Introduction aux tables tech. Prérequis : TDI Nitrox ou équivalent.", price: 'CHF 390' },
-            { num: '03', name: 'Decompression Procedures', sub: 'Deco multi-paliers', desc: "Planification de plongées décompressives, gestion des paliers obligatoires, procédures d'urgence. Prérequis : Advanced Nitrox.", price: 'CHF 590' },
+            { num: '03', name: 'Decompression Procedures', sub: 'Deco multi-paliers', desc: "Planification de plongées décompressives, gestion des paliers obligatoires, procédures d'urgence. Prérequis : Advanced Nitrox.", price: 'CHF 390' },
+            { num: '04', name: 'DPV Diver', sub: 'Scooter sous-marin', desc: "Pilotage sécurisé d'un propulseur sous-marin (DPV) : maniabilité, navigation, gestion de la flottabilité et procédures d'urgence. Prérequis : certification OW + 25 plongées.", price: 'CHF 150' },
           ],
         },
         ffessm: {
@@ -395,7 +396,8 @@ const TRANSLATIONS = {
           items: [
             { num: '01', name: 'Enriched Air Nitrox', sub: 'EANx ≤ 40 %', desc: 'Oxygen-enriched mixes up to 40% O₂ for longer no-deco dives. Prerequisite: OW certification.', price: 'CHF 290' },
             { num: '02', name: 'Advanced Nitrox', sub: 'EANx 21–100 %', desc: 'Enriched mixes up to 100% for decompression stops. Introduction to technical tables. Prerequisite: TDI Nitrox or equivalent.', price: 'CHF 390' },
-            { num: '03', name: 'Decompression Procedures', sub: 'Multi-stop deco', desc: 'Planning and executing decompression dives, managing mandatory stops, emergency procedures. Prerequisite: Advanced Nitrox.', price: 'CHF 590' },
+            { num: '03', name: 'Decompression Procedures', sub: 'Multi-stop deco', desc: 'Planning and executing decompression dives, managing mandatory stops, emergency procedures. Prerequisite: Advanced Nitrox.', price: 'CHF 390' },
+            { num: '04', name: 'DPV Diver', sub: 'Underwater scooter', desc: 'Safe operation of a diver propulsion vehicle (DPV): handling, navigation, buoyancy management and emergency procedures. Prerequisite: OW certification + 25 logged dives.', price: 'CHF 150' },
           ],
         },
         ffessm: {
