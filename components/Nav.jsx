@@ -24,7 +24,7 @@ const Nav = ({ heroMode, lang, setLang, t }) => {
       <nav className={navClass}>
         <a href="#top" className="nav-logo">
           <span className="nav-logo-mark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.2"/><circle cx="15" cy="6" r="1" stroke="currentColor" strokeWidth="1.2"/></svg>
+            <img src="images/logo.png" width="14" height="14" alt="" />
           </span>
           <span>Bulles en Valais</span>
         </a>
