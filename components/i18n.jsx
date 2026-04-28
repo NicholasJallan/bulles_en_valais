@@ -147,27 +147,27 @@ const TRANSLATIONS = {
       cta: 'Partager un retour',
       items: [
         {
-          author: 'Maude Maréchal',
+          author: 'Maude M.',
           course: 'PADI Open Water + Dry Suit',
           text: "J'ai passé mon PADI Open water avec Nicholas (+dry suit car fait en hiver), et la formation était très qualitative. Très bon accompagnement, et formation qui m'a donné un niveau au top. J'ai pu plonger au Mexique en toute confiance, et les accompagnateurs ont confirmé que j'avais eu une excellente formation 👌\nMerci Nicholas !",
         },
         {
-          author: 'Florent Quesnel',
+          author: 'Florent Q.',
           course: 'PADI Open Water · CMAS Niveau 1',
           text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
         },
         {
-          author: 'Alexandre Fosty',
+          author: 'Alexandre F.',
           course: 'PADI Open Water',
           text: "Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘",
         },
         {
-          author: 'Marthe Triolet',
+          author: 'Marthe T.',
           course: 'Nitrox · Deep · Étanche · Niveau 3 · RIFAP · Rescue',
           text: "J'ai passé plusieurs certifications avec Nicholas (Nitrox, Deep, étanche, ainsi que Niveau 3, RIFAP et Rescue), et l'expérience a été vraiment top du début à la fin.\n\nTrès pédagogue et à l'écoute, il sait s'adapter à chacun, ce qui permet de progresser rapidement tout en prenant plaisir à plonger.\n\nOn se sent en confiance, bien encadré, et on progresse rapidement.\n\nJe recommande sans hésiter.",
         },
         {
-          author: 'Guillaume Lejeune',
+          author: 'Guillaume L.',
           course: 'PADI Open Water',
           text: "Open water fait avec Nicholas, au top 👌\nUne super approche de la plongée, qui donne envie de continuer ! …",
         },
@@ -368,27 +368,27 @@ const TRANSLATIONS = {
       cta: 'Share feedback',
       items: [
         {
-          author: 'Maude Maréchal',
+          author: 'Maude M.',
           course: 'PADI Open Water + Dry Suit',
           text: "J'ai passé mon PADI Open water avec Nicholas (+dry suit car fait en hiver), et la formation était très qualitative. Très bon accompagnement, et formation qui m'a donné un niveau au top. J'ai pu plonger au Mexique en toute confiance, et les accompagnateurs ont confirmé que j'avais eu une excellente formation 👌\nMerci Nicholas !",
         },
         {
-          author: 'Florent Quesnel',
+          author: 'Florent Q.',
           course: 'PADI Open Water · CMAS Niveau 1',
           text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
         },
         {
-          author: 'Alexandre Fosty',
+          author: 'Alexandre F.',
           course: 'PADI Open Water',
           text: "Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘",
         },
         {
-          author: 'Marthe Triolet',
+          author: 'Marthe T.',
           course: 'Nitrox · Deep · Étanche · Niveau 3 · RIFAP · Rescue',
           text: "J'ai passé plusieurs certifications avec Nicholas (Nitrox, Deep, étanche, ainsi que Niveau 3, RIFAP et Rescue), et l'expérience a été vraiment top du début à la fin.\n\nTrès pédagogue et à l'écoute, il sait s'adapter à chacun, ce qui permet de progresser rapidement tout en prenant plaisir à plonger.\n\nOn se sent en confiance, bien encadré, et on progresse rapidement.\n\nJe recommande sans hésiter.",
         },
         {
-          author: 'Guillaume Lejeune',
+          author: 'Guillaume L.',
           course: 'PADI Open Water',
           text: "Open water fait avec Nicholas, au top 👌\nUne super approche de la plongée, qui donne envie de continuer ! …",
         },
