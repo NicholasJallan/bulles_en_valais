@@ -684,6 +684,48 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
 .specialties .eyebrow { color: rgba(240,237,230,0.6); }
 .specialties .eyebrow::before { background: rgba(240,237,230,0.4); }
 
+.spec-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.spec-tab {
+  background: none;
+  border: none;
+  color: rgba(240,237,230,0.4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 28px 12px 0;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+.spec-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 28px;
+  height: 2px;
+  background: var(--accent-soft);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s;
+}
+.spec-tab.active { color: rgba(240,237,230,0.9); }
+.spec-tab.active::after { transform: scaleX(1); }
+.spec-tab:hover { color: rgba(240,237,230,0.65); }
+.spec-tab-lead {
+  font-size: 13px;
+  color: rgba(240,237,230,0.55);
+  margin-bottom: 28px;
+  margin-top: 20px;
+  max-width: 680px;
+  line-height: 1.6;
+}
 .spec-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -715,6 +757,14 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
   color: #fff;
 }
 .spec-name em { color: var(--accent-soft); font-style: italic; }
+.spec-equiv {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(240,237,230,0.28);
+  margin-top: 8px;
+  text-transform: uppercase;
+}
 .spec-desc {
   font-size: 13px;
   color: rgba(240,237,230,0.7);
