@@ -11,7 +11,7 @@ const About = ({ t }) => (
 
       <div className="about-grid">
         <div className="about-portrait reveal">
-          <div className="about-portrait-placeholder">{t.about.portrait_ph}</div>
+          <img src="images/nicholas.jpg" alt={t.about.portrait_alt} loading="lazy" />
         </div>
 
         <div className="about-text reveal">
