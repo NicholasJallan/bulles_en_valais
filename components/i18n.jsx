@@ -172,7 +172,7 @@ const TRANSLATIONS = {
       phone: 'Téléphone · Suisse',
       email: 'Email',
       certs: 'Certifications',
-      form: { name: 'Nom', email: 'Email', phone: 'Téléphone (optionnel)', interest: 'Je suis intéressé·e par', message: 'Votre message', namePh: 'Votre nom', emailPh: 'vous@exemple.ch', phonePh: '+41 …', messagePh: "Niveau actuel, disponibilités, questions, projet de voyage…", submit: 'Envoyer le message', success: 'Merci — votre message a bien été envoyé. Je vous réponds au plus vite.', error: "Erreur d'envoi. Merci de réessayer ou d'utiliser WhatsApp." },
+      form: { name: 'Nom', email: 'Email', phone: 'Téléphone (optionnel)', interest: 'Je suis intéressé·e par', message: 'Votre message', namePh: 'Votre nom', emailPh: 'vous@exemple.ch', phonePh: '+41 …', messagePh: "Niveau actuel, disponibilités, questions, projet de voyage…", submit: 'Envoyer le message', success: 'Merci — votre message a bien été envoyé. Je vous réponds au plus vite.', error: "Erreur d'envoi. Merci de réessayer ou d'utiliser WhatsApp.", sendAnother: 'Envoyer un autre message' },
       interests: [
         { v: 'baptism', l: 'Baptême — Discover Scuba' },
         { v: 'padi-owd', l: 'PADI Open Water Diver' },
@@ -368,7 +368,7 @@ const TRANSLATIONS = {
       phone: 'Phone · Switzerland',
       email: 'Email',
       certs: 'Certifications',
-      form: { name: 'Name', email: 'Email', phone: 'Phone (optional)', interest: "I'm interested in", message: 'Your message', namePh: 'Your name', emailPh: 'you@example.com', phonePh: '+41 …', messagePh: 'Current level, availability, questions, travel plans…', submit: 'Send the message', success: 'Thanks — your message is on its way. I will reply as soon as possible.', error: 'Sending failed. Please try again or use WhatsApp.' },
+      form: { name: 'Name', email: 'Email', phone: 'Phone (optional)', interest: "I'm interested in", message: 'Your message', namePh: 'Your name', emailPh: 'you@example.com', phonePh: '+41 …', messagePh: 'Current level, availability, questions, travel plans…', submit: 'Send the message', success: 'Thanks — your message is on its way. I will reply as soon as possible.', error: 'Sending failed. Please try again or use WhatsApp.', sendAnother: 'Send another message' },
       interests: [
         { v: 'baptism', l: 'Try dive — Discover Scuba' },
         { v: 'padi-owd', l: 'PADI Open Water Diver' },

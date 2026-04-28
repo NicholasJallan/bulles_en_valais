@@ -73,39 +73,48 @@ const Contact = ({ t }) => {
             </div>
           </div>
 
-          <form className="contact-form" onSubmit={submit}>
-            <div className="form-row">
-              <div className="form-field">
-                <label>{t.contact.form.name}</label>
-                <input type="text" required value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
-              </div>
-              <div className="form-field">
-                <label>{t.contact.form.email}</label>
-                <input type="email" required value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
-              </div>
+          {status === 'ok' ? (
+            <div className="contact-form form-confirmed">
+              <div className="form-confirmed-icon">✓</div>
+              <p className="form-confirmed-msg">{t.contact.form.success}</p>
+              <button className="form-confirmed-reset" onClick={() => setStatus(null)}>
+                {t.contact.form.sendAnother}
+              </button>
             </div>
-            <div className="form-row">
-              <div className="form-field">
-                <label>{t.contact.form.phone}</label>
-                <input type="tel" value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
+          ) : (
+            <form className="contact-form" onSubmit={submit}>
+              <div className="form-row">
+                <div className="form-field">
+                  <label>{t.contact.form.name}</label>
+                  <input type="text" required value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
+                </div>
+                <div className="form-field">
+                  <label>{t.contact.form.email}</label>
+                  <input type="email" required value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
+                </div>
               </div>
-              <div className="form-field">
-                <label>{t.contact.form.interest}</label>
-                <select value={form.interest} onChange={update('interest')}>
-                  {t.contact.interests.map(i => <option key={i.v} value={i.v}>{i.l}</option>)}
-                </select>
+              <div className="form-row">
+                <div className="form-field">
+                  <label>{t.contact.form.phone}</label>
+                  <input type="tel" value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
+                </div>
+                <div className="form-field">
+                  <label>{t.contact.form.interest}</label>
+                  <select value={form.interest} onChange={update('interest')}>
+                    {t.contact.interests.map(i => <option key={i.v} value={i.v}>{i.l}</option>)}
+                  </select>
+                </div>
               </div>
-            </div>
-            <div className="form-field" style={{marginBottom: 8}}>
-              <label>{t.contact.form.message}</label>
-              <textarea value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
-            </div>
-            <button type="submit" className="form-submit" disabled={status === 'sending'}>
-              {status === 'sending' ? '…' : t.contact.form.submit}
-            </button>
-            {status === 'ok' && <div className="form-success">{t.contact.form.success}</div>}
-            {status === 'err' && <div className="form-success" style={{background: 'rgba(184,92,59,0.25)'}}>{t.contact.form.error}</div>}
-          </form>
+              <div className="form-field" style={{marginBottom: 8}}>
+                <label>{t.contact.form.message}</label>
+                <textarea value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
+              </div>
+              <button type="submit" className="form-submit" disabled={status === 'sending'}>
+                {status === 'sending' ? '…' : t.contact.form.submit}
+              </button>
+              {status === 'err' && <div className="form-error">{t.contact.form.error}</div>}
+            </form>
+          )}
         </div>
       </div>
     </section>
