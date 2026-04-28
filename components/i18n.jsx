@@ -125,7 +125,7 @@ const TRANSLATIONS = {
       items: [
         { t: 'Fourni pour le cours', d: 'Selon votre taille et les disponibilités, une partie du matériel est incluse dans la formation — bloc, détendeur, gilet, combinaison.' },
         { t: 'À investir : PMT', d: "Palmes, masque, tuba : votre set personnel. Un conseil avant d'acheter peut éviter un choix inadapté à votre morphologie ou au type de plongée visé." },
-        { t: 'À louer sur place', d: 'Le matériel non disponible pour vous est à louer et reste à votre charge. Tarifs préférentiels auprès de mes partenaires valaisans.' },
+        { t: 'À louer sur place', d: 'Le matériel non disponible pour vous est à louer et reste à votre charge. Tarifs préférentiels auprès de mes partenaires (<a href="https://www.plongee.ch" target="_blank" rel="noopener noreferrer">plongee.ch</a> et <a href="https://www.scubashop.ch" target="_blank" rel="noopener noreferrer">scubashop.ch</a>).', html: true },
       ],
     },
     insurance: {
@@ -321,7 +321,7 @@ const TRANSLATIONS = {
       items: [
         { t: 'Provided for the course', d: 'Depending on your size and availability, a share of the gear is included in the training — tank, regulator, BCD, wetsuit.' },
         { t: 'Worth owning: MFS', d: 'Mask, fins, snorkel: your personal set. Ask before you buy to avoid a choice that does not suit your morphology or intended use.' },
-        { t: 'Rented locally', d: 'Gear we cannot provide is rented and at your expense. Preferred rates with my local Valais partners.' },
+        { t: 'Rented locally', d: 'Gear we cannot provide is rented and at your expense. Preferred rates with my partners (<a href="https://www.plongee.ch" target="_blank" rel="noopener noreferrer">plongee.ch</a> and <a href="https://www.scubashop.ch" target="_blank" rel="noopener noreferrer">scubashop.ch</a>).', html: true },
       ],
     },
     insurance: {

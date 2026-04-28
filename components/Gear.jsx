@@ -15,7 +15,7 @@ const Gear = ({ t }) => (
           {t.gear.items.map((it, i) => (
             <div className="gear-item" key={i}>
               <h4 className="serif">{it.t}</h4>
-              <p>{it.d}</p>
+              {it.html ? <p dangerouslySetInnerHTML={{__html: it.d}} /> : <p>{it.d}</p>}
             </div>
           ))}
         </div>
