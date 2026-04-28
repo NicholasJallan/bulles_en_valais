@@ -869,20 +869,31 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
 .faq-a-inner { padding: 0 0 28px 0; color: var(--ink-soft); font-size: 16px; line-height: 1.65; max-width: 70ch; }
 
 /* ========== CONTACT ========== */
-.contact { background: var(--deep-2); color: #f0ede6; padding-bottom: 80px; }
-.contact .sec-header h2 { color: #fff; font-size: clamp(56px, 8vw, 120px); }
-.contact .sec-header h2 em { color: var(--accent-soft); }
+.contact {
+  background: var(--deep-2);
+  color: #f0ede6;
+  padding: clamp(48px, 6vw, 80px) 0;
+}
 .contact .sec-lead { color: rgba(240,237,230,0.7); }
 .contact .eyebrow { color: rgba(240,237,230,0.55); }
 .contact .eyebrow::before { background: rgba(240,237,230,0.4); }
 
 .contact-grid {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 80px;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 64px;
   align-items: start;
 }
-.contact-channels { display: grid; gap: 4px; }
+.contact-left { display: flex; flex-direction: column; }
+.contact-title {
+  color: #fff;
+  font-size: clamp(32px, 3.5vw, 56px);
+  line-height: 1.05;
+  margin-bottom: 20px;
+}
+.contact-title em { font-style: italic; color: var(--accent-soft); }
+.contact-lead { margin-bottom: 32px; }
+.contact-channels { display: grid; gap: 0; }
 .contact-channel {
   display: flex; align-items: center; gap: 20px;
   padding: 24px 0;

@@ -7,8 +7,6 @@ const Contact = ({ t }) => {
     e.preventDefault();
     setStatus('sending');
     try {
-      // Posts to the site's own mail endpoint served by the Pi (nginx → sendmail bridge).
-      // If the endpoint is not reachable (e.g. dev preview), falls back to mailto:.
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -18,7 +16,6 @@ const Contact = ({ t }) => {
       setStatus('ok');
       setForm({ name: '', email: '', phone: '', interest: 'padi-owd', message: '' });
     } catch (err) {
-      // Graceful fallback — open the user's mail client pre-filled
       const subject = encodeURIComponent(`Contact — ${form.name}`);
       const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
       window.location.href = `mailto:nicholas@bullesenvalais.ch?subject=${subject}&body=${body}`;
@@ -29,40 +26,39 @@ const Contact = ({ t }) => {
   return (
     <section className="contact" id="contact">
       <div className="container">
-        <div className="sec-header">
-          <div>
-            <div className="eyebrow" style={{marginBottom: 20}}>{t.contact.eyebrow}</div>
-            <h2>{t.contact.title_1}<br/><em>{t.contact.title_em}</em></h2>
-          </div>
-          <p className="sec-lead">{t.contact.lead}</p>
-        </div>
-
         <div className="contact-grid">
-          <div className="contact-channels">
-            <a href="https://wa.me/41794368112" target="_blank" rel="noopener noreferrer" className="contact-channel">
-              <div className="contact-channel-icon"><Icons.Whatsapp /></div>
-              <div className="contact-channel-text">
-                <span className="mono">{t.contact.whatsapp}</span>
-                <span className="val">+41 79 436 81 12</span>
-              </div>
-            </a>
-            <a href="tel:+41794368112" className="contact-channel">
-              <div className="contact-channel-icon"><Icons.Phone /></div>
-              <div className="contact-channel-text">
-                <span className="mono">{t.contact.phone}</span>
-                <span className="val">+41 79 436 81 12</span>
-              </div>
-            </a>
-            <a href="mailto:nicholas@bullesenvalais.ch" className="contact-channel">
-              <div className="contact-channel-icon"><Icons.Mail /></div>
-              <div className="contact-channel-text">
-                <span className="mono">{t.contact.email}</span>
-                <span className="val">nicholas@bullesenvalais.ch</span>
-              </div>
-            </a>
 
-            <div style={{marginTop: 40, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: 13, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7}}>
-              <span className="mono" style={{display:'block', marginBottom: 10, letterSpacing: '0.14em'}}>{t.contact.certs}</span>
+          <div className="contact-left">
+            <div className="eyebrow" style={{marginBottom: 16}}>{t.contact.eyebrow}</div>
+            <h2 className="contact-title">{t.contact.title_1}<br/><em>{t.contact.title_em}</em></h2>
+            <p className="sec-lead contact-lead">{t.contact.lead}</p>
+
+            <div className="contact-channels">
+              <a href="https://wa.me/41794368112" target="_blank" rel="noopener noreferrer" className="contact-channel">
+                <div className="contact-channel-icon"><Icons.Whatsapp /></div>
+                <div className="contact-channel-text">
+                  <span className="mono">{t.contact.whatsapp}</span>
+                  <span className="val">+41 79 436 81 12</span>
+                </div>
+              </a>
+              <a href="tel:+41794368112" className="contact-channel">
+                <div className="contact-channel-icon"><Icons.Phone /></div>
+                <div className="contact-channel-text">
+                  <span className="mono">{t.contact.phone}</span>
+                  <span className="val">+41 79 436 81 12</span>
+                </div>
+              </a>
+              <a href="mailto:nicholas@bullesenvalais.ch" className="contact-channel">
+                <div className="contact-channel-icon"><Icons.Mail /></div>
+                <div className="contact-channel-text">
+                  <span className="mono">{t.contact.email}</span>
+                  <span className="val">nicholas@bullesenvalais.ch</span>
+                </div>
+              </a>
+            </div>
+
+            <div style={{marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: 12, color: 'rgba(240,237,230,0.5)', lineHeight: 1.7}}>
+              <span className="mono" style={{display:'block', marginBottom: 8, letterSpacing: '0.14em'}}>{t.contact.certs}</span>
               DEJEPS{' '}<a href="https://recherche-educateur.sports.gouv.fr/CartePro/07425ED0350" target="_blank" rel="noopener noreferrer" style={{color:'inherit', textDecoration:'underline', textUnderlineOffset:3}}>07425ED0350</a><br/>
               <br/>
               FFESSM E3 #28663<br/>
@@ -115,6 +111,7 @@ const Contact = ({ t }) => {
               {status === 'err' && <div className="form-error">{t.contact.form.error}</div>}
             </form>
           )}
+
         </div>
       </div>
     </section>
