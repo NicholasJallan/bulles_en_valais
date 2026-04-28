@@ -1,8 +1,8 @@
 const Places = ({ t }) => {
   const IMGS = [
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
-    'https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200&q=85',
-    'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=1200&q=85',
+    'images/dive_rosel.jpg',
+    'images/dive_sion.jpg',
+    'images/dive_leman.jpg',
   ];
   return (
     <section className="places" id="places">
