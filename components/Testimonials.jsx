@@ -9,11 +9,21 @@ const Testimonials = ({ t }) => (
         <p className="sec-lead">{t.testimonials.lead}</p>
       </div>
 
-      <div className="testimonial-empty">
-        <h3 className="serif"><em>« … »</em></h3>
-        <p>{t.testimonials.ph}</p>
-        <a href="#contact" className="btn btn-outline">{t.testimonials.cta} <Icons.Arrow /></a>
-        <span className="mono">{t.testimonials.status}</span>
+      <div className="testimonial-grid">
+        {t.testimonials.items.map((item, i) => (
+          <div className="testimonial-card reveal" key={i}>
+            <div className="testimonial-quote">❝</div>
+            <p className="testimonial-text">{item.text}</p>
+            <div className="testimonial-author">
+              <span className="testimonial-name">{item.author}</span>
+              <span className="testimonial-course mono">{item.course}</span>
+            </div>
+          </div>
+        ))}
+        <div className="testimonial-cta reveal">
+          <p>Vous venez de plonger avec moi ?</p>
+          <a href="#contact" className="btn btn-outline">{t.testimonials.cta} <Icons.Arrow /></a>
+        </div>
       </div>
     </div>
   </section>

@@ -144,9 +144,19 @@ const TRANSLATIONS = {
       title_1: 'Ils sont passés',
       title_em: 'par ici.',
       lead: "Les retours d'élèves sont en cours de collecte. Cette section évoluera à mesure que les formations se succèdent.",
-      ph: "Vous venez de plonger avec moi ? Un mot sur votre expérience aide les prochains élèves à se projeter. Écrivez-moi, je publierai votre retour ici — avec votre accord.",
       cta: 'Partager un retour',
-      status: 'Section en construction',
+      items: [
+        {
+          author: 'Maude Maréchal',
+          course: 'PADI Open Water + Dry Suit',
+          text: "J'ai passé mon PADI Open water avec Nicholas (+dry suit car fait en hiver), et la formation était très qualitative. Très bon accompagnement, et formation qui m'a donné un niveau au top. J'ai pu plonger au Mexique en toute confiance, et les accompagnateurs ont confirmé que j'avais eu une excellente formation 👌\nMerci Nicholas !",
+        },
+        {
+          author: 'Florent Quesnel',
+          course: 'PADI Open Water · CMAS Niveau 1',
+          text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
+        },
+      ],
     },
     faq: {
       eyebrow: '09 — FAQ',
@@ -340,9 +350,19 @@ const TRANSLATIONS = {
       title_1: 'They came',
       title_em: 'through here.',
       lead: 'Student feedback is currently being collected. This section will grow as more courses run.',
-      ph: 'Just dived with me? A few words on your experience help future students picture it. Send them through — with your agreement, I will publish them here.',
       cta: 'Share feedback',
-      status: 'Section in progress',
+      items: [
+        {
+          author: 'Maude Maréchal',
+          course: 'PADI Open Water + Dry Suit',
+          text: "J'ai passé mon PADI Open water avec Nicholas (+dry suit car fait en hiver), et la formation était très qualitative. Très bon accompagnement, et formation qui m'a donné un niveau au top. J'ai pu plonger au Mexique en toute confiance, et les accompagnateurs ont confirmé que j'avais eu une excellente formation 👌\nMerci Nicholas !",
+        },
+        {
+          author: 'Florent Quesnel',
+          course: 'PADI Open Water · CMAS Niveau 1',
+          text: "PADI Open Water et CMAS Niv 1 passé avec Nicholas, formation de qualité par un instructeur passionné et rigoureux. Grand merci !",
+        },
+      ],
     },
     faq: {
       eyebrow: '09 — FAQ',
