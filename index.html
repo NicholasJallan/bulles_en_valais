@@ -1320,6 +1320,75 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
+/* ========== HIRONDELLE TRANSITION ========== */
+.hirondelle-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  padding: 0;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.4s cubic-bezier(.2,.8,.2,1), transform 1.6s cubic-bezier(.2,.8,.2,1);
+  cursor: none;
+}
+.hirondelle-section.is-revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+.hirondelle-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 110%;
+  top: -5%;
+  object-fit: cover;
+  object-position: center;
+  will-change: transform;
+}
+.hirondelle-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8,24,36,0.48) 0%,
+    transparent 22%,
+    transparent 76%,
+    rgba(8,20,30,0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+.hirondelle-cursor {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.85);
+  background: radial-gradient(circle at 38% 38%, rgba(200,230,255,0.25), rgba(100,180,255,0.08));
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 5;
+}
+.hirondelle-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, rgba(255,255,255,0.95), rgba(140,200,255,0.35));
+  border: 1px solid rgba(255,255,255,0.65);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: hirondelleBubbleRise 1.5s ease-out forwards;
+  z-index: 4;
+}
+@keyframes hirondelleBubbleRise {
+  0%   { opacity: 0.8; transform: translate(-50%, -50%) translateY(0) translateX(0); }
+  30%  { opacity: 0.7; }
+  100% { opacity: 0;   transform: translate(-50%, -50%) translateY(-170px) translateX(var(--drift, 0px)); }
+}
+
 /* placeholder hero images */
 .placeholder-bg {
   background: linear-gradient(135deg, #0a2838 0%, #0f3a4f 50%, #1a4d5f 100%);
@@ -1346,9 +1415,11 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
 <script type="text/babel" src="components/Hero.jsx"></script>
 <script type="text/babel" src="components/About.jsx"></script>
 <script type="text/babel" src="components/Agencies.jsx"></script>
+<script type="text/babel" src="components/HirondelleTransition.jsx"></script>
 <script type="text/babel" src="components/Compare.jsx"></script>
 <script type="text/babel" src="components/Specialties.jsx"></script>
 <script type="text/babel" src="components/Places.jsx"></script>
+<script type="text/babel" src="components/BdeTransition.jsx"></script>
 <script type="text/babel" src="components/Gear.jsx"></script>
 <script type="text/babel" src="components/Insurance.jsx"></script>
 <script type="text/babel" src="components/Testimonials.jsx"></script>

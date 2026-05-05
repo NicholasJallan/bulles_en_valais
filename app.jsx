@@ -63,9 +63,11 @@ function App() {
       <Hero mode={state.hero} t={t} />
       <About t={t} />
       <Agencies layout={state.agencyLayout} t={t} />
+      <HirondelleTransition />
       <Compare t={t} />
       <Specialties t={t} />
       <Places t={t} />
+      <BdeTransition />
       <Gear t={t} />
       <Insurance t={t} />
       <Testimonials t={t} />
