@@ -157,4 +157,3 @@ Ou automatiser via webhook GitHub + script shell sur le Pi.
 
 - Le site fonctionne **100% statique** : Nginx suffit, pas de Node, pas de PHP.
 - Transpilation JSX **côté navigateur** via Babel. Pour de la prod à fort trafic, pré-compilation recommandée (esbuild/vite) — pas nécessaire pour un site perso.
-- Les images Unsplash actuelles sont des **placeholders** : remplacez-les par des photos authentiques avant mise en prod.
