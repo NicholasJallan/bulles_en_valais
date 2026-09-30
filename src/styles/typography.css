@@ -1,0 +1,18 @@
+/* Provisional type scale: fonts and sizes are chosen in S02 (Gate 1). */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-hero);
+}
+
+p {
+  max-width: var(--measure);
+  text-wrap: pretty;
+}

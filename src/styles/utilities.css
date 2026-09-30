@@ -1,0 +1,9 @@
+/* Hidden on screen, still read by assistive technologies. */
+.visually-hidden:not(:focus, :active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

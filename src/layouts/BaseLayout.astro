@@ -1,0 +1,48 @@
+---
+import '@/styles/tokens.css';
+import '@/styles/global.css';
+import '@/styles/typography.css';
+import '@/styles/motion.css';
+import '@/styles/utilities.css';
+import { alternates, routePath, type RouteId } from '@/i18n/routes.ts';
+import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
+
+interface Props {
+  locale: Locale;
+  route: RouteId;
+  title: string;
+  description: string;
+}
+
+const { locale, route, title, description } = Astro.props;
+const { site } = Astro;
+if (site === undefined) throw new Error('`site` is missing from astro.config.mjs');
+
+const canonical = new URL(routePath(route, locale), site).href;
+const links = alternates(route).map(({ hreflang, path }) => ({
+  hreflang,
+  href: new URL(path, site).href,
+}));
+---
+
+<!doctype html>
+<html lang={LANG_TAGS[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    {/* External file in public/, run before any stylesheet: never inline code (CSP). */}
+    <script is:inline src="/js/boot.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {links.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={href} />
+    ))}
+    <script>
+      import '@/scripts/app.ts';
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

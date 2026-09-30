@@ -1,0 +1,17 @@
+/* Provisional tokens (values of the current site): the design system replaces them in S02. */
+:root {
+  --color-surface: #fafaf7;
+  --color-ink: #0f1e28;
+  --color-accent: #0f3a4f;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+
+  --text-base: 1rem;
+  --text-hero: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
+  --leading-body: 1.6;
+  --leading-tight: 1.05;
+
+  --space-gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
+  --measure: 65ch;
+}
