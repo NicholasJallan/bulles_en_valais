@@ -1080,6 +1080,7 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
   color: var(--accent-soft);
 }
 .form-error a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.form-field [aria-invalid="true"] { border-bottom-color: var(--accent-soft); box-shadow: 0 1px 0 var(--accent-soft); }
 .form-confirmed {
   display: flex;
   flex-direction: column;
@@ -1105,10 +1106,11 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; }
   line-height: 1.65;
   margin: 0;
 }
+.form-confirmed:focus { outline: none; }
 .form-confirmed-reset {
   background: none;
   border: 1px solid rgba(240,237,230,0.2);
-  color: rgba(240,237,230,0.45);
+  color: rgba(240,237,230,0.55);
   font-size: 12px;
   letter-spacing: 0.1em;
   padding: 8px 20px;

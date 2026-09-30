@@ -1,28 +1,58 @@
+const CONTACT_EMAIL = 'nicholas@bullesenvalais.ch';
 // website is a honeypot: hidden from people, filled in by naive bots.
 const EMPTY_FORM = { name: '', email: '', phone: '', interest: 'sdi-owd', message: '', website: '' };
 
 const mailtoHref = (form) => {
-  const subject = encodeURIComponent(`Contact — ${form.name}`);
-  const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
-  return `mailto:nicholas@bullesenvalais.ch?subject=${subject}&body=${body}`;
+  try {
+    const subject = encodeURIComponent(`Contact — ${form.name}`);
+    const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
+    return `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+  } catch (err) {
+    return `mailto:${CONTACT_EMAIL}`; // text with a lone surrogate cannot be URI-encoded
+  }
 };
 
 const Contact = ({ t }) => {
   const [status, setStatus] = React.useState(null); // null | 'sending' | 'ok' | 'err'
   const [form, setForm] = React.useState(EMPTY_FORM);
-  const shownAt = React.useRef(Date.now());
-  const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const [invalid, setInvalid] = React.useState([]); // fields rejected by the server
+  const shownAt = React.useRef(performance.now());
+  const confirmedRef = React.useRef(null);
+  const nameRef = React.useRef(null);
+  const refocusName = React.useRef(false);
+  const update = (k) => (e) => {
+    setForm({ ...form, [k]: e.target.value });
+    if (invalid.includes(k)) setInvalid(invalid.filter((f) => f !== k));
+  };
+  const fieldProps = (k) => ({
+    id: `contact-${k}`,
+    'aria-invalid': invalid.includes(k) || undefined,
+    'aria-describedby': invalid.includes(k) ? 'contact-form-error' : undefined,
+  });
+
+  React.useEffect(() => {
+    if (status === 'ok' && confirmedRef.current) confirmedRef.current.focus();
+    if (status === null && refocusName.current && nameRef.current) {
+      refocusName.current = false;
+      nameRef.current.focus();
+    }
+  }, [status]);
 
   const submit = async (e) => {
     e.preventDefault();
     setStatus('sending');
+    setInvalid([]);
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, elapsed: Date.now() - shownAt.current, locale: document.documentElement.lang }),
+        body: JSON.stringify({ ...form, elapsed: Math.round(performance.now() - shownAt.current), locale: document.documentElement.lang }),
       });
-      if (!res.ok) throw new Error('http ' + res.status);
+      if (!res.ok) {
+        const data = await res.json().catch(() => null); // nginx 413/429/5xx pages are HTML
+        setInvalid(data && Array.isArray(data.fields) ? data.fields : []);
+        throw new Error('http ' + res.status);
+      }
       setStatus('ok');
       setForm(EMPTY_FORM);
     } catch (err) {
@@ -55,11 +85,11 @@ const Contact = ({ t }) => {
                   <span className="val">+41 79 436 81 12</span>
                 </div>
               </a>
-              <a href="mailto:nicholas@bullesenvalais.ch" className="contact-channel">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="contact-channel">
                 <div className="contact-channel-icon"><Icons.Mail /></div>
                 <div className="contact-channel-text">
                   <span className="mono">{t.contact.email}</span>
-                  <span className="val">nicholas@bullesenvalais.ch</span>
+                  <span className="val">{CONTACT_EMAIL}</span>
                 </div>
               </a>
             </div>
@@ -77,10 +107,10 @@ const Contact = ({ t }) => {
           </div>
 
           {status === 'ok' ? (
-            <div className="contact-form form-confirmed">
-              <div className="form-confirmed-icon">✓</div>
+            <div className="contact-form form-confirmed" role="status" tabIndex={-1} ref={confirmedRef}>
+              <div className="form-confirmed-icon" aria-hidden="true">✓</div>
               <p className="form-confirmed-msg">{t.contact.form.success}</p>
-              <button className="form-confirmed-reset" onClick={() => setStatus(null)}>
+              <button className="form-confirmed-reset" onClick={() => { refocusName.current = true; setStatus(null); }}>
                 {t.contact.form.sendAnother}
               </button>
             </div>
@@ -88,29 +118,29 @@ const Contact = ({ t }) => {
             <form className="contact-form" onSubmit={submit}>
               <div className="form-row">
                 <div className="form-field">
-                  <label>{t.contact.form.name}</label>
-                  <input type="text" required maxLength={100} value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
+                  <label htmlFor="contact-name">{t.contact.form.name}</label>
+                  <input type="text" required maxLength={100} ref={nameRef} {...fieldProps('name')} value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
                 </div>
                 <div className="form-field">
-                  <label>{t.contact.form.email}</label>
-                  <input type="email" required maxLength={254} value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
+                  <label htmlFor="contact-email">{t.contact.form.email}</label>
+                  <input type="email" required maxLength={254} {...fieldProps('email')} value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-field">
-                  <label>{t.contact.form.phone}</label>
-                  <input type="tel" maxLength={40} value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
+                  <label htmlFor="contact-phone">{t.contact.form.phone}</label>
+                  <input type="tel" maxLength={40} {...fieldProps('phone')} value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
                 </div>
                 <div className="form-field">
-                  <label>{t.contact.form.interest}</label>
-                  <select value={form.interest} onChange={update('interest')}>
+                  <label htmlFor="contact-interest">{t.contact.form.interest}</label>
+                  <select id="contact-interest" value={form.interest} onChange={update('interest')}>
                     {t.contact.interests.map(i => <option key={i.v} value={i.v}>{i.l}</option>)}
                   </select>
                 </div>
               </div>
               <div className="form-field" style={{marginBottom: 8}}>
-                <label>{t.contact.form.message}</label>
-                <textarea maxLength={5000} value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
+                <label htmlFor="contact-message">{t.contact.form.message}</label>
+                <textarea maxLength={5000} {...fieldProps('message')} value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
               </div>
               <div className="hp" aria-hidden="true">
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={update('website')} />
@@ -119,8 +149,10 @@ const Contact = ({ t }) => {
                 {status === 'sending' ? '…' : t.contact.form.submit}
               </button>
               {status === 'err' && (
-                <div className="form-error" role="alert">
-                  {t.contact.form.error}{' '}
+                <div className="form-error" role="alert" id="contact-form-error">
+                  {invalid.length > 0 && t.contact.form.errorFields
+                    ? `${t.contact.form.errorFields} ${invalid.map((k) => (t.contact.form.fieldNames || {})[k] || k).join(', ')}.`
+                    : t.contact.form.error}{' '}
                   <a href={mailtoHref(form)}>{t.contact.form.errorMail}</a>
                 </div>
               )}
