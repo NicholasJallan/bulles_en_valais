@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// Unit tests for api/contact.php — dependency-free, runs on PHP 7.4+.
+// Unit tests for public/api/contact.php — dependency-free, runs on PHP 7.4+.
 // Usage: php tests/php/contact_test.php  (exit code 1 on failure)
 
 if (PHP_SAPI !== 'cli') {
@@ -19,7 +19,7 @@ register_shutdown_function(static function (): void {
 
 define('CONTACT_CONFIG_PATH', __DIR__ . '/no-such-config.php'); // never the real mail-config.php
 define('CONTACT_NO_AUTORUN', true);
-require __DIR__ . '/../../api/contact.php';
+require __DIR__ . '/../../public/api/contact.php';
 
 function check(string $label, bool $condition): void
 {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Integration tests for api/contact.php: PHP built-in server + fake SMTP server.
+# Integration tests for public/api/contact.php: PHP built-in server + fake SMTP server.
 # Usage: bash tests/php/run_integration.sh   (exit code 1 on failure)
 # Needs php, curl, lsof and Python 3.8+.
 set -uo pipefail

@@ -12,4 +12,4 @@ if (PHP_SAPI !== 'cli-server' || parse_url((string) ($_SERVER['REQUEST_URI'] ?? 
 }
 
 define('CONTACT_CONFIG_PATH', __DIR__ . '/test-config.php');
-require __DIR__ . '/../../api/contact.php';
+require __DIR__ . '/../../public/api/contact.php';

@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SOURCE="$ROOT/api/contact.php"
+SOURCE="$ROOT/public/api/contact.php"
 TEST="$ROOT/tests/php/contact_test.php"
 PI=pi@bullesenvalais.ch
 
