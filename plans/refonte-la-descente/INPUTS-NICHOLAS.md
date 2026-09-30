@@ -1,0 +1,24 @@
+# Ce que Nicholas doit fournir ou valider
+
+> Chaque session vérifie ici ses prérequis. Statuts : ⬜ à fournir · 🟨 partiel · ✅ reçu ou validé (avec la date).
+> Pour transmettre un élément : le déposer dans le dépôt (chemin indiqué) ou le donner en réponse à la session concernée, qui met à jour ce fichier.
+
+| # | Élément | Détails attendus | Où le déposer | Pour | Statut |
+|---|---|---|---|---|---|
+| I-01 | Changements non commités | Valider SDI/TDI avant PADI partout et FFESSM **E4** (au lieu de « E3 #28663 ») | réponse en S00 | S00 | ✅ 30.09.2026 — validés (y compris nouveaux tarifs et PTH120), commit `3ad6146` |
+| I-02 | **Logo vectoriel** | SVG, AI ou PDF ; variantes éventuelles (monochrome, symbole seul) | `src/assets/brand/` (ou en réponse en S04) | S04 | ⬜ |
+| I-03 | Données des lacs | Pour Rosel, Les Îles (Sion) et Léman SE : site(s) précis, profondeur max, températures surface/fond (été et hiver), visibilité habituelle, accès et parking, niveau requis, meilleure saison | réponse en S03 | S03, S09 | ⬜ |
+| I-04 | Profondeurs de l'échelle | Valider ou corriger : baptême 12 m · OW (SDI/PADI) 18 m · FFESSM N1 20 m encadré · Advanced 30 m · FFESSM N2 20 m autonome / 40 m encadré · Deep 40 m · TDI Deco 45 m · FFESSM N3 60 m · PTH120 120 m (formation 0–80 m) | réponse en S03 | S03, S08 | ⬜ |
+| I-05 | Températures du HUD | Valeurs décoratives mais plausibles (été) : 0 m 18 °C · 5 m 17 · 10 m 14 · 15 m 11 (thermocline) · 20 m 8 · 30 m 7 · 40 m 6 | réponse en S03 | S06 | ⬜ |
+| I-06 | Google Ads et GA4 | Actions de conversion suivies (formulaire, WhatsApp, téléphone ?) avec leurs libellés `AW-10798308119/…` ; confirmer que le GA4 `G-QG5ZCVY1Z7` t'appartient et doit rester | réponse en S11 | S11 | ⬜ |
+| I-07 | Mode de consentement | **Avancé** (recommandé : meilleure mesure) ou **basique** (balise chargée seulement après accord) | réponse en S11 | S11 | ⬜ |
+| I-08 | Mentions légales | Nom et forme juridique (raison individuelle ?), adresse postale professionnelle (affichable ?), IDE/UID s'il existe, e-mail et téléphone, durée de conservation des messages reçus | réponse en S03 | S03, S11 | ⬜ |
+| I-09 | Témoignages | Accord pour les traduire en anglais avec la mention « Translated from French » ; nouveaux avis ; lien vers ta fiche Google, s'il y en a une | réponse en S03 | S03, S10 | ⬜ |
+| I-10 | **Tarifs incohérents** | ~~TDI Nitrox avancé et Deco Procedures : CHF 250 ou CHF 390 ?~~ → **CHF 250 partout** (S00). Restent : FFESSM N1–N4 : **« Sur demande »** (Cursus) ou **CHF 390 / 490 / 690 / 990** (Spécialités) ? N1 : « encadré à 20 m » ou « autonome » ? À confirmer aussi : le Nitrox TDI de base (CHF 290) coûte plus cher que le Nitrox avancé (CHF 250) | réponse en S03 | S03 | 🟨 TDI tranché le 30.09.2026 |
+| I-11 | Préproduction | Sous-domaine `next.bullesenvalais.ch` protégé par mot de passe (as-tu accès au DNS ?) ou prévisualisation sur le réseau local uniquement | réponse en S12 | S12 | ⬜ |
+| I-12 | Bons cadeaux | Offres (baptême CHF 90, formations, montant libre ?), durée de validité, paiement (TWINT, virement…), format du bon (PDF par e-mail, imprimé), conditions (report, remboursement) | réponse en S03 | S03, S10 | ⬜ |
+| I-13 | Photos originales | Versions haute définition de `dive_sion.jpg`, `dive_leman.jpg` et `dive_rosel.jpg` (aujourd'hui 800×1000) ; autres vraies photos si tu en as (surface, bateau, élèves **avec leur accord**) | `src/assets/images/originals/` | S04 | ⬜ |
+| I-14 | Réseaux et profils | Instagram, Facebook, fiche Google… pour le pied de page et le JSON-LD (`sameAs`). Optionnel | réponse en S03 | S03, S11 | ⬜ |
+| I-15 | Retouches et IA | Accord pour retirer les lignes électriques, le pylône, l'éolienne et le panneau de la photo du Rosel ; validation des visuels IA (Gate 3) | Gate 3 (S04) | S04 | ⬜ |
+| I-16 | Domaine canonique | Garder `dive.bullesenvalais.ch` (défaut, aucun impact sur Ads) ou passer à `bullesenvalais.ch`. Optionnel | réponse en S13 | S13 | ⬜ |
+| I-17 | Accès et outils | `ssh` + `sudo` sur le Pi pour S00, S12 et S13 ; accord pour `brew install php` en local (tests du formulaire) | réponse en S00 | S00, S12, S13 | ✅ 30.09.2026 — accès accordé (écritures confirmées une à une) ; PHP 8.5 installé |
