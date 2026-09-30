@@ -2,18 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository state
+
+- **`main` is the live site until S13** (React + Babel compiled in the browser, deployed file by file: see [Live site](#live-site-main--until-s13)). Urgent fixes to the live site go on `main`. No redesign commit on `main` before S13.
+- **Branch `refonte/la-descente`**: the redesign "La Descente", a static Astro 7 site. Plan, session protocol and progress: `plans/refonte-la-descente/` (start with `README.md`; the decisions and mutations in `PROGRESS.md` override the specs). One session at a time, each ends at its own boundary.
+- `legacy/`: the old site, read-only, source of the content migrated in S03 (texts and prices: `legacy/components/i18n.jsx`). Deleted in S13. To run the old site, use `main` (`git worktree add ../bev-legacy main`).
+
 ## Development
 
-### Run locally
+Node ≥ 22.12 (the Mac has Node 26). No UI framework at runtime, nothing loaded from a CDN.
 
 ```bash
-python3 -m http.server 8000 --bind 127.0.0.1
-# then open http://localhost:8000
+npm install
+npm run dev             # dev server, http://localhost:4321
+npm run build           # static build → dist/ (contact.php copied to dist/api/), then check:dist
+npm run preview         # serves dist/ on http://localhost:4321
+npm run check           # astro check (types)
+npm test                # Vitest: src/**/*.test.ts, scripts/**/*.test.mjs (includes the FR/EN parity test)
+npm run coverage        # + v8 coverage, ≥ 80 % on src/lib, src/data, src/i18n
+npm run test:e2e        # Playwright: builds, then tests the preview server (tests/e2e)
+npm run test:visual     # Playwright screenshots (tests/visual, from S05)
+npm run test:a11y       # axe (tests/a11y, from S05)
+npm run format          # Prettier (format:check to verify)
+npm run check:budgets   # gzip budgets of dist/: initial JS ≤ 90 KB per page, total JS ≤ 150 KB, CSS ≤ 30 KB
+npm run check:dist      # run by every build: no inline JavaScript nor resource of another origin, no hidden,
+                        # secret or stray PHP file (api/contact.php only, and present)
 ```
 
-Always bind to `127.0.0.1`: the server serves the whole working tree as plain text, including gitignored files, to anyone on the network otherwise. Binding is not enough against DNS rebinding (the server ignores the `Host` header), so keep no secrets in the working tree: nothing local needs `api/mail-config.php` (the tests use `tests/php/test-config.php`).
+Invariants at the end of every session: `npm run build`, `npm run check` and `npm test` pass, no console error on `/` and `/en/` (the smoke test checks it).
 
-No build step. No package manager. No Node required. The contact endpoint is PHP, so with this static server a form submission fails and shows the error state.
+- **Astro 7 and coding agents**: Astro detects agents (Claude Code) and then runs `astro dev` / `astro preview` in the background (detached, with a lock file). Stop them with `npx astro dev stop` / `npx astro preview stop`; `--ignore-lock` keeps them in the foreground (the Playwright `webServer` uses it).
+- **The dev server serves every file of the project** (Vite), gitignored ones included: `vite.server.fs.deny` in `astro.config.mjs` refuses `mail-config.php`, `settings.json`, `.env`… Never `npm run dev -- --host`. To show the site on the LAN, `npm run preview -- --host` (serves `dist/` only), with Nicholas's agreement.
+- **Firefox**: the Firefox build of Playwright 1.63 does not start on macOS 27.0.1 ("Could not find profile folder"). Until a Playwright update fixes it, run the other projects: `npx playwright test tests/e2e --project=chromium --project=webkit --project=mobile-chrome --project=mobile-safari`.
 
 ### Test the contact endpoint
 
@@ -23,11 +43,67 @@ bash tests/php/run_integration.sh   # PHP built-in server + fake SMTP server (ne
 bash tests/php/run_unit_php74.sh    # unit tests with the production PHP 7.4, piped over ssh to the Pi (ask first)
 ```
 
-Production runs **PHP-FPM 7.4**: keep `api/contact.php` compatible with PHP 7.4 (no `str_starts_with`, `match`, union types, named arguments…). `php7.4 -l` only checks the syntax; `run_unit_php74.sh` runs the unit tests, which call every function including the entry points, under 7.4 without writing anything on the Pi.
+Production runs **PHP-FPM 7.4**: keep `public/api/contact.php` compatible with PHP 7.4 (no `str_starts_with`, `match`, union types, named arguments…). `php7.4 -l` only checks the syntax; `run_unit_php74.sh` runs the unit tests, which call every function including the entry points, under 7.4 without writing anything on the Pi.
+
+## Architecture (branch `refonte/la-descente`)
+
+```
+src/
+├── pages/                 index.astro (FR, /) · en/index.astro (EN, /en/)
+├── layouts/               BaseLayout.astro: lang, title, description, canonical, hreflang, boot.js, app.ts
+├── components/<feature>/  one folder per section; page/HomePage.astro assembles the page for a locale
+├── i18n/                  types.ts · fr.ts · en.ts · index.ts · routes.ts (+ tests)
+├── lib/                   pure logic, tested with Vitest (TDD)
+├── scripts/app.ts         single client entry point
+├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
+└── assets/images/         images for astro:assets
+public/                    copied as is: api/contact.php, js/boot.js
+scripts/                   check-budgets.mjs · check-dist.mjs (+ lib/, tested)
+tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contact endpoint)
+```
+
+### Translations
+
+- Every visible text lives in `src/i18n/` (and `src/data/` for the localized labels of data, from S03). French is the source language, at `/` (no prefix); English at `/en/`. The architecture is ready for German: add `'de'` to `LOCALES` in `src/i18n/types.ts` and follow the type errors.
+- **FR/EN parity is mandatory and enforced by the tests**: `fr.ts` and `en.ts` are typed `Dictionary` (TypeScript rejects a missing or extra key), and `src/i18n/parity.test.ts` also compares value kinds and array lengths, and refuses empty strings. Never change one language without the other.
+- No HTML in the strings: headings with an emphasis use `Emphasis` (`before`, `em`, `after`), texts with links use `Rich`.
+- `localePath(locale, path)` adds the locale prefix; `routes.ts` maps each page to its path per locale (language switch, canonical, `hreflang` with `x-default` → French).
+
+### Client scripts
+
+- `public/js/boot.js`: synchronous, first script of `<head>`. Adds `js`, and `motion-ok` unless reduced motion or calm mode is asked (removed after 3 s if the motion module has not added `motion-ready`).
+- `src/scripts/app.ts`: the only module of the page. Elements declare their controllers with `data-controller="name"` (several names separated by spaces); the `CONTROLLERS` registry maps each name to a dynamic `import()` of a module exporting `init(element)`, which returns a cleanup function (`src/lib/controllers.ts`).
+
+### Rules that are easy to break
+
+- **No inline script** (the target CSP forbids them): `is:inline` only on a `<script src>` pointing to a file of `public/` (boot.js) and on JSON-LD. `vite.build.assetsInlineLimit: 0` stops Astro from inlining small scripts and Vite from producing `data:` URIs. `check:dist` fails the build on an inline script, an inline event handler, a `javascript:` URL, or a script or stylesheet of another origin (everything is self-hosted).
+- **Astro 7**: the Rust compiler no longer fixes HTML (close every tag, no block inside `<p>`); `compressHTML: 'jsx'` removes whitespace that contains a line break between elements, so keep a wanted space on the same line (`{a} <em>{b}</em>`) or write `{' '}`.
+- No design value hard-coded: colors, spacing, radii, durations and easings come from `src/styles/tokens.css` (provisional values until S02).
+- Animate only `transform`, `opacity`, `clip-path` (and `filter` sparingly); no `scroll` listener to animate.
+
+## Contact / WhatsApp
+
+- **WhatsApp number**: `41794368112` (E.164 without `+`); **phone**: `+41 79 436 81 12`; **email**: `nicholas@bullesenvalais.ch`. In the redesign they move to `src/data/contact.ts` (S03).
+- The contact form POSTs JSON to `/api/contact` (`public/api/contact.php`), with a hidden honeypot field `website`, `elapsed` (ms since the page loaded) and `locale`. On failure the form shows an error — listing the fields the server rejected, if any — with a pre-filled `mailto:` link (never opened automatically).
+- `contact.php` checks, in order: method, `Content-Type: application/json`, `Origin` allowlist, body ≤ 32 KB, valid JSON, spam (honeypot filled or `elapsed` < 3 s → fake 200, nothing sent, only the reason logged; a missing `elapsed` is accepted: pages loaded before the 30.09.2026 deploy do not send it), field rules. It then sends one plain-text e-mail through Gmail SMTP (STARTTLS + AUTH LOGIN): base64 body, RFC 2047 headers, envelope addresses from the config only.
+- The SMTP credentials live in `mail-config.php` on the Pi, next to `contact.php`: **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
+
+## Live site (`main`) — until S13
+
+The notes below describe the current production and apply to the `main` branch until S13, which deploys `dist/` as atomic releases (`plans/refonte-la-descente/02-architecture.md` §16). Nothing is deployed from `refonte/la-descente` before S12.
+
+### Run the old site locally (from a `main` worktree)
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# then open http://localhost:8000
+```
+
+Always bind to `127.0.0.1`: the server serves the whole working tree as plain text, including gitignored files, to anyone on the network otherwise. Binding is not enough against DNS rebinding (the server ignores the `Host` header), so keep no secrets in the working tree.
 
 ### Deploy to Raspberry Pi
 
-The Pi serves the site from `/var/www/html/dive` via nginx. There is no git repo on the Pi — deploy by rsync:
+The Pi serves the site from `/var/www/html/dive` via nginx. There is no git repo on the Pi — deploy by rsync, from `main`:
 
 ```bash
 # Single file
@@ -55,45 +131,8 @@ After nginx config changes: `ssh pi@bullesenvalais.ch "sudo nginx -t && sudo sys
 
 Lives at `/etc/nginx/sites-available/bullesenvalais` on the Pi. The `dive` server block serves `dive.bullesenvalais.ch` (and the other `dive.*` names listed in `ALLOWED_ORIGINS`) from `/var/www/html/dive` with `index index.html`: static files, plus PHP for the contact endpoint only. `/api/contact` is internally redirected to `/api/contact.php`, the only PHP file executed (PHP-FPM 7.4, rate limit `zone=contact`: 5 requests/min per IP, burst 3, HTTP 429; body ≤ 32 KB); any other `.php` and any other path under `/api/` return 404. Other unknown paths return `index.html` with a 200 (SPA fallback), so check files on the Pi with `ls`, not `curl`. Logs: `/var/log/nginx/dive.access_log` and `dive.error_log`.
 
-Security headers are set in the `dive` server block only. The `script-src` directive includes both `'unsafe-inline'` and `'unsafe-eval'` because Babel Standalone (no-build architecture) fetches JSX files via XHR, compiles them, and injects the result as inline scripts into the DOM — both flags are required for this to work.
+Security headers are set in the `dive` server block only. The current `script-src` includes both `'unsafe-inline'` and `'unsafe-eval'` because Babel Standalone compiles the JSX in the browser and injects it as inline scripts; the redesign removes both (target CSP: `02-architecture.md` §14).
 
-## Architecture
+### Old architecture (`legacy/`)
 
-### No-build stack
-
-React 18 + Babel Standalone loaded from unpkg CDN with SRI hashes. JSX is transpiled **in the browser** at runtime. Every component file ends with `window.ComponentName = ComponentName` to expose it as a global — this is how `index.html` wires them together.
-
-Load order in `index.html` matters: `i18n.jsx` and `Icons.jsx` must come before any component that uses them. `app.jsx` is last.
-
-### Component model
-
-Each `.jsx` file in `components/` is a self-contained React component that receives a `t` prop (translation object) and renders a page section. Components are pure presentational — no data fetching, no shared state. All state lives in `App` (`app.jsx`).
-
-### Translations
-
-All copy lives in `components/i18n.jsx` as a single `TRANSLATIONS` object (`fr` / `en`). The `useT(lang)` hook (defined in `i18n.jsx`, exposed as `window.useT`) returns the correct sub-tree. To add or change any visible text, edit only `i18n.jsx`.
-
-**FR/EN parity is mandatory.** Every change to `i18n.jsx` must be applied to both the `fr` and `en` subtrees — same keys, same values (translated), same structure. Never update one language without updating the other.
-
-### Design tokens
-
-CSS custom properties defined in the `<style>` block of `index.html`:
-- `[data-theme="dark"]` — dark mode overrides
-- `[data-palette="nordic|glacier|sunset"]` — palette overrides
-- Hero layout, agency layout, and dark mode are runtime-toggled via `data-` attributes on `<html>`
-
-### Tweaks panel
-
-`Tweaks.jsx` is a floating dev/demo panel (bottom-left) that switches palette, hero layout, agency layout, and dark mode. It communicates state changes upstream via `window.parent.postMessage` (for iframe embedding). The `DEFAULTS` object at the top of `app.jsx` controls which variant ships as the production default.
-
-### Contact / WhatsApp
-
-- **WhatsApp number**: `41794368112` (E.164 without `+`) — set in `components/Chat.jsx` (`PHONE` const) and `components/Contact.jsx` (`wa.me` href).
-- **Phone**: `+41 79 436 81 12` — `tel:` href in `Contact.jsx`.
-- **Email**: `nicholas@bullesenvalais.ch` — mailto fallback in `Contact.jsx`.
-- Contact form POSTs JSON to `/api/contact` (`api/contact.php`), with a hidden honeypot field `website`, `elapsed` (ms since the page loaded) and `locale`. On failure the form shows an error — listing the fields the server rejected, if any — with a pre-filled `mailto:` link (never opened automatically).
-- `api/contact.php` checks, in order: method, `Content-Type: application/json`, `Origin` allowlist, body ≤ 32 KB, valid JSON, spam (honeypot filled or `elapsed` < 3 s → fake 200, nothing sent, only the reason logged; a missing `elapsed` is accepted: pages loaded before the 30.09.2026 deploy do not send it), field rules. It then sends one plain-text e-mail through Gmail SMTP (STARTTLS + AUTH LOGIN): base64 body, RFC 2047 headers, envelope addresses from the config only. The SMTP credentials live in `api/mail-config.php` on the Pi (any local copy is gitignored): never read, print, commit or sync it.
-
-### Scroll reveal
-
-`App` sets up a single `IntersectionObserver` that adds `.visible` to `.reveal` elements when they enter the viewport. It re-runs whenever `state.hero`, `state.agencyLayout`, or `lang` changes (layout shifts may create new `.reveal` nodes).
+React 18 + Babel Standalone from unpkg, JSX compiled in the browser; each component exposes itself on `window`. All copy in `legacy/components/i18n.jsx` (`TRANSLATIONS.fr` / `.en`), language chosen on the client. `Tweaks.jsx` and the `postMessage` edit mode are leftovers of a mock-up tool.
