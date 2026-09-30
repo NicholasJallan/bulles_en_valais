@@ -1,6 +1,6 @@
 const Contact = ({ t }) => {
   const [status, setStatus] = React.useState(null); // null | 'sending' | 'ok' | 'err'
-  const [form, setForm] = React.useState({ name: '', email: '', phone: '', interest: 'padi-owd', message: '' });
+  const [form, setForm] = React.useState({ name: '', email: '', phone: '', interest: 'sdi-owd', message: '' });
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   const submit = async (e) => {
@@ -14,7 +14,7 @@ const Contact = ({ t }) => {
       });
       if (!res.ok) throw new Error('http ' + res.status);
       setStatus('ok');
-      setForm({ name: '', email: '', phone: '', interest: 'padi-owd', message: '' });
+      setForm({ name: '', email: '', phone: '', interest: 'sdi-owd', message: '' });
     } catch (err) {
       const subject = encodeURIComponent(`Contact — ${form.name}`);
       const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
@@ -61,7 +61,7 @@ const Contact = ({ t }) => {
               <span className="mono" style={{display:'block', marginBottom: 8, letterSpacing: '0.14em'}}>{t.contact.certs}</span>
               DEJEPS{' '}<a href="https://recherche-educateur.sports.gouv.fr/CartePro/07425ED0350" target="_blank" rel="noopener noreferrer" style={{color:'inherit', textDecoration:'underline', textUnderlineOffset:3}}>07425ED0350</a><br/>
               <br/>
-              FFESSM E3 #28663<br/>
+              FFESSM E4<br/>
               PADI MSDT #525399<br/>
               SDI-TDI #35812<br/>
               <br/>

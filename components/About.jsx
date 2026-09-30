@@ -20,7 +20,7 @@ const About = ({ t }) => (
           <p>{t.about.body_3}</p>
 
           <div className="about-credentials">
-            <div className="cred">FFESSM<strong>E3 #28663</strong></div>
+            <div className="cred">FFESSM<strong>E4</strong></div>
             <div className="cred">PADI<strong>MSDT #525399</strong></div>
             <div className="cred">SDI/TDI<strong>#35812</strong></div>
           </div>

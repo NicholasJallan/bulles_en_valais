@@ -25,9 +25,9 @@ const AgencyPanel = ({ a, priceCardTitle }) => (
 );
 
 const Agencies = ({ layout, t }) => {
-  const [active, setActive] = React.useState('padi');
-  const [openAcc, setOpenAcc] = React.useState('padi');
-  const agencies = { padi: {...t.agencies.padi, key:'padi'}, tdi: {...t.agencies.tdi, key:'tdi'}, ffessm: {...t.agencies.ffessm, key:'ffessm'} };
+  const [active, setActive] = React.useState('tdi');
+  const [openAcc, setOpenAcc] = React.useState('tdi');
+  const agencies = { tdi: {...t.agencies.tdi, key:'tdi'}, padi: {...t.agencies.padi, key:'padi'}, ffessm: {...t.agencies.ffessm, key:'ffessm'} };
   const a = agencies[active];
 
   return (

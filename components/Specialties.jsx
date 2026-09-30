@@ -1,5 +1,5 @@
 const Specialties = ({ t }) => {
-  const [tab, setTab] = React.useState('padi');
+  const [tab, setTab] = React.useState('sdi');
   const tabData = t.specialties.tabs[tab];
 
   return (
@@ -14,7 +14,7 @@ const Specialties = ({ t }) => {
         </div>
 
         <div className="spec-tabs">
-          {['padi','sdi','tdi','ffessm'].map(k => (
+          {['sdi','tdi','padi','ffessm'].map(k => (
             <button
               key={k}
               className={`spec-tab ${tab === k ? 'active' : ''}`}

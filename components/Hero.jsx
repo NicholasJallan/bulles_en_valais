@@ -44,7 +44,7 @@ const Hero = ({ mode, t }) => {
     <section className="hero" id="top">
       <div className="hero-bg" style={{ backgroundImage: `url(${HERO_IMG})` }} />
       <div className="hero-grain" />
-      <div className="hero-credentials">FFESSM E3 #28663 — PADI MSDT #525399 — SDI/TDI #35812</div>
+      <div className="hero-credentials">FFESSM E4 — PADI MSDT #525399 — SDI/TDI #35812</div>
       <div className="hero-content">
         <div className="hero-eyebrow">{t.hero.eyebrow}</div>
         <h1 className="serif">{t.hero.title_1}<em>{t.hero.title_em}</em><br/>{t.hero.title_2}</h1>
