@@ -1,6 +1,16 @@
+// website is a honeypot: hidden from people, filled in by naive bots.
+const EMPTY_FORM = { name: '', email: '', phone: '', interest: 'sdi-owd', message: '', website: '' };
+
+const mailtoHref = (form) => {
+  const subject = encodeURIComponent(`Contact — ${form.name}`);
+  const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
+  return `mailto:nicholas@bullesenvalais.ch?subject=${subject}&body=${body}`;
+};
+
 const Contact = ({ t }) => {
   const [status, setStatus] = React.useState(null); // null | 'sending' | 'ok' | 'err'
-  const [form, setForm] = React.useState({ name: '', email: '', phone: '', interest: 'sdi-owd', message: '' });
+  const [form, setForm] = React.useState(EMPTY_FORM);
+  const shownAt = React.useRef(Date.now());
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   const submit = async (e) => {
@@ -10,16 +20,13 @@ const Contact = ({ t }) => {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, elapsed: Date.now() - shownAt.current, locale: document.documentElement.lang }),
       });
       if (!res.ok) throw new Error('http ' + res.status);
       setStatus('ok');
-      setForm({ name: '', email: '', phone: '', interest: 'sdi-owd', message: '' });
+      setForm(EMPTY_FORM);
     } catch (err) {
-      const subject = encodeURIComponent(`Contact — ${form.name}`);
-      const body = encodeURIComponent(`Nom / Name: ${form.name}\nEmail: ${form.email}\nTéléphone / Phone: ${form.phone}\nIntérêt / Interest: ${form.interest}\n\n${form.message}`);
-      window.location.href = `mailto:nicholas@bullesenvalais.ch?subject=${subject}&body=${body}`;
-      setStatus('ok');
+      setStatus('err');
     }
   };
 
@@ -82,17 +89,17 @@ const Contact = ({ t }) => {
               <div className="form-row">
                 <div className="form-field">
                   <label>{t.contact.form.name}</label>
-                  <input type="text" required value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
+                  <input type="text" required maxLength={100} value={form.name} onChange={update('name')} placeholder={t.contact.form.namePh} />
                 </div>
                 <div className="form-field">
                   <label>{t.contact.form.email}</label>
-                  <input type="email" required value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
+                  <input type="email" required maxLength={254} value={form.email} onChange={update('email')} placeholder={t.contact.form.emailPh} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-field">
                   <label>{t.contact.form.phone}</label>
-                  <input type="tel" value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
+                  <input type="tel" maxLength={40} value={form.phone} onChange={update('phone')} placeholder={t.contact.form.phonePh} />
                 </div>
                 <div className="form-field">
                   <label>{t.contact.form.interest}</label>
@@ -103,12 +110,20 @@ const Contact = ({ t }) => {
               </div>
               <div className="form-field" style={{marginBottom: 8}}>
                 <label>{t.contact.form.message}</label>
-                <textarea value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
+                <textarea maxLength={5000} value={form.message} onChange={update('message')} placeholder={t.contact.form.messagePh} />
+              </div>
+              <div className="hp" aria-hidden="true">
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={update('website')} />
               </div>
               <button type="submit" className="form-submit" disabled={status === 'sending'}>
                 {status === 'sending' ? '…' : t.contact.form.submit}
               </button>
-              {status === 'err' && <div className="form-error">{t.contact.form.error}</div>}
+              {status === 'err' && (
+                <div className="form-error" role="alert">
+                  {t.contact.form.error}{' '}
+                  <a href={mailtoHref(form)}>{t.contact.form.errorMail}</a>
+                </div>
+              )}
             </form>
           )}
 
