@@ -4,6 +4,10 @@ declare(strict_types=1);
 // Unit tests for api/contact.php — dependency-free, runs on PHP 7.4+.
 // Usage: php tests/php/contact_test.php  (exit code 1 on failure)
 
+if (PHP_SAPI !== 'cli') {
+    exit; // never through a web server
+}
+
 $GLOBALS['results'] = ['pass' => 0, 'fail' => 0, 'done' => false];
 
 register_shutdown_function(static function (): void {
@@ -13,6 +17,7 @@ register_shutdown_function(static function (): void {
     }
 });
 
+define('CONTACT_CONFIG_PATH', __DIR__ . '/no-such-config.php'); // never the real mail-config.php
 define('CONTACT_NO_AUTORUN', true);
 require __DIR__ . '/../../api/contact.php';
 
@@ -123,11 +128,15 @@ check('email over 254 chars → error', strlen($longEmail) === 256 && in_array('
 check('quoted local part with LF → error', in_array('email', $fieldErrors(['email' => "\"a\\\nb\"@example.com"]), true));
 check('quoted local part with NUL → error', in_array('email', $fieldErrors(['email' => "\"a\\\x00b\"@example.com"]), true));
 check('quoted local part with <> → error', in_array('email', $fieldErrors(['email' => '"a<b>c"@example.com']), true));
-check('phone with letters → error', in_array('phone', $fieldErrors(['phone' => '+41 79 abc']), true));
+check('encoded-word lookalike in e-mail → error', in_array('email', $fieldErrors(['email' => '=?utf-8?q?v=40x.y=3e?=@example.com']), true));
 check('phone of 41 chars → error', in_array('phone', $fieldErrors(['phone' => str_repeat('1', 41)]), true));
+check('phone with a line feed → error', in_array('phone', $fieldErrors(['phone' => "079\n123 45 67"]), true));
 check('empty phone → ok', $fieldErrors(['phone' => '']) === []);
 check('phone with ( ) . - → ok', $fieldErrors(['phone' => '+41 (79) 436.81-12']) === []);
 check('Swiss phone with a slash → ok', $fieldErrors(['phone' => '079/436 81 12']) === []);
+check('phone with a note → ok', $fieldErrors(['phone' => '079 123 45 67 (soir)']) === []);
+check('phone with a no-break space → ok', $fieldErrors(['phone' => "079\u{00A0}123 45 67"]) === []);
+check('phone of 40 multibyte chars → ok', $fieldErrors(['phone' => str_repeat('é', 40)]) === []);
 check('message over 5000 chars → error', in_array('message', $fieldErrors(['message' => str_repeat('é', 5001)]), true));
 check('message of 5000 chars → ok', $fieldErrors(['message' => str_repeat('é', 5000)]) === []);
 check('invalid UTF-8 message → error', in_array('message', $fieldErrors(['message' => "abc\xC3\x28"]), true));
@@ -137,17 +146,23 @@ check('known locale is kept', validate_payload(valid_payload(['locale' => 'en'])
 check('unknown locale is dropped', validate_payload(valid_payload(['locale' => 'xx']))['data']['locale'] === '');
 
 // ---------------------------------------------------------------------------
-section('is_spam');
-check('honeypot filled → spam', is_spam(valid_payload(['website' => 'http://spam.example'])) === true);
-check('elapsed < 3000 → spam', is_spam(valid_payload(['elapsed' => 2999])) === true);
-check('missing elapsed → spam', is_spam(array_diff_key(valid_payload(), ['elapsed' => 0])) === true);
-check('non-numeric elapsed → spam', is_spam(valid_payload(['elapsed' => 'soon'])) === true);
-check('normal submission → not spam', is_spam(valid_payload()) === false);
-check('elapsed exactly 3000 → not spam', is_spam(valid_payload(['elapsed' => 3000])) === false);
+section('spam_reason');
+check('honeypot filled → honeypot', spam_reason(valid_payload(['website' => 'http://spam.example'])) === 'honeypot');
+check('non-string honeypot → honeypot', spam_reason(valid_payload(['website' => ['x']])) === 'honeypot');
+check('elapsed < 3000 → too_fast', spam_reason(valid_payload(['elapsed' => 2999])) === 'too_fast');
+check('non-numeric elapsed → too_fast', spam_reason(valid_payload(['elapsed' => 'soon'])) === 'too_fast');
+check('negative elapsed → too_fast', spam_reason(valid_payload(['elapsed' => -5])) === 'too_fast');
+check('missing elapsed (page loaded before S00) → accepted', spam_reason(array_diff_key(valid_payload(), ['elapsed' => 0])) === null);
+check('normal submission → accepted', spam_reason(valid_payload()) === null);
+check('elapsed exactly 3000 → accepted', spam_reason(valid_payload(['elapsed' => 3000])) === null);
 
 // ---------------------------------------------------------------------------
 section('origin_allowed');
-foreach (['https://dive.bullesenvalais.ch', 'https://bullesenvalais.ch', 'https://www.bullesenvalais.ch'] as $origin) {
+$allowedOrigins = [
+    'https://dive.bullesenvalais.ch', 'https://bullesenvalais.ch', 'https://www.bullesenvalais.ch',
+    'https://dive.bullesenvalais.com', 'https://dive.bulleenvalais.ch', 'https://dive.bulleenvalais.com',
+];
+foreach ($allowedOrigins as $origin) {
     check("{$origin} → allowed", origin_allowed($origin) === true);
 }
 foreach (['', 'null', 'http://dive.bullesenvalais.ch', 'https://dive.bullesenvalais.ch.evil.com', 'https://evil.com'] as $origin) {
@@ -172,11 +187,13 @@ check('body over 32 KB → 413', $statusOf('POST', 'application/json', $site, st
 check('invalid JSON → 400', $statusOf('POST', 'application/json', $site, '{"name":') === 400);
 check('JSON scalar → 400', $statusOf('POST', 'application/json', $site, '"hello"') === 400);
 $spam = evaluate_request('POST', 'application/json', $site, json_encode(valid_payload(['website' => 'x'])));
-check('spam → 200 ok without sending', $spam['status'] === 200 && $spam['send'] === null);
+check('spam → 200 ok without sending, with its reason', $spam['status'] === 200 && $spam['send'] === null && $spam['dropped'] === 'honeypot');
 $invalid = evaluate_request('POST', 'application/json', $site, json_encode(valid_payload(['email' => 'nope'])));
 check('validation error → 400 with fields', $invalid['status'] === 400 && $invalid['body']['fields'] === ['email']);
 $accepted = evaluate_request('POST', 'application/json', $site, $json);
-check('valid request → data to send', $accepted['send'] !== null && $accepted['send']['email'] === 'elodie@example.com');
+check('valid request → data to send', $accepted['send'] !== null && $accepted['send']['email'] === 'elodie@example.com' && $accepted['dropped'] === null && $accepted['note'] === null);
+$legacy = evaluate_request('POST', 'application/json', $site, json_encode(array_diff_key(valid_payload(), ['elapsed' => 0])));
+check('request without elapsed → delivered, with a note to log', $legacy['send'] !== null && $legacy['note'] === 'accepted without elapsed');
 
 // ---------------------------------------------------------------------------
 section('build_message');
@@ -205,6 +222,35 @@ check('body keeps the literal message', strpos((string) $decodedBody, "l1\r\n.\r
 check('body lists the interest', strpos((string) $decodedBody, 'sdi-owd') !== false);
 $noReply = build_message($cfg, array_merge($fields, ['email' => '']));
 check('no Reply-To without a valid email', stripos($noReply, 'Reply-To:') === false);
+
+// ---------------------------------------------------------------------------
+section('smtp_reply_code');
+check('single-line reply → its code', smtp_reply_code("250 ok\r\n") === '250');
+check('bare code line → its code', smtp_reply_code("250\r\n") === '250');
+check('multi-line reply with one code → that code', smtp_reply_code("250-a\r\n250-b\r\n250 c\r\n") === '250');
+check('multi-line reply with mixed codes → invalid', smtp_reply_code("250-a\r\n554 no\r\n") === null);
+check('truncated multi-line reply → invalid', smtp_reply_code("250-a\r\n250-b\r\n") === null);
+check('code-only last line after continuations → its code', smtp_reply_code("250-a\r\n250\r\n") === '250');
+check('LF-only line endings → accepted', smtp_reply_code("250-a\n250 b\n") === '250');
+check('mismatch on a middle line → invalid', smtp_reply_code("250-a\r\n251-b\r\n250 c\r\n") === null);
+check('four-digit code → invalid', smtp_reply_code("2500 x\r\n") === null);
+check('code glued to text → invalid', smtp_reply_code("250x\r\n") === null);
+check('garbage → invalid', smtp_reply_code("hello\r\n") === null);
+check('empty reply → invalid', smtp_reply_code('') === null);
+
+// ---------------------------------------------------------------------------
+section('mail configuration');
+$baseConfig = ['host' => 'smtp.example.test', 'port' => '587', 'user' => 'u', 'pass' => 'p', 'from' => 'site@example.test', 'to' => 'owner@example.test'];
+$normalized = normalize_mail_config($baseConfig);
+check('port is cast to int and STARTTLS defaults to on', $normalized !== null && $normalized['port'] === 587 && $normalized['starttls'] === true);
+check('missing password → rejected', normalize_mail_config(array_diff_key($baseConfig, ['pass' => 0])) === null);
+check('port out of range → rejected', normalize_mail_config(array_merge($baseConfig, ['port' => 70000])) === null);
+check('invalid sender address → rejected', normalize_mail_config(array_merge($baseConfig, ['from' => 'not an address'])) === null);
+check('STARTTLS off towards a remote host → rejected', normalize_mail_config(array_merge($baseConfig, ['starttls' => false])) === null);
+$loopback = normalize_mail_config(array_merge($baseConfig, ['host' => '127.0.0.1', 'starttls' => false]));
+check('STARTTLS off towards loopback (tests) → allowed', $loopback !== null && $loopback['starttls'] === false);
+check('configuration that is not an array → rejected', normalize_mail_config('nope') === null);
+check('missing configuration file → rejected', load_mail_config(__DIR__ . '/no-such-config.php') === null);
 
 // ---------------------------------------------------------------------------
 section('smtp_dialogue (in-memory socket pair)');
@@ -241,6 +287,55 @@ $error = smtp_starttls($client);
 fclose($client);
 fclose($server);
 check('clear-text data buffered after STARTTLS aborts before the handshake', $error === 'starttls (unexpected data)');
+
+$pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$client, $server] = $pair;
+fwrite($server, "220 fake\r\n250 fake\r\n454 TLS not available\r\n");
+$error = smtp_dialogue($client, array_merge($cfg, ['starttls' => true]), "x\r\n");
+stream_set_blocking($server, false);
+$sent = (string) stream_get_contents($server);
+fclose($client);
+fclose($server);
+check('STARTTLS refused → abort without AUTH in clear text', $error === 'starttls (454)' && strpos($sent, 'AUTH') === false);
+
+$pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$client, $server] = $pair;
+fwrite($server, str_repeat("250-x\r\n", 60) . "250 end\r\n");
+$error = smtp_step($client, null, '250', 'ehlo');
+fclose($client);
+fclose($server);
+check('reply longer than the line cap → error', $error === 'ehlo (bad reply)');
+
+$pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$client, $server] = $pair;
+fclose($server);
+$error = smtp_step($client, null, '220', 'greeting');
+fclose($client);
+check('no reply at all (closed or timed out) → "no reply"', $error === 'greeting (no reply)');
+
+// ---------------------------------------------------------------------------
+section('entry points (no network, no file written)');
+$previousErrorLog = ini_set('error_log', '/dev/null');
+$probe = stream_socket_server('tcp://127.0.0.1:0');
+$freePort = (int) substr((string) strrchr((string) stream_socket_get_name($probe, false), ':'), 1);
+fclose($probe);
+$connectError = (string) smtp_send(array_merge($cfg, ['host' => '127.0.0.1', 'port' => $freePort, 'starttls' => false]), "x\r\n");
+check('smtp_send reports a refused connection', strpos($connectError, 'connect (') === 0);
+check('mail_config_path uses CONTACT_CONFIG_PATH when defined', mail_config_path() === CONTACT_CONFIG_PATH);
+$delivery = deliver(validate_payload(valid_payload())['data']);
+check('deliver without a configuration → 500 delivery', $delivery['status'] === 500 && $delivery['body'] === ['ok' => false, 'error' => 'delivery']);
+ob_start();
+@respond(405, ['ok' => false, 'error' => 'method']); // @: CLI output already started, headers cannot be set
+check('respond prints the JSON body', ob_get_clean() === '{"ok":false,"error":"method"}');
+$_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+ob_start();
+@handle_request();
+check('handle_request answers OPTIONS without a body', ob_get_clean() === '');
+$_SERVER['REQUEST_METHOD'] = 'GET';
+ob_start();
+@handle_request();
+check('handle_request refuses GET', ob_get_clean() === '{"ok":false,"error":"method"}');
+ini_set('error_log', (string) $previousErrorLog);
 
 // ---------------------------------------------------------------------------
 $GLOBALS['results']['done'] = true;

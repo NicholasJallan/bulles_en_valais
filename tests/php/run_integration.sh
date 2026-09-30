@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Integration tests for api/contact.php: PHP built-in server + fake SMTP server.
 # Usage: bash tests/php/run_integration.sh   (exit code 1 on failure)
+# Needs php, curl, lsof and Python 3.8+.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TESTS="$ROOT/tests/php"
 WORK="$(mktemp -d)"
 LOG="$WORK/smtp.jsonl"
-SMTP_PORT=2525
+PHP_ERRORS="$WORK/php_errors.log"
+SMTP_PORT=2525 # must match tests/php/test-config.php
 HTTP_PORT=8099
 URL="http://127.0.0.1:$HTTP_PORT/api/contact"
 SITE="https://dive.bullesenvalais.ch"
@@ -47,7 +49,7 @@ wait_for() { # description command...
 }
 
 post() { # origin content-type data → sets STATUS and BODY
-  local args=(-s -o "$WORK/body" -w '%{http_code}' -X POST --data-binary "$3")
+  local args=(-s --max-time 15 -o "$WORK/body" -w '%{http_code}' -X POST --data-binary "$3")
   [ -n "$1" ] && args+=(-H "Origin: $1")
   [ -n "$2" ] && args+=(-H "Content-Type: $2")
   STATUS=$(curl "${args[@]}" "$URL")
@@ -68,12 +70,22 @@ await_session() { # marker → index of the session carrying it
 }
 
 # --- servers ---------------------------------------------------------------
+for port in "$SMTP_PORT" "$HTTP_PORT"; do
+  if lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "port $port is already in use: stop the other process (or test run) first" >&2
+    exit 1
+  fi
+done
 python3 "$TESTS/fake_smtp.py" "$SMTP_PORT" "$LOG" "$WORK/smtp.ready" &
 SMTP_PID=$!
-php -S "127.0.0.1:$HTTP_PORT" "$TESTS/router.php" >"$WORK/php.log" 2>&1 &
+php -d log_errors=1 -d error_log="$PHP_ERRORS" -S "127.0.0.1:$HTTP_PORT" "$TESTS/router.php" >"$WORK/php.log" 2>&1 &
 PHP_PID=$!
 wait_for "fake SMTP server" test -f "$WORK/smtp.ready"
-wait_for "PHP built-in server" curl -s -o /dev/null "$URL"
+wait_for "PHP built-in server" curl -s --max-time 1 -o /dev/null "$URL"
+if ! kill -0 "$SMTP_PID" 2>/dev/null || ! kill -0 "$PHP_PID" 2>/dev/null; then
+  echo "a test server exited during startup" >&2
+  exit 1
+fi
 
 # --- delivery --------------------------------------------------------------
 echo "normal request"
@@ -94,6 +106,16 @@ expect "malicious request opened exactly one new session" "$index" 2
 python3 "$TESTS/smtp_log.py" check "$LOG" "$index" malicious
 record "malicious session assertions" $?
 
+echo "client loaded before the S00 deploy (no website, elapsed or locale)"
+post "$SITE" "$JSON" '{"name":"Élodie Martin","email":"elodie@example.com","phone":"","interest":"sdi-owd","message":"Bonjour (ref-l1)"}'
+expect "legacy request → 200" "$STATUS" 200
+index=$(await_session 'ref-l1')
+expect "legacy request is delivered" "$index" 3
+python3 "$TESTS/smtp_log.py" check "$LOG" "$index" legacy
+record "legacy session assertions" $?
+grep -q 'contact: accepted without elapsed' "$PHP_ERRORS"
+record "legacy acceptance is logged (to know when to require elapsed)" $?
+
 # --- refusals: none of these may reach the SMTP server -----------------------
 echo "refusals"
 post "" "$JSON" "$(normal 'x')"
@@ -113,12 +135,16 @@ post "$SITE" "$JSON" '{"name":'
 expect "invalid JSON → 400" "$STATUS" 400
 post "$SITE" "$JSON" "$(payload 'Eve' '\"a\\\nBcc: v@x.y\"@example.com' 'x')"
 expect "quoted e-mail hiding a line feed → 400 on email" "$STATUS $BODY" '400 {"ok":false,"error":"validation","fields":["email"]}'
-expect "GET → 405" "$(curl -s -o /dev/null -w '%{http_code}' "$URL")" 405
-expect "405 advertises the allowed methods" "$(curl -s -D - -o /dev/null "$URL" | tr -d '\r' | grep -i '^allow:')" 'Allow: POST, OPTIONS'
-expect "OPTIONS → 204" "$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS "$URL")" 204
+expect "GET → 405" "$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' "$URL")" 405
+expect "405 advertises the allowed methods" "$(curl -s --max-time 5 -D - -o /dev/null "$URL" | tr -d '\r' | grep -i '^allow:')" 'Allow: POST, OPTIONS'
+expect "OPTIONS → 204" "$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' -X OPTIONS "$URL")" 204
 post "$SITE" "$JSON" "$(normal 'ref-s1')"
 expect "sentinel request → 200" "$STATUS" 200
-expect "only the sentinel reached SMTP after the refusals" "$(await_session 'ref-s1')" 3
+expect "only the sentinel reached SMTP after the refusals" "$(await_session 'ref-s1')" 4
+grep -q 'contact: dropped (honeypot)' "$PHP_ERRORS"
+record "honeypot drop is logged with its reason" $?
+grep -q 'contact: dropped (too_fast)' "$PHP_ERRORS"
+record "too-fast drop is logged with its reason" $?
 
 # --- delivery failure ----------------------------------------------------------
 echo "delivery failure"
@@ -126,10 +152,10 @@ kill "$SMTP_PID" && wait "$SMTP_PID" 2>/dev/null
 SMTP_PID=""
 post "$SITE" "$JSON" "$(normal 'ref-f1')"
 expect "SMTP server down → 500 delivery" "$STATUS $BODY" '500 {"ok":false,"error":"delivery"}'
-grep -q 'contact: delivery failed at connect' "$WORK/php.log"
+grep -q 'contact: delivery failed at connect' "$PHP_ERRORS"
 record "failure is logged with its stage" $?
-! grep -qiE 'elodie|Élodie|ref-f1' "$WORK/php.log"
-record "log contains no personal data" $?
+! grep -qiE 'elodie|Élodie|bot@|ref-' "$PHP_ERRORS"
+record "error log contains no personal data" $?
 
 echo
 echo "$PASS passed, $FAIL failed"

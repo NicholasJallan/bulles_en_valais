@@ -3,7 +3,7 @@
 
   smtp_log.py await LOG MARKER      print the 1-based index of the first session
                                     whose decoded body contains MARKER (waits up to 5 s)
-  smtp_log.py check LOG INDEX MODE  assert on session INDEX; MODE is normal or malicious
+  smtp_log.py check LOG INDEX MODE  assert on session INDEX; MODE is normal, malicious or legacy
 """
 import email
 import email.policy
@@ -76,9 +76,14 @@ def check(path, index, mode):
         expect("reply-to is the visitor", message["Reply-To"].addresses[0].addr_spec == "elodie@example.com")
         expect("body keeps the message, lone dot included", "je voudrais plonger au Rosel.\n.\nMerci" in body)
         expect("body shows the locale", "Langue     : fr" in body)
-    else:
+    elif mode == "malicious":
         expect("subject carries the sanitized name", str(message["Subject"]) == "Contact Bulles en Valais — Bob Bcc: victim@example.com")
         expect("injected commands stay literal text in the body", "\n.\nMAIL FROM:<a@b.c>\nRCPT TO:<victim@example.com>\nDATA\n" in body)
+    elif mode == "legacy":
+        expect("body keeps the message", "Bonjour (ref-l1)" in body)
+        expect("body has no locale line", "Langue" not in body)
+    else:
+        expect(f"unknown mode {mode!r}", False)
     return 0 if all(results) else 1
 
 

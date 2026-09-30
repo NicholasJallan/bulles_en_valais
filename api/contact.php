@@ -10,6 +10,10 @@ const ALLOWED_ORIGINS = [
     'https://dive.bullesenvalais.ch',
     'https://bullesenvalais.ch',
     'https://www.bullesenvalais.ch',
+    // other names served by the same nginx block
+    'https://dive.bullesenvalais.com',
+    'https://dive.bulleenvalais.ch',
+    'https://dive.bulleenvalais.com',
 ];
 const ALLOWED_INTERESTS = [
     'baptism', 'sdi-owd', 'sdi-aowd', 'sdi-rescue', 'tdi', 'padi-owd', 'padi-aowd',
@@ -22,11 +26,12 @@ const MAX_JSON_DEPTH = 4;
 const MAX_NAME_CHARS = 100;
 const MAX_EMAIL_CHARS = 254;
 const MAX_MESSAGE_CHARS = 5000;
+const MAX_PHONE_CHARS = 40;
 const MIN_ELAPSED_MS = 3000;
-const PHONE_PATTERN = '#^[0-9 +()./\-]{0,40}$#D'; // "/" as in 079/436 81 12
 // Unquoted local part only: FILTER_VALIDATE_EMAIL alone accepts quoted parts
 // that smuggle LF or NUL into headers.
 const EMAIL_PATTERN = '/^[A-Za-z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[A-Za-z0-9.-]+$/D';
+const LOOPBACK_HOSTS = ['127.0.0.1', '::1', 'localhost'];
 
 const HEADER_CHUNK_BYTES = 36; // encoded word = 60 chars, fits after "Subject: "
 const SITE_NAME = 'Bulles en Valais';
@@ -110,14 +115,18 @@ function is_json_content_type(string $contentType): bool
     return preg_match('#^application/json\s*(;|$)#i', trim($contentType)) === 1;
 }
 
-function is_spam(array $data): bool
+/** 'honeypot' or 'too_fast' when the submission must be dropped, null otherwise. */
+function spam_reason(array $data): ?string
 {
     $website = $data['website'] ?? '';
     if (!is_string($website) || trim($website) !== '') {
-        return true;
+        return 'honeypot';
     }
-    $elapsed = $data['elapsed'] ?? null;
-    return !is_numeric($elapsed) || (float) $elapsed < MIN_ELAPSED_MS;
+    if (!array_key_exists('elapsed', $data)) {
+        return null; // pages loaded before the S00 deploy do not send it
+    }
+    $elapsed = $data['elapsed'];
+    return is_numeric($elapsed) && (float) $elapsed >= MIN_ELAPSED_MS ? null : 'too_fast';
 }
 
 /** Trimmed string value, '' when absent, null when the type is wrong. */
@@ -141,12 +150,17 @@ function is_valid_email(?string $email): bool
     return $email !== null
         && strlen($email) <= MAX_EMAIL_CHARS
         && preg_match(EMAIL_PATTERN, $email) === 1
+        && strpos($email, '=?') === false // no RFC 2047 encoded-word lookalike
         && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+// Free text (notes such as "(soir)" are fine): it only reaches the base64 body.
 function is_valid_phone(?string $phone): bool
 {
-    return $phone !== null && preg_match(PHONE_PATTERN, $phone) === 1;
+    return $phone !== null
+        && is_valid_utf8($phone)
+        && preg_match('/[\x00-\x1F\x7F]/', $phone) === 0
+        && char_length($phone) <= MAX_PHONE_CHARS;
 }
 
 function is_valid_message(?string $message): bool
@@ -187,39 +201,46 @@ function validate_payload(array $data): array
     ];
 }
 
-function response(int $status, ?array $body): array
+/**
+ * Outcome of a request: 'send' carries the validated fields to deliver,
+ * 'dropped' the reason why a spam submission was silently ignored, 'note'
+ * anything else worth logging (never personal data).
+ */
+function result(int $status, ?array $body, ?array $send = null, ?string $dropped = null, ?string $note = null): array
 {
-    return ['status' => $status, 'body' => $body, 'send' => null];
+    return ['status' => $status, 'body' => $body, 'send' => $send, 'dropped' => $dropped, 'note' => $note];
 }
 
-// Checks run in a fixed order; 'send' carries the validated fields when the
-// message must actually be delivered.
+// Checks run in a fixed order.
 function evaluate_request(string $method, string $contentType, string $origin, string $raw): array
 {
     if ($method === 'OPTIONS') {
-        return response(204, null);
+        return result(204, null);
     }
     if ($method !== 'POST') {
-        return response(405, ['ok' => false, 'error' => 'method']);
+        return result(405, ['ok' => false, 'error' => 'method']);
     }
     if (!is_json_content_type($contentType) || !origin_allowed($origin)) {
-        return response(403, ['ok' => false, 'error' => 'forbidden']);
+        return result(403, ['ok' => false, 'error' => 'forbidden']);
     }
     if (strlen($raw) > MAX_BODY_BYTES) {
-        return response(413, ['ok' => false, 'error' => 'too_large']);
+        return result(413, ['ok' => false, 'error' => 'too_large']);
     }
     $data = json_decode($raw, true, MAX_JSON_DEPTH);
     if (!is_array($data)) {
-        return response(400, ['ok' => false, 'error' => 'json']);
+        return result(400, ['ok' => false, 'error' => 'json']);
     }
-    if (is_spam($data)) {
-        return response(200, ['ok' => true]); // bots get no hint
+    $spam = spam_reason($data);
+    if ($spam !== null) {
+        return result(200, ['ok' => true], null, $spam); // bots get no hint
     }
-    $result = validate_payload($data);
-    if ($result['errors'] !== []) {
-        return response(400, ['ok' => false, 'error' => 'validation', 'fields' => $result['errors']]);
+    $validation = validate_payload($data);
+    if ($validation['errors'] !== []) {
+        return result(400, ['ok' => false, 'error' => 'validation', 'fields' => $validation['errors']]);
     }
-    return ['status' => 200, 'body' => ['ok' => true], 'send' => $result['data']];
+    // Shows when clients from before the S00 deploy are gone (then require elapsed).
+    $note = array_key_exists('elapsed', $data) ? null : 'accepted without elapsed';
+    return result(200, ['ok' => true], $validation['data'], null, $note);
 }
 
 // ---------------------------------------------------------------------------
@@ -292,6 +313,28 @@ function smtp_write($sock, string $data): bool
 }
 
 /**
+ * Code of a complete reply whose lines all carry the same code; null for an
+ * empty, malformed or truncated reply.
+ */
+function smtp_reply_code(string $reply): ?string
+{
+    $lines = (array) preg_split('/\r?\n/', rtrim($reply, "\r\n"));
+    $code = (string) substr((string) $lines[0], 0, 3);
+    if (preg_match('/^\d{3}$/', $code) !== 1) {
+        return null;
+    }
+    $last = count($lines) - 1;
+    foreach ($lines as $index => $line) {
+        $separator = (string) substr((string) $line, 3, 1);
+        $allowed = $index === $last ? [' ', ''] : ['-'];
+        if (strncmp((string) $line, $code, 3) !== 0 || !in_array($separator, $allowed, true)) {
+            return null;
+        }
+    }
+    return $code;
+}
+
+/**
  * Sends one command (or none, to read a greeting) and checks the reply code.
  * Errors carry the stage and the reply code only: no personal data in logs.
  *
@@ -303,10 +346,11 @@ function smtp_step($sock, ?string $command, string $expect, string $stage): ?str
         return $stage . ' (write)';
     }
     $reply = smtp_read($sock);
-    if (strncmp($reply, $expect, 3) === 0) {
+    $code = smtp_reply_code($reply);
+    if ($code === $expect) {
         return null;
     }
-    return $stage . ' (' . (preg_match('/^\d{3}/', $reply, $m) === 1 ? $m[0] : 'no reply') . ')';
+    return $stage . ' (' . ($code ?? ($reply === '' ? 'no reply' : 'bad reply')) . ')';
 }
 
 /** @param resource $sock */
@@ -380,7 +424,7 @@ function smtp_send(array $cfg, string $message): ?string
     $errstr = '';
     $sock = @fsockopen($cfg['host'], $cfg['port'], $errno, $errstr, SMTP_TIMEOUT_S);
     if ($sock === false) {
-        return 'connect (' . $errno . ')';
+        return 'connect (' . $errno . ' ' . sanitize_header($errstr) . ')';
     }
     stream_set_timeout($sock, SMTP_TIMEOUT_S);
     try {
@@ -401,30 +445,40 @@ function mail_config_path(): string
     return defined('CONTACT_CONFIG_PATH') ? (string) constant('CONTACT_CONFIG_PATH') : __DIR__ . '/mail-config.php';
 }
 
-/** Normalized configuration, or null when a key is missing or invalid. */
-function load_mail_config(string $path): ?array
+/**
+ * Normalized configuration, or null when a key is missing or invalid.
+ * STARTTLS can only be turned off towards a loopback host (tests).
+ *
+ * @param mixed $raw
+ */
+function normalize_mail_config($raw): ?array
 {
-    $raw = is_file($path) ? require $path : null;
     if (!is_array($raw)) {
         return null;
     }
-    foreach (['host', 'user', 'pass', 'from', 'to'] as $key) {
+    foreach (['host', 'port', 'user', 'pass', 'from', 'to'] as $key) {
         if (!isset($raw[$key]) || !is_scalar($raw[$key]) || (string) $raw[$key] === '') {
             return null;
         }
     }
-    $port = (int) ($raw['port'] ?? 0);
     $cfg = [
         'host' => (string) $raw['host'],
-        'port' => $port,
+        'port' => (int) $raw['port'],
         'user' => (string) $raw['user'],
         'pass' => (string) $raw['pass'],
         'from' => (string) $raw['from'],
         'to' => (string) $raw['to'],
         'starttls' => (bool) ($raw['starttls'] ?? true),
     ];
-    $valid = $port > 0 && $port <= 65535 && is_valid_email($cfg['from']) && is_valid_email($cfg['to']);
+    $valid = $cfg['port'] > 0 && $cfg['port'] <= 65535
+        && is_valid_email($cfg['from']) && is_valid_email($cfg['to'])
+        && ($cfg['starttls'] || in_array($cfg['host'], LOOPBACK_HOSTS, true));
     return $valid ? $cfg : null;
+}
+
+function load_mail_config(string $path): ?array
+{
+    return normalize_mail_config(is_file($path) ? require $path : null);
 }
 
 function deliver(array $fields): array
@@ -432,14 +486,14 @@ function deliver(array $fields): array
     $cfg = load_mail_config(mail_config_path());
     if ($cfg === null) {
         error_log('contact: mail configuration missing or invalid');
-        return response(500, ['ok' => false, 'error' => 'delivery']);
+        return result(500, ['ok' => false, 'error' => 'delivery']);
     }
     $error = smtp_send($cfg, build_message($cfg, $fields));
     if ($error !== null) {
         error_log('contact: delivery failed at ' . $error);
-        return response(500, ['ok' => false, 'error' => 'delivery']);
+        return result(500, ['ok' => false, 'error' => 'delivery']);
     }
-    return response(200, ['ok' => true]);
+    return result(200, ['ok' => true]);
 }
 
 function respond(int $status, ?array $body): void
@@ -458,13 +512,19 @@ function respond(int $status, ?array $body): void
 function handle_request(): void
 {
     $raw = file_get_contents('php://input', false, null, 0, MAX_BODY_BYTES + 1);
-    $result = evaluate_request(
+    $outcome = evaluate_request(
         (string) ($_SERVER['REQUEST_METHOD'] ?? ''),
         (string) ($_SERVER['CONTENT_TYPE'] ?? ''),
         (string) ($_SERVER['HTTP_ORIGIN'] ?? ''),
         $raw === false ? '' : $raw
     );
-    $final = $result['send'] !== null ? deliver($result['send']) : $result;
+    if ($outcome['dropped'] !== null) {
+        error_log('contact: dropped (' . $outcome['dropped'] . ')'); // reason only, to spot false positives
+    }
+    if ($outcome['note'] !== null) {
+        error_log('contact: ' . $outcome['note']);
+    }
+    $final = $outcome['send'] !== null ? deliver($outcome['send']) : $outcome;
     respond($final['status'], $final['body']);
 }
 

@@ -6,7 +6,7 @@ declare(strict_types=1);
 // The test configuration path is a constant set here, never read from the
 // request or the environment. This file must never be deployed.
 
-if (parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) !== '/api/contact') {
+if (PHP_SAPI !== 'cli-server' || parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) !== '/api/contact') {
     http_response_code(404);
     return;
 }
