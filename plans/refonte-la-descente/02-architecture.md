@@ -62,8 +62,8 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── footer/     Footer · calm-mode.ts
 │   │   └── ui/         Button · Eyebrow · SectionHeader · SplitHeading · ImageReveal · RichText · Icon
 │   ├── scripts/app.ts                 # point d'entrée unique, orchestre l'initialisation (§7)
-│   ├── i18n/  types.ts · fr.ts · en.ts · index.ts · routes.ts · parity.test.ts
-│   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · *.test.ts
+│   ├── i18n/  types.ts · dictionary.ts · fr.ts · en.ts · legal/{fr,en}.ts · index.ts · routes.ts (+ tests)
+│   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
 │   ├── lib/
 │   │   ├── motion/  gsap.ts · eases.ts · tokens.ts · lenis.ts · reduced-motion.ts · reveal.ts · split.ts · magnetic.ts
 │   │   ├── depth/   resolve-depth.ts · temperature.ts · ladder-scale.ts (+ tests)
@@ -74,7 +74,10 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── form/    validate.ts (+ test) · submit.ts
 │   │   ├── analytics/ consent.ts · events.ts
 │   │   ├── seo/     jsonld.ts (+ test)
-│   │   └── format.ts (+ test)          # CHF, mètres, coordonnées, durée mm:ss
+│   │   ├── css/     custom-properties.ts (+ test)   # lecture de tokens.css pour les tests (S02)
+│   │   ├── format.ts (+ test)          # CHF, mètres, coordonnées, durée mm:ss
+│   │   └── typography.ts (+ test)      # typographie au rendu : apostrophes, espaces insécables (S03)
+│   ├── test/  content-checks.ts (+ test)  # contrôles génériques des dictionnaires et des données (S03)
 │   ├── styles/ tokens.css · typography.css · global.css · motion.css · utilities.css
 │   └── assets/ images/ · brand/logo.svg · textures/water-mask.png
 ├── tests/ e2e/ · visual/ · a11y/ · php/
@@ -106,9 +109,12 @@ export default defineConfig({
     routing: { prefixDefaultLocale: false },
   },
   fonts: [
-    // Choisis à la Gate 1 (S02). Vérifier la syntaxe exacte des graisses variables dans la doc Fonts API.
-    { provider: fontProviders.google(), name: 'Fraunces', cssVariable: '--font-display' /* weights, styles, subsets */ },
-    { provider: fontProviders.fontshare(), name: 'Switzer', cssVariable: '--font-sans' },
+    // Gate 1 (D25) : Instrument Serif (titres) + Switzer (texte, interface, chiffres du HUD).
+    // tokens.css relie les rôles : --font-display → --font-instrument-serif, --font-sans → --font-switzer.
+    { provider: fontProviders.google(), name: 'Instrument Serif', cssVariable: '--font-instrument-serif',
+      weights: [400], styles: ['normal', 'italic'], subsets: ['latin'], fallbacks: ['Georgia', 'serif'] },
+    { provider: fontProviders.fontshare(), name: 'Switzer', cssVariable: '--font-switzer',
+      weights: ['100 900'], styles: ['normal', 'italic'], fallbacks: ['Arial', 'sans-serif'] },
   ],
   integrations: [
     sitemap({
@@ -136,39 +142,43 @@ export type Rich = ReadonlyArray<{ text: string } | { link: { label: string; hre
 export interface Dictionary { meta: {…}; nav: {…}; hud: {…}; hero: {…}; /* une clé par section */ }
 ```
 
+- L'interface `Dictionary` est dans `dictionary.ts` (une clé par bloc, dans l'ordre de la page ; `types.ts` reste sans import car `astro.config.mjs` le charge). Les pages légales sont dans `legal/{fr,en}.ts`.
 - `fr.ts` et `en.ts` exportent chacun un objet de type `Dictionary` : TypeScript refuse toute clé manquante ou en trop.
-- `parity.test.ts` vérifie en plus la **longueur des tableaux** (FAQ, témoignages, surlignages) et l'absence de chaîne vide.
+- Les sur-titres ne contiennent que leur libellé : la profondeur du marqueur vient de `src/data/sections.ts` (composant `Eyebrow`).
+- **Typographie au rendu** : les sources gardent des apostrophes droites et des espaces simples ; `getDictionary()` applique `typeset()` (`src/lib/typography.ts`) une fois par langue, et `localize()` fait de même pour les libellés localisés de `src/data/`.
+- `parity.test.ts` vérifie en plus la **longueur des tableaux** (FAQ, témoignages, surlignages), l'absence de chaîne vide et de HTML, les mêmes marqueurs `TODO(I-xx)` aux mêmes endroits dans chaque langue, et la longueur des titres (≤ 60) et descriptions (≤ 155) de chaque page ; `content.test.ts` vérifie que les coordonnées écrites dans les textes sont celles de `src/data/contact.ts`.
 - **Aucun HTML dans les chaînes.** Les liens (partenaires plongee.ch et scubashop.ch) passent par `Rich` et le composant `RichText`. Plus de `dangerouslySetInnerHTML`.
 - URLs : `/` (FR) et `/en/`. Les pages légales sont mises en correspondance dans `routes.ts` pour le sélecteur de langue. `hreflang` : `fr-CH`, `en`, `x-default` → `/`.
 - Pas de redirection automatique. Option : si `navigator.language` commence par `en` sur la page FR, un discret « This page is also available in English » (fermable, mémorisé dans `localStorage`).
-- Témoignages : texte original sur la page FR ; sur la page EN, traduction marquée « Translated from French » (à valider par Nicholas, 📥 I-09), avec les bons attributs `lang`.
+- Témoignages (avis Google) : texte original sur la page FR ; sur la page EN, traduction marquée « Translated from French » (I-09, D29), avec les bons attributs `lang`.
 
 ## 5. Données (source unique)
 
 ```ts
-// src/data/courses.ts
+// src/data/courses.ts — un seul catalogue : cursus, spécialités, fédéral (S03)
 export type AgencyId = 'sdi-tdi' | 'padi' | 'ffessm';
 export type Price = { readonly amount: number; readonly currency: 'CHF' } | { readonly onRequest: true };
 export interface Course {
-  readonly id: string;              // 'sdi-owsd'
+  readonly id: string;              // 'sdi-owsd' ; CourseId = union littérale des id
   readonly agency: AgencyId;
   readonly group: 'core' | 'specialty' | 'tech' | 'federal';
   readonly name: Localized;
-  readonly meta: Localized;         // « Équivalent OWD », « 2 heures · baptême »
+  readonly meta?: Localized;        // ligne sous le nom dans la grille du Cursus
   readonly price: Price;
-  readonly maxDepth?: number;       // mètres, pour l'échelle de profondeur (📥 I-04)
+  readonly cursus?: 'row' | 'extra';// ligne de la grille du Cursus, ou ligne sous la grille
+  readonly maxDepth?: number;       // mètres, pour l'échelle de profondeur (I-04)
   readonly inLadder?: boolean;
-  readonly formInterest?: string;   // valeur du <select> du formulaire
+  readonly formInterest?: Interest; // valeur du <select> du formulaire (contact.ts)
 }
 ```
 
-- Tous les tarifs sont migrés **à l'identique** depuis `legacy/components/i18n.jsx`, puis dédoublonnés. **Deux incohérences sont à trancher par Nicholas (📥 I-10)** :
-  1. TDI Nitrox avancé et Decompression Procedures : **CHF 250** dans le panneau Cursus, **CHF 390** dans l'onglet Spécialités TDI.
-  2. FFESSM N1 à N4 : **« Sur demande »** dans le panneau Cursus, **CHF 390 / 490 / 690 / 990** dans l'onglet Spécialités FFESSM. Le texte du N1 dans Spécialités (« plongées en autonomie ») contredit celui du panneau Cursus (« plongée encadrée à 20 m »).
-- `places.ts` : `id`, `name`, `coords` (`lat`/`lng` décimaux + libellé DMS), `photo`, `data` (profondeur max, températures, visibilité, accès : 📥 I-03).
-- `credentials.ts` : FFESSM E4, PADI MSDT #525399, SDI/TDI #35812, DEJEPS `07425ED0350` (lien vers la carte pro), CAH 2B.
-- `contact.ts` : téléphone, WhatsApp (`41794368112`), e-mail, liste des **intérêts du formulaire** (valeurs actuelles + `gift`). Un test vérifie que chaque valeur figure dans `ALLOWED_INTERESTS` de `public/api/contact.php`.
-- Formatage centralisé dans `src/lib/format.ts` : `formatCHF(690, 'fr')` → « CHF 690 », profondeurs, coordonnées, durées. Testé.
+- **Un prix par cours** : tous les tarifs de `legacy/components/i18n.jsx` sont dans `courses.ts`, spécialités comprises ; un test les compare à l'ancien site, avec les changements décidés en I-10 (D22, D23). `cursusCourses()`, `ladderCourses()`, `courseById()` et `isOnRequest()` servent les sections.
+- `specialties.ts` : les cartes des quatre onglets (SDI 10, TDI 4, PADI 10 avec leur équivalent SDI, FFESSM 7 avec le PTH70) pointent vers le catalogue (`course`, `equivalent`) et portent leur `sub` et leur description.
+- `places.ts` : `id`, `name`, `area`, `coords` (degrés décimaux, libellé DMS calculé par `formatCoordinates`), `description`, `photo` et `facts` : profondeur max du lac et, pour le Léman, quelques sites (I-03). Ordre du Rhône : Sion, Rosel, Léman.
+- `credentials.ts` : SDI/TDI #35812, PADI MSDT #525399, FFESSM E4, DEJEPS `07425ED0350` (lien vers la carte pro), CAH 2B.
+- `contact.ts` : téléphone, WhatsApp (`41794368112`, `whatsappUrl()`), e-mail, profils publics (Instagram), lien de la fiche Google, **intérêts du formulaire** (valeurs actuelles + `gift`) et leurs libellés. Un test vérifie que ces valeurs sont exactement celles de `ALLOWED_INTERESTS` de `public/api/contact.php`.
+- `gifts.ts` : les trois offres de bons cadeaux (le baptême affiche le prix du catalogue) ; `sections.ts` : le profil de plongée (ancres, marqueurs des sur-titres, profondeurs du HUD, ancres historiques).
+- Formatage centralisé dans `src/lib/format.ts` : `formatCHF(690, 'fr')` → « CHF 690 », profondeurs, marqueurs (« 05 m »), températures, coordonnées, durées. Testé.
 
 ## 6. Composants
 

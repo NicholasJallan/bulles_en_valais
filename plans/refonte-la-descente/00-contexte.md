@@ -94,6 +94,7 @@ Ordre actuel : Hero → Instructeur (01) → Cursus (02 : SDI/TDI, PADI, FFESSM 
 
 - **Langues** : identifiants et code en anglais, commentaires rares et en anglais, **textes visibles uniquement dans `src/i18n/`** (et `src/data/` pour les libellés localisés des données). FR est la langue source ; EN est une vraie traduction, pas du mot à mot.
 - **Parité FR/EN obligatoire**, garantie par le type `Dictionary` et par `src/i18n/parity.test.ts`. Ajouter l'allemand = ajouter `'de'` au type `Locale` et laisser TypeScript lister les manques.
+- **Typographie au rendu** : apostrophes droites et espaces simples dans les sources ; `getDictionary()` et `localize()` appliquent `typeset()` (`src/lib/typography.ts`). **Un fait, une source** : prix, profondeurs et intérêts dans `src/data/courses.ts`, coordonnées dans `src/data/contact.ts`, marqueurs des sur-titres dans `src/data/sections.ts`.
 - **Organisation par fonctionnalité** (`src/components/<feature>/`), fichiers de 200 à 400 lignes (800 au maximum), fonctions de moins de 50 lignes, pas d'imbrication au-delà de 4 niveaux, immutabilité par défaut.
 - **Aucune valeur de design en dur** : couleurs, espacements, rayons, durées et courbes passent par les tokens (`src/styles/tokens.css`, miroir TS dans `src/lib/motion/tokens.ts`).
 - **Pas de framework UI au runtime** (ni React ni Preact) : composants `.astro` + petits contrôleurs TypeScript pilotés par attributs `data-*`.

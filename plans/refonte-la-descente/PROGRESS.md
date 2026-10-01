@@ -6,8 +6,8 @@
 
 - [x] **S00** — Correctif sécurité du formulaire (site actuel, `main`) — 30.09.2026
 - [x] **S01** — Fondations Astro 7 (branche `refonte/la-descente`) — 01.10.2026
-- [ ] **S02** — Design system & styleguide — 🛑 Gate 1
-- [ ] **S03** — Contenus & i18n typés FR/EN — 🛑 Gate 2
+- [x] **S02** — Design system & styleguide — 01.10.2026 (Gate 1 validée)
+- [x] **S03** — Contenus & i18n typés FR/EN — 01.10.2026 (Gate 2 validée)
 - [ ] **S04** — Visuels : retouches, IA, logo, favicons, OG — 🛑 Gate 3
 - [ ] **S05** — Page statique complète
 - [ ] **S06** — Moteur de mouvement
@@ -23,8 +23,8 @@
 
 | Gate | Objet | Statut | Date | Décision |
 |---|---|---|---|---|
-| 1 | Palette, typographie, sensation du mouvement (styleguide) | ⬜ | | |
-| 2 | Textes FR/EN (`CONTENT-REVIEW.md`) | ⬜ | | |
+| 1 | Palette, typographie, sensation du mouvement (styleguide) | ✅ | 2026-10-01 | Appariement **B** (Instrument Serif + Switzer) ; palette gardée, lagon moins « bleu clair » et descente moins verte ; tempo normal ; HUD en Switzer tabulaire (D25). Jugée sur `https://dive.bullesenvalais.ch/styleguide/` (D31) |
+| 2 | Textes FR/EN (`CONTENT-REVIEW.md`) | ✅ | 2026-10-01 | Tout accepté, questions posées dans la session ; TDI Deco à CHF 250, témoignages traduits, fiche Google, « le Léman », deux « Alexandre F. » séparés, confidentialité sans rubrique États-Unis ni délai de réponse |
 | 3 | Visuels (hero, retouches, IA, logo animé) | ⬜ | | |
 | 4 | Recette complète en préproduction | ⬜ | | |
 
@@ -53,6 +53,16 @@
 | 2026-10-01 | D19 | Budgets : JS initial = scripts et préchargements référencés par la page **plus leurs imports statiques** (es-module-lexer) ; JS total = tous les `.js` de `dist/` ; CSS par page (feuilles liées + `<style>`) ; gzip niveau 6, 1 Ko = 1 024 octets | S01 |
 | 2026-10-01 | D20 | `is:inline` permis sur un `<script src>` vers un fichier de `public/` (`boot.js`) : ce n'est pas du code inline. L'interdit du §9 vise le code JavaScript inline (JSON-LD excepté) | S01 |
 | 2026-10-01 | D21 | **Pas de validation Firefox tant qu'elle ne fonctionne pas** : le Firefox de Playwright ne démarre pas sur macOS 27.0.1, donc le projet `firefox` est retiré des tests E2E (à rétablir si une mise à jour de Playwright le corrige) ; la recette manuelle ne teste Firefox que s'il fonctionne | Nicholas (après S01) |
+| 2026-10-01 | D22 | FFESSM N1 à N4 : prix affichés partout (CHF 390 / 490 / 690 / 990), plus de « Sur demande » dans le Cursus ; N5, PTH70 et PTH120 sur demande | Nicholas (I-10 a) |
+| 2026-10-01 | D23 | TDI : Nitrox et Nitrox avancé à **CHF 290**, Decompression Procedures à **CHF 250** (le Nitrox avancé était à 250 depuis D9) ; FFESSM N1 aux prérogatives officielles (encadré à 20 m) | Nicholas (I-10 b, c ; Gate 2) |
+| 2026-10-01 | D24 | Échelle de profondeur : baptême à **6 m** ; **PTH70** ajouté (sur demande, onglet FFESSM, 70 m), nécessaire avant la formation PTH120 | Nicholas (I-04) |
+| 2026-10-01 | D25 | **Gate 1** : appariement **B** (Instrument Serif + Switzer), chiffres du HUD en Switzer tabulaire (aucun mono), tempo normal ; palette gardée avec un lagon moins « bleu clair » et une descente moins verte | Nicholas (Gate 1) |
+| 2026-10-01 | D26 | Polices Fontshare (Switzer) servies telles que livrées et jamais committées : l'ITF Free Font License 2.0 interdit sous-ensemble, conversion de format et diffusion par un dépôt | S02 (licence) |
+| 2026-10-01 | D27 | Pages légales : nom, IDE CHE-249.028.561, e-mail et téléphone, **sans adresse postale** ; messages conservés selon leur utilité ; ni rubrique sur les transferts vers les États-Unis, ni délai de réponse | Nicholas (I-08, Gate 2) |
+| 2026-10-01 | D28 | « Bons cadeaux » hors du menu principal (5 liens + « Me contacter »), accessible par le profil de plongée du HUD et le pied de page | S03 (choix délégué par Nicholas) |
+| 2026-10-01 | D29 | Témoignages : avis Google, traduits sur la page EN avec « Translated from French » ; les deux « Alexandre F. » (deux personnes) jamais côte à côte ; « Laisser un avis Google » mène à la fiche Google ; pas de page Facebook pour l'instant | Nicholas (I-09, I-14, Gate 2) |
+| 2026-10-01 | D30 | Revues de code à **effort modéré** (une passe, modèle plus léger) pour économiser les tokens | Nicholas |
+| 2026-10-01 | D31 | **Prévisualisation sur le Pi** quand Nicholas est à distance : `_astro/`, `js/` et `styleguide/` ajoutés au docroot du site en ligne (`noindex`, liés nulle part), sans toucher à `index.html` ; essai à blanc, `rsync -rlt --omit-dir-times`, `--delete` limité à ces dossiers, `chown` de ces seuls dossiers (procédure dans `CLAUDE.md`) | Nicholas (Gate 1) |
 
 ## Mutations du plan
 
@@ -81,6 +91,14 @@
 | 2026-10-01 | S02 | ajouter | Polices Fontshare (Switzer, Zodiak, General Sans) servies **telles que livrées** et jamais committées : l'ITF Free Font License 2.0 (17.08.2026) autorise l'auto-hébergement mais interdit le sous-ensemble, la conversion de format et la diffusion par un dépôt (le cache de la Fonts API est dans `node_modules/.astro/` et `.astro/`, ignorés par git). Seuls les monos Google (OFL) sont en sous-ensemble | licence ; à promouvoir en décision à la fusion |
 | 2026-10-01 | S02 | ajouter | `BaseLayout` : `route` facultatif (pas de canonical ni de hreflang hors des routes) mais alors `noindex` obligatoire (union de types), slot `head` ; `app.ts` enregistre `styleguide-switch` et `styleguide-motion`, à retirer en S13 avec le styleguide | styleguide ; union après la revue de code |
 | 2026-10-01 | S02 | corriger | Brief S02, tâche 9 : l'URL LAN de la gate passe par `npm run build && npm run preview -- --host` (avec l'accord de Nicholas) au lieu de `npm run dev -- --host` | D18 (le serveur de dev sert tous les fichiers du projet) ; revue de code |
+| 2026-10-01 | S02 | remplacer | Tâche 9 : Gate 1 jugée sur `https://dive.bullesenvalais.ch/styleguide/`, publiée sur le Pi (D31), et non par l'URL LAN ; brief S02 mis à jour | Nicholas à distance |
+| 2026-10-01 | S02 | appliquer | Tâche 10 : Instrument Serif + Switzer seulement (4 fichiers servis, 3 préchargés, 72 Ko) ; variables de famille gardées, `--font-display` pointe vers `--font-instrument-serif` ; sélecteurs d'appariement et de police du HUD retirés ; `01-direction-artistique.md` §2 (températures I-05), §4 (palette finale), §5 (typographie), §7 (E9) et §9 mis à jour | D25 |
+| 2026-10-01 | S02 ∥ S03 | fusionner | S02 menée dans un worktree sous `.claude/worktrees/`, fusionnée par `d48b427` ; les échantillons du styleguide lisent les dictionnaires et les données : l'exception « textes hors de `src/i18n/` » ne couvre plus que les textes de documentation du styleguide | parallélisation |
+| 2026-10-01 | S03 | ajouter | `src/i18n/dictionary.ts`, `src/i18n/legal/`, `src/lib/typography.ts` (typographie au rendu), `src/test/content-checks.ts`, `src/data/sections.ts` et `src/data/gifts.ts` ; `02-architecture` §2 à §5, `00-contexte` §6 et `CLAUDE.md` mis à jour | structure des textes et des données |
+| 2026-10-01 | S03 | modifier | Cours : un seul catalogue (spécialités comprises), `meta` facultatif, champ `cursus`, `formInterest` typé ; « Sur devis » → « Sur demande » ; sur-titres : libellé dans le dictionnaire, profondeur dans `sections.ts` | un prix par cours ; `Eyebrow` de S02 |
+| 2026-10-01 | S03 | réduire | `places.ts` : profondeur max des lacs et sites du Léman seulement ; températures, visibilité, accès, niveau et saison abandonnés | I-03 : non fournis, aucun fait inventé |
+| 2026-10-01 | S03 | modifier | Gate 2 présentée dans la session (questions numérotées) et non par la lecture de `CONTENT-REVIEW.md` | Nicholas à distance |
+| 2026-10-01 | S02, S03 | modifier | Revue complète pour S02 (Opus), revue à effort modéré pour S03 (Sonnet, une passe) | D30 |
 
 ## Mesures
 
@@ -89,6 +107,7 @@
 | 2026-09-30 | **Site actuel** (prod, mobile, CPU ×4, Fast 4G, cache chaud) | 1,8 s (render delay) | 0,00 | n.m. | ~1 Mo+ (React + Babel via unpkg, non mesurable en cross-origin) | inline | ≈ 5 Mo d'images décodées | —/91/73/83 |
 | 2026-10-01 | S01 : squelette sans design (`check:budgets` sur `dist/`) | n.m. | n.m. | n.m. | 0,6 / 0,6 Ko | 0,7 Ko | n.m. | n.m. |
 | 2026-10-01 | S02 : tokens, polices, styleguide (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko (GSAP des démos, styleguide seulement) | 3,2 Ko (accueil) · 9,3 Ko (styleguide) | polices préchargées : 122 Ko, 3 fichiers (paire A) | n.m. |
+| 2026-10-01 | S02 + S03 fusionnées, après la Gate 1 (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko | 3,2 Ko (accueil) · 7,5 Ko (styleguide) | polices préchargées : 72 Ko, 3 fichiers (paire B) | n.m. |
 
 ## Journal
 
@@ -162,7 +181,7 @@
   - Playwright : ~~réessayer Firefox après une mise à jour~~ → D21 : Firefox n'est validé que s'il fonctionne ; projet retiré (`56d6f41`), à rétablir si une mise à jour de Playwright le corrige.
 - **Retour arrière** : `git switch main && git branch -D refonte/la-descente`, puis `git push origin --delete refonte/la-descente`. `main` n'a pas été touché.
 
-### S02 — 2026-10-01 (design system & styleguide : tâches 1 à 8 terminées, Gate 1 en attente)
+### S02 — 2026-10-01 (design system & styleguide, en parallèle de S03)
 - **Contexte** : exécutée en parallèle de S03, dans un worktree git dédié (branche `worktree-agent-a89ded45a165ffabb`, créée par l'outil depuis `main` puis recalée sur `6277579`), à fusionner dans `refonte/la-descente`. Preview sur le port 4322 ; `test:e2e` non lancé (port 4321 réservé à S03, smoke prévu après la fusion).
 - **Fait** :
   - **Polices (tâche 1)** : Fonts API avec les candidates A (Fraunces + Switzer), B (Instrument Serif + Switzer), C (Zodiak + General Sans) et deux monos du HUD en sous-ensemble (JetBrains Mono, Geist Mono : chiffres, unités, capitales, `° · : —`). `BaseLayout` charge la paire A avec trois préchargements ; le styleguide ajoute les autres, chargées seulement quand un sélecteur les utilise.
@@ -252,3 +271,77 @@
   - revue : `78c0dd3`, `f15e5a4`, `b97d9ca`, `35a779f`, `1be0cdc` ;
   - puis les captures refaites et ce complément.
 - **Retour arrière** : `git revert` de ces commits (tokens, composants et styleguide sont isolés) ; ou ne pas fusionner la branche du worktree.
+- **Gate 1 (tâche 9)** : Nicholas étant à distance, le styleguide est publié sur le Pi (D31) : `https://dive.bullesenvalais.ch/styleguide/` (procédure : `CLAUDE.md`, « Preview on the Pi »). Réponses : appariement **B** (« plutôt B »), palette gardée mais lagon trop « bleu clair » et descente trop verte, tempo normal, HUD en grotesque. Après ajustement (lagon `oklch(90% 0.018 205)`, encre `oklch(45% 0.06 215)`, émeraude `oklch(37% 0.04 215)`, déco émeraude `oklch(74% 0.035 95)`, contrastes toujours verts), **Gate 1 validée le 01.10.2026** (D25).
+- **Tâche 10** (`647548d`) : polices réduites à Instrument Serif + Switzer (4 fichiers servis, 3 préchargés, 72 Ko) ; sélecteurs d'appariement et de police du HUD retirés du styleguide ; colonne d'eau aux températures I-05 ; `01-direction-artistique.md` §2, §4, §5, §7 et §9 mis à jour.
+- **Fusion** dans `refonte/la-descente` (`d48b427`, sans conflit). Raccords :
+  - échantillons du styleguide lus depuis les dictionnaires et les données (`c86bd7d`) ;
+  - `Eyebrow` utilise `formatDepthMarker` (`db963c2`) ;
+  - sur-titre du hero sur toute la ligne de la grille (`a2c3887`) : la règle scopée ne s'appliquait pas à la racine du composant enfant ; révélé sur téléphone par le vrai libellé, plus long.
+- **Prévisualisations sur le Pi** (01.10.2026), trois envois, chacun après un essai à blanc :
+  - `rsync -rlt --omit-dir-times` : `-a` aurait donné au docroot le propriétaire et le mode du Mac ;
+  - `--delete` limité aux dossiers du styleguide, `chown` de ces seuls dossiers ;
+  - vérifiés en HTTPS (types de contenu) et dans Chromium : aucune erreur console, aucune ressource bloquée par la CSP actuelle ;
+  - docroot (`700 www-data`) et `index.html` du site en ligne inchangés.
+- **Points ouverts** :
+  - S04 (Gate 3) : même procédure de prévisualisation si Nicholas est à distance ;
+  - S12–S13 : `_astro/`, `js/` et `styleguide/` restent dans l'ancien docroot (inoffensifs ; disparaissent avec la bascule sur les releases) ;
+  - S13 : supprimer le styleguide.
+
+### S03 — 2026-10-01 (contenus & i18n typés FR/EN, en parallèle de S02)
+- **Contexte** : menée dans le dépôt principal pendant que S02 tournait dans son worktree. Inputs demandés en une question groupée ; réponses reçues en deux fois. Questions de la Gate 2 posées dans la session, Nicholas ne pouvant pas lire `CONTENT-REVIEW.md` à distance.
+- **Inputs** (`INPUTS-NICHOLAS.md`) : I-03, I-04, I-05, I-08, I-09, I-10, I-12 et I-14 reçus le 01.10.2026 ; décisions D22 à D24 et D27 à D29.
+- **Fait** :
+  - `src/lib/format.ts` (TDD) :
+    - CHF sans groupement sous cinq chiffres ;
+    - profondeurs, marqueurs « 05 m », températures (vrai signe moins), coordonnées (O pour l'ouest en français), durée mm:ss ;
+    - formateurs `Intl` mis en cache (le HUD formatera à chaque image).
+  - `src/lib/typography.ts` (TDD) : typographie au rendu (apostrophes courbes, espaces fines insécables, unités), appliquée par `getDictionary()` et `localize()`.
+  - Données (`src/data/`) :
+    - catalogue unique des cours : un prix par cours, testé contre l'ancien site ;
+    - cartes des onglets de spécialités : SDI 10, TDI 4, PADI 10 avec leurs équivalents, FFESSM 7 ;
+    - lieux dans l'ordre du Rhône, certifications ;
+    - contact : intérêts identiques à `ALLOWED_INTERESTS`, `gift` compris ; fiche Google ; Instagram ;
+    - bons cadeaux ;
+    - profil de plongée : marqueurs des sur-titres, profondeurs du HUD, ancres historiques.
+  - Textes :
+    - `Dictionary` complet (`dictionary.ts`) ;
+    - `fr.ts` et `en.ts` : textes repris de l'ancien site, plus les nouveaux textes de la DA §9 ; EN britannique ; 8 témoignages traduits ;
+    - pages Confidentialité et Mentions légales (`legal/`), à relire : ce n'est pas un avis juridique.
+  - `gift` ajouté à `ALLOWED_INTERESTS` de `public/api/contact.php` (test d'abord).
+  - `CONTENT-REVIEW.md` : choix de structure, textes nouveaux et modifiés FR | EN, sur-titres, réponses de la Gate 2.
+- **Vérification de la migration** : les 890 chaînes de `legacy/components/i18n.jsx` ont été cherchées dans les nouvelles sources. Les 73 absentes mot pour mot sont toutes des changements listés :
+  - sur-titres devenus marqueurs de profondeur ;
+  - titres découpés en `Emphasis` ;
+  - coordonnées et équivalences désormais calculées ;
+  - HTML devenu `Rich` ;
+  - modifications M1 à M21.
+- **Vérifications** (état fusionné) :
+  - build et `check:dist` (3 pages) ; `astro check` : 0 erreur, 0 avertissement, 0 indice ;
+  - 335 tests Vitest (couverture : 99,6 % des instructions, 97,9 % des branches), 138 tests PHP, E2E 16/16 ;
+  - `check:budgets` : JS 1,3 / 36,4 Ko, CSS 3,2 Ko sur l'accueil ;
+  - `grep -rn "TODO(I-" src/ | wc -l` → 16 lignes, aucune dans le contenu.
+- **Revues** : une première revue complète (Opus), lancée avant les réponses de Nicholas, a été arrêtée. Une revue à effort modéré (Sonnet, D30) a porté sur l'état final ; ses trois constats sont corrigés (`55e4048`) :
+  - HIGH : `formatDepth(Infinity)` affichait « ∞ m » ;
+  - MEDIUM : le test des offres cadeaux ne vérifiait pas tout ce que son nom annonçait ;
+  - LOW : `PADI_CARDS` n'était pas en lecture seule.
+- **Gate 2 validée le 01.10.2026** : tout accepté, sans retour. Politique de confidentialité sans rubrique sur les États-Unis ni délai de réponse (`8f15f8f`).
+- **Constats** :
+  - l'ICU de Node groupe `fr-CH` avec une apostrophe (« 12'500 ») : le test ne fige pas le séparateur ;
+  - l'outil d'écriture décode les séquences `\u00a0` : les espaces invisibles sont écrites par script, en séquences d'échappement ;
+  - le site en ligne (`main`) garde les anciens prix (TDI Nitrox avancé à 250, FFESSM « Sur demande ») : décalage accepté par Nicholas, mise à jour au fil des sessions.
+- **Commits** :
+  - avant la fusion : `d53a624`, `848eb5c`, `b971d9b`, `1bfc4ca`, `8f227d6`, `87a48f4`, `29e59eb`, `4d43542` ;
+  - après la fusion : `c86bd7d`, `db963c2`, `55e4048`, `8b33ed0`, `a2c3887`, `6aae570`, `8f15f8f` ;
+  - puis ce journal.
+  - Branche poussée sur `origin` avec l'accord de Nicholas.
+- **Points ouverts** :
+  - S05 :
+    - sur-titres par `Eyebrow` avec les marqueurs de `sections.ts` ;
+    - `localize()` pour les données ; `cursusCourses()` et `GIFT_OFFERS` ;
+    - « Bons cadeaux » hors du menu (D28) ;
+    - `GOOGLE_PROFILE_URL` sur « Laisser un avis Google ».
+  - S06 : table des températures I-05 (intermédiaires proposés dans `INPUTS-NICHOLAS.md`).
+  - S11 : tableau des cookies de la page Confidentialité ; `sameAs` du JSON-LD (Instagram, fiche Google).
+  - S12–S13 : fixer la rotation des journaux nginx et en écrire la durée dans la page Confidentialité (aujourd'hui « conservés pour la sécurité du site, puis supprimés »).
+  - Point à garder en tête : Google (Gmail) et WhatsApp peuvent traiter des données hors de Suisse ; la rubrique a été retirée à la demande de Nicholas.
+- **Retour arrière** : `git revert` des commits S03 (données, dictionnaires, typographie, `gift` côté PHP) ; aucun impact sur le site en ligne.

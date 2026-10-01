@@ -52,8 +52,10 @@ src/
 ├── pages/                 index.astro (FR, /) · en/index.astro (EN, /en/)
 ├── layouts/               BaseLayout.astro: lang, title, description, canonical, hreflang, boot.js, app.ts
 ├── components/<feature>/  one folder per section; page/HomePage.astro assembles the page for a locale
-├── i18n/                  types.ts · fr.ts · en.ts · index.ts · routes.ts (+ tests)
-├── lib/                   pure logic, tested with Vitest (TDD)
+├── i18n/                  types.ts · dictionary.ts · fr.ts · en.ts · legal/ · index.ts · routes.ts (+ tests)
+├── data/                  courses · specialties · places · credentials · contact · gifts · sections (+ tests)
+├── lib/                   pure logic, tested with Vitest (TDD): color/, motion/, css/, format, typography
+├── test/                  content-checks.ts: generic checks shared by the dictionary and data tests
 ├── scripts/app.ts         single client entry point
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
@@ -65,7 +67,9 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 ### Translations
 
 - Every visible text lives in `src/i18n/` (and `src/data/` for the localized labels of data, from S03). French is the source language, at `/` (no prefix); English at `/en/`. The architecture is ready for German: add `'de'` to `LOCALES` in `src/i18n/types.ts` and follow the type errors.
-- **FR/EN parity is mandatory and enforced by the tests**: `fr.ts` and `en.ts` are typed `Dictionary` (TypeScript rejects a missing or extra key), and `src/i18n/parity.test.ts` also compares value kinds and array lengths, and refuses empty strings. Never change one language without the other.
+- **FR/EN parity is mandatory and enforced by the tests**: `fr.ts` and `en.ts` are typed `Dictionary` (`src/i18n/dictionary.ts`; TypeScript rejects a missing or extra key), and `src/i18n/parity.test.ts` also compares value kinds and array lengths, refuses empty strings and HTML, requires the same `TODO(I-xx)` markers at the same places, and bounds the length of titles and descriptions. Never change one language without the other.
+- **Typography is applied when reading**: write straight apostrophes and plain spaces in the sources; `getDictionary()` runs `typeset()` (`src/lib/typography.ts`: curly apostrophes, French no-break spaces, units kept with their figures), and `localize(value, locale)` does the same for the `Localized` labels of `src/data/`.
+- **One source per fact**: prices, depths and form interests live in `src/data/courses.ts` (every course once, specialties included); eyebrows hold their label only, their depth marker comes from `src/data/sections.ts`; contact details from `src/data/contact.ts` (a test checks the ones written in the texts).
 - No HTML in the strings: headings with an emphasis use `Emphasis` (`before`, `em`, `after`), texts with links use `Rich`.
 - `localePath(locale, path)` adds the locale prefix; `routes.ts` maps each page to its path per locale (language switch, canonical, `hreflang` with `x-default` → French).
 
@@ -100,6 +104,21 @@ python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
 Always bind to `127.0.0.1`: the server serves the whole working tree as plain text, including gitignored files, to anyone on the network otherwise. Binding is not enough against DNS rebinding (the server ignores the `Host` header), so keep no secrets in the working tree.
+
+### Preview on the Pi (styleguide, D31)
+
+When Nicholas reviews from a distance, the styleguide is published next to the live site, without touching it: only `_astro/`, `js/` and `styleguide/` of `dist/` go to the docroot (they do not exist in the old site), `noindex`, linked from nowhere. Dry run first; `-rlt` (not `-a`, which would give the docroot the owner and mode of the Mac); the scoped `--delete` only removes stale files of those three folders; `chown` only them:
+
+```bash
+npm run build
+rsync -rltv -n --delete --omit-dir-times --rsync-path="sudo rsync" \
+  --include='/_astro/***' --include='/js/***' --include='/styleguide/***' --exclude='*' \
+  dist/ pi@bullesenvalais.ch:/var/www/html/dive/
+# then the same command without -n, and:
+ssh pi@bullesenvalais.ch "sudo chown -R www-data:www-data /var/www/html/dive/_astro /var/www/html/dive/js /var/www/html/dive/styleguide"
+```
+
+URL: `https://dive.bullesenvalais.ch/styleguide/`. Never send `index.html`, `en/` or `api/` this way: they would replace the live site.
 
 ### Deploy to Raspberry Pi
 

@@ -1,6 +1,6 @@
 # Relecture des contenus — Gate 2 (S03)
 
-> Produit en S03 le 01.10.2026. À valider par Nicholas (**Gate 2**, obligatoire avant S12).
+> Produit en S03 le 01.10.2026. **Gate 2 validée par Nicholas le 01.10.2026** : questions posées dans la session (il ne pouvait pas lire ce fichier à distance), tout accepté, retours intégrés ci-dessous.
 > Sources : `src/i18n/fr.ts`, `src/i18n/en.ts`, `src/i18n/legal/{fr,en}.ts`, `src/data/*.ts`.
 > Seuls les textes **nouveaux ou modifiés** figurent ici ; tous les autres sont repris tels quels de l'ancien site (`legacy/components/i18n.jsx`).
 > **Pages légales : textes à relire par Nicholas ; ceci n'est pas un avis juridique.**
@@ -20,7 +20,7 @@ Pour valider : réponds « Gate 2 validée », ou donne tes corrections (numéro
 | C7 | **Typographie au rendu** : apostrophes courbes (’), espaces fines insécables avant ? ! ; et insécables avant : et dans « », unités et montants insécables (« 18 m », « CHF 80 ») | Les sources restent faciles à modifier ; le site affiche une typographie française correcte |
 | C8 | Lien **« Bons cadeaux » dans la navigation** (proposition) | Un 6ᵉ lien de menu ; à refuser si tu préfères un menu court |
 | C9 | **Certifications dans l'ordre SDI/TDI, PADI, FFESSM, DEJEPS, CAH** (l'ancien site mettait FFESSM d'abord dans « L'instructeur ») | Cohérent avec « SDI/TDI d'abord » (S00) |
-| C10 | **TDI Nitrox avancé et Decompression Procedures : CHF 290** (I-10 c ; j'ai compris « les 2 » comme ces deux cours, à CHF 250 jusqu'ici) | Le Nitrox avancé n'est plus moins cher que le Nitrox de base |
+| C10 | **TDI Nitrox et Nitrox avancé : CHF 290 ; Decompression Procedures reste à CHF 250** (I-10 c, précisé à la Gate 2) | Le Nitrox avancé n'est plus moins cher que le Nitrox de base |
 | C11 | **PTH70 ajouté** (I-04) : ligne « Sur demande » du Cursus FFESSM, carte de l'onglet FFESSM, 70 m sur l'échelle | Un cours de plus, nécessaire avant le PTH120 |
 | C12 | **Échelle de profondeur** (I-04) : baptême 6 m · Open Water 18 m · N1 20 m · Advanced 30 m · N2 et Deep 40 m · TDI Deco 45 m · N3 60 m · PTH70 70 m · PTH120 120 m | Données de `courses.ts` (`maxDepth`) |
 | C13 | **Pas d'adresse postale** (I-08) : Confidentialité et Mentions légales donnent le nom, l'IDE CHE-249.028.561, l'e-mail et le téléphone | Voir la question 9 |
@@ -52,8 +52,8 @@ Pour valider : réponds « Gate 2 validée », ou donne tes corrections (numéro
 | N19 | `gifts.steps` | Vous choisissez : Dites-moi pour qui est le bon et ce que vous souhaitez offrir : un message suffit. · Vous recevez le bon : Je vous envoie le bon en PDF, à imprimer ou à transmettre. · La personne plonge : Elle choisit sa date avec moi, dans l'année qui suit. | You choose: Tell me who the voucher is for and what you would like to give: a message is enough. · You receive the voucher: I send you the voucher as a PDF, ready to print or forward. · They dive: They pick a date with me within the following year. |
 | N20 | `gifts` (titres, CTA, carte) | Les offres · Comment ça marche · Conditions · Offrir un bon cadeau · Bon cadeau | The offers · How it works · Terms · Give a gift voucher · Gift voucher |
 | N21 | `testimonials.prompt` (était codé en dur en FR) | Vous venez de plonger avec moi ? | Just dived with me? |
-| N22 | `testimonials` (rail, langue, source) | Témoignage précédent · Témoignage suivant · Avis rédigés en français · Avis publiés sur Google | Previous testimonial · Next testimonial · Reviews written in French · Reviews published on Google |
-| N22b | Nouveaux avis Google (I-09), en version originale sur les deux pages | **Alexandre F.** (Open Water · Nitrox) : son nouveau texte **remplace** l'ancien (même auteur, avis modifié sur Google ?) · **Stefano T.** (PADI Open Water) : texte complet, signature « Stefano » retirée · **Adeline V.** (Baptême offert) : « mom compagnon » corrigé en « mon compagnon » | Course labels: Open Water · Nitrox · PADI Open Water · Gifted try-dive |
+| N22 | `testimonials` (rail, langue, source, appel) | Témoignage précédent · Témoignage suivant · Avis rédigés en français · Avis publiés sur Google · Laisser un avis Google (vers la fiche Google) | Previous testimonial · Next testimonial · Translated from French · Reviews published on Google · Leave a Google review |
+| N22b | Nouveaux avis Google (I-09) ; la page EN montre les **traductions** des 8 avis | **Alexandre F.** (Open Water · Nitrox) : un **second** Alexandre F. (deux personnes), jamais affiché à côté du premier · **Stefano T.** (PADI Open Water) : texte complet, signature « Stefano » retirée · **Adeline V.** (Baptême offert) : « mom compagnon » corrigé en « mon compagnon » | Translations of the 8 reviews, marked “Translated from French”; course labels: Open Water · Nitrox · PADI Open Water · Gifted try-dive |
 | N23 | `contact.title` · `subtitle` | Sous l'eau, on ne parle pas. *Remontons.* · On en parle *de vive voix ?* | Underwater, we don't talk. *Let's surface.* · Shall we *talk it through?* |
 | N24 | `contact.form` (nouveaux) | Laissez ce champ vide (pot de miel, invisible) · Envoi en cours… · Erreur d'envoi. Merci de réessayer, ou de m'écrire directement : · Écrire sur WhatsApp · Ce champ est obligatoire. · Vérifiez l'adresse e-mail, par exemple vous@exemple.ch. · Ce texte est trop long. | Leave this field empty · Sending… · Sending failed. Please try again, or write to me directly: · Write on WhatsApp · This field is required. · Please check the email address, for example you@example.com. · This text is too long. |
 | N25 | `contact.form.mail` (e-mail préparé en cas d'échec) | Objet : Contact depuis le site · Nom · E-mail · Téléphone · Intérêt | Subject: Contact from the website · Name · Email · Phone · Interest |
@@ -65,7 +65,7 @@ Pour valider : réponds « Gate 2 validée », ou donne tes corrections (numéro
 | N31 | `instructor` (liens) | Vérifier sur le registre officiel (carte pro DEJEPS) | Check on the official register |
 | N32 | `footer` | Valais · Suisse · © <année> Bulles en Valais · Nicholas Jallan · Crédits : Photos : © Nicholas Jallan ; Interlude « Lumière » : visuel généré par IA · Confidentialité · Mentions légales · Mode calme (activé / désactivé) : Coupe les animations et le défilement doux. · Gérer les cookies · Réseaux (Instagram @nicho_dive) · Remonter à la surface | Valais · Switzerland · © <year> Bulles en Valais · Nicholas Jallan · Credits: Photos: © Nicholas Jallan; “Light” interlude: AI-generated image · Privacy · Legal notice · Calm mode (on / off): Turns off animations and smooth scrolling. · Manage cookies · Social media · Back to the surface |
 | N33 | `notFound` (404) | Erreur 404 · Cette page est restée *au fond.* · Le lien est peut-être ancien, ou l'adresse mal saisie. Remontons ensemble à la surface. · Retour à l'accueil | Error 404 · This page stayed *at the bottom.* · The link may be old, or the address mistyped. Let's head back to the surface together. · Back to the home page |
-| N34 | `legal.privacy` | Politique de confidentialité complète (11 rubriques), voir `src/i18n/legal/fr.ts`. Responsable : Nicholas Jallan, Bulles en Valais (IDE CHE-249.028.561). Conservation : messages « tant qu'ils servent à votre demande ou à votre formation, et supprimés sur simple demande » ; journaux du serveur « conservés pour la sécurité du site, puis supprimés » (durée à fixer en S12–S13 avec la rotation des journaux) | Privacy policy (11 sections), see `src/i18n/legal/en.ts` |
+| N34 | `legal.privacy` | Politique de confidentialité (10 rubriques ; à la Gate 2, ni rubrique sur les transferts vers les États-Unis ni délai de réponse), voir `src/i18n/legal/fr.ts`. Responsable : Nicholas Jallan, Bulles en Valais (IDE CHE-249.028.561). Conservation : messages « tant qu'ils servent à votre demande ou à votre formation, et supprimés sur simple demande » ; journaux du serveur « conservés pour la sécurité du site, puis supprimés » (durée à fixer en S12–S13 avec la rotation des journaux) | Privacy policy (11 sections), see `src/i18n/legal/en.ts` |
 | N35 | `legal.legalNotice` | Mentions légales (6 rubriques), voir `src/i18n/legal/fr.ts` : éditeur, numéro IDE, e-mail, téléphone, sans forme juridique ni adresse | Legal notice (6 sections), see `src/i18n/legal/en.ts` |
 | N36 | lieux : nom · zone · profondeur (I-03) · texte alternatif | Les Îles · Sion · 38 m · Le plan d'eau des Îles, à Sion, au coucher du soleil. — Lac du Rosel · Martigny · 23 m · Du matériel de plongée posé sur la rive du lac du Rosel. — Léman · De Rivaz à Hermance · 300 m · sites : Rivaz Gare, Château de Chillon, Bikini, Hermance, Tougues · Le château de Chillon, au bord du Léman. | Les Îles · Sion · 38 m · The lake at Les Îles, in Sion, at sunset. — Lac du Rosel · Martigny · 23 m · Dive gear laid out on the shore of Lac du Rosel. — Lake Geneva · From Rivaz to Hermance · 300 m · sites: Rivaz Gare, Chillon Castle, Bikini, Hermance, Tougues · Chillon Castle, on the shore of Lake Geneva. |
 | N37 | intérêt du formulaire `gift` (aussi accepté par `contact.php`) | Un bon cadeau | A gift voucher |
@@ -116,28 +116,22 @@ Les profondeurs du HUD (début → fin de chaque section) suivent `01-direction-
 | M17 | Témoignages, page EN | Textes FR sans attribut `lang` | Textes FR avec `lang="fr"` et la mention « Reviews written in French » (en attendant I-09) | Défaut n° 9 de l'audit |
 | M18 | Prix « Sur devis » (N5, PTH120) | Sur devis | Sur demande / On request | C3 |
 | M19 | Carte FFESSM N1 (Spécialités) | Plongeur autonome · Plongées en autonomie jusqu'à 20 m avec un guide de palanquée, encadré jusqu'à 40 m. Idéal pour débuter en bouteille. | Encadré 20 m · Plongées encadrées par un guide de palanquée jusqu'à 20 m. Idéal pour débuter en bouteille. (EN : Supervised 20 m · Dives to 20 m, led by a dive guide. The entry point for scuba diving.) | Prérogatives officielles (PE20), I-10 b |
-| M20 | Prix TDI Nitrox avancé, Decompression Procedures | CHF 250 | CHF 290 | C10, I-10 c |
-| M21 | Témoignage d'Alexandre F. | « Nous avons passé le Open Water avec Nicholas… » | Son nouvel avis Google (N22b) | I-09 |
+| M20 | Prix TDI Nitrox avancé | CHF 250 | CHF 290 (Decompression Procedures reste à CHF 250) | C10, I-10 c |
+| M21 | Témoignages | 5 avis | 8 avis : celui d'un second Alexandre F., de Stefano T. et d'Adeline V. ajoutés (N22b) | I-09 |
 
 ## 5. `TODO(I-xx)` restants
 
-Commande du brief : `grep -rn "TODO(I-" src/ | wc -l` → **17** lignes, dont **une seule dans le contenu** : l'adresse de la page Facebook (`TODO(I-14)` dans `src/data/contact.ts`). Les 16 autres sont des exemples dans les tests et les commentaires de l'outil de vérification.
+Commande du brief : `grep -rn "TODO(I-" src/ | wc -l` → **16** lignes, **aucune dans le contenu** (ce sont des exemples dans les tests et les commentaires de l'outil de vérification).
 
-Inputs reçus le 01.10.2026 : I-03, I-04, I-05, I-08, I-10 (a, b, c), I-12 ; en partie I-09 (nouveaux avis) et I-14 (Instagram).
+Tous les inputs de S03 sont reçus (01.10.2026) : I-03, I-04, I-05, I-08, I-09 (traduction accordée, lien de la fiche Google), I-10, I-12, I-14 (Instagram ; pas de page Facebook pour l'instant).
 
-Encore en attente, sans marqueur :
-- **I-09** : accord pour traduire les témoignages en anglais (en attendant, la page EN montre les originaux) et lien de ta fiche Google ;
-- **I-14** : adresse de la page Facebook.
+## 6. Réponses de Nicholas (Gate 2, 01.10.2026)
 
-## 6. Questions ouvertes
-
-1. **I-10 c** : j'ai passé à CHF 290 le Nitrox avancé **et** Decompression Procedures. Si Deco Procedures doit rester à CHF 250, dis-le.
-2. **C8** : lien « Bons cadeaux » dans la navigation, oui ou non ?
-3. **Témoignages EN** (I-09) : les traduire, avec la mention « Translated from French » ?
-4. **« Partager un retour »** : vers ta fiche Google (il me faut le lien) ou vers le formulaire, comme aujourd'hui ?
-5. **Léman** : le hero (« Léman S-E »), le chapeau des Lieux et la FAQ parlent de la « partie sud-est du Léman », alors que tes sites vont de Rivaz à Hermance et Tougues. Je propose « le Léman » tout court dans ces trois textes.
-6. **Confidentialité** : confirmer que les messages du formulaire passent par Gmail, la mention « je réponds dans un délai de 30 jours » (délai légal) et les transferts vers les États-Unis encadrés par le Data Privacy Framework.
-7. **Sur-titres** (§3) : profondeurs choisies pour le manifeste (3 m), l'échelle (18 m), le comparatif (40 m), les lieux (30 m), « Avant de s'immerger » (20 m), les bons cadeaux (15 m) et les témoignages (10 m).
-8. **Avis d'Alexandre F.** : le nouveau texte remplace bien l'ancien (même personne) ?
-9. **Adresse postale** (C13) : à savoir seulement. Pour qui vend en ligne, la loi contre la concurrence déloyale (art. 3, al. 1, let. s LCD) demande une « adresse de contact ». Ton site ne vend rien en ligne : à vérifier si tu as un doute.
-10. **Site en ligne (`main`)** : il affiche encore TDI à CHF 250 et FFESSM « Sur demande ». Faut-il le mettre à jour avant la refonte ?
+1. TDI : Nitrox et Nitrox avancé à CHF 290, Decompression Procedures à CHF 250.
+2. Lien « Bons cadeaux » : « l'intégration la plus cohérente » → hors du menu principal (5 liens + « Me contacter »), accessible par le profil de plongée du HUD et le pied de page (D28).
+3. Témoignages traduits en anglais, avec « Translated from French ».
+4. « Laisser un avis Google » vers la fiche Google ; pas de page Facebook pour l'instant.
+5. « le Léman » au lieu de « la partie sud-est du Léman » (hero, Lieux, FAQ).
+6. Deux personnes différentes signent « Alexandre F. » : initiale seule, jamais côte à côte.
+7. Le site en ligne (`main`) peut garder les anciens prix pour l'instant ; il sera mis à jour au fil des sessions.
+8. Textes, sur-titres, lieux, corrections mineures et pages légales acceptés ; pas de rubrique sur les États-Unis ni de délai de réponse dans la politique de confidentialité.
