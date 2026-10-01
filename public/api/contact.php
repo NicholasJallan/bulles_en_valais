@@ -17,7 +17,7 @@ const ALLOWED_ORIGINS = [
 ];
 const ALLOWED_INTERESTS = [
     'baptism', 'sdi-owd', 'sdi-aowd', 'sdi-rescue', 'tdi', 'padi-owd', 'padi-aowd',
-    'padi-rescue', 'padi-dm', 'ffessm', 'specialty', 'refresher', 'other',
+    'padi-rescue', 'padi-dm', 'ffessm', 'specialty', 'refresher', 'gift', 'other',
 ];
 const ALLOWED_LOCALES = ['fr', 'en', 'de'];
 

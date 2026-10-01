@@ -140,6 +140,7 @@ check('phone of 40 multibyte chars → ok', $fieldErrors(['phone' => str_repeat(
 check('message over 5000 chars → error', in_array('message', $fieldErrors(['message' => str_repeat('é', 5001)]), true));
 check('message of 5000 chars → ok', $fieldErrors(['message' => str_repeat('é', 5000)]) === []);
 check('invalid UTF-8 message → error', in_array('message', $fieldErrors(['message' => "abc\xC3\x28"]), true));
+check('gift voucher interest is kept', validate_payload(valid_payload(['interest' => 'gift']))['data']['interest'] === 'gift');
 check('unknown interest → other', validate_payload(valid_payload(['interest' => 'hack\r\n']))['data']['interest'] === 'other');
 check('non-string interest → other', validate_payload(valid_payload(['interest' => 42]))['data']['interest'] === 'other');
 check('known locale is kept', validate_payload(valid_payload(['locale' => 'en']))['data']['locale'] === 'en');
