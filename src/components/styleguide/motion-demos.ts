@@ -14,10 +14,14 @@ registerEases(CustomEase);
 
 interface Demo {
   play(): void;
-  destroy(): void;
+  /** What GSAP cannot revert itself (styles written by hand). */
+  cleanup?: Cleanup;
 }
 
 const VISIBLE_RATIO = 0.35;
+// The masks of the lines are padded (.demo-line-mask) so that descenders and accents show:
+// a line starts low enough to hide under the mask, its padding included.
+const LINE_START_PERCENT = 135;
 
 function applyTempo(value: string | undefined): void {
   const scale = Number(value);
@@ -27,17 +31,24 @@ function applyTempo(value: string | undefined): void {
 /** E5: the lines rise from their mask and settle; the italic words arrive slightly later. */
 function titleDemo(target: HTMLElement): Demo {
   let timeline: gsap.core.Timeline | undefined;
-  const split = SplitText.create(target, {
+  // autoSplit splits again when fonts load or the width changes, and carries the time over to
+  // the new timeline: create it running while the demo plays, or it would freeze half-way.
+  let playing = false;
+  SplitText.create(target, {
     type: 'lines, words',
     mask: 'lines',
+    linesClass: 'demo-line',
     wordsClass: 'demo-word',
     autoSplit: true,
     onSplit(self) {
       const rise = seconds(DURATIONS_MS.rise);
+      const onComplete = (): void => {
+        playing = false;
+      };
       timeline = gsap
-        .timeline({ paused: true })
+        .timeline({ paused: !playing, onComplete })
         .from(self.lines, {
-          yPercent: 110,
+          yPercent: LINE_START_PERCENT,
           duration: rise,
           ease: 'buoyant',
           stagger: seconds(STAGGER_MS.line),
@@ -51,10 +62,9 @@ function titleDemo(target: HTMLElement): Demo {
     },
   });
   return {
-    play: () => timeline?.restart(),
-    destroy: () => {
-      timeline?.kill();
-      split.revert();
+    play: () => {
+      playing = true;
+      timeline?.restart();
     },
   };
 }
@@ -85,8 +95,7 @@ function revealDemo(figure: HTMLElement): Demo {
   render();
   return {
     play: () => timeline.restart(),
-    destroy: () => {
-      timeline.kill();
+    cleanup: () => {
       figure.style.clipPath = '';
     },
   };
@@ -129,7 +138,7 @@ function startDemo(
   return () => {
     stopObserving();
     unbind();
-    demo.destroy();
+    demo.cleanup?.();
   };
 }
 
@@ -141,22 +150,34 @@ function startBubbles(section: HTMLElement): Cleanup {
   return createBubbles({ stage, canvas, trigger: button, ticker: gsap.ticker });
 }
 
-export function startDemos(section: HTMLElement): Cleanup {
+function followTempo(): Cleanup {
   applyTempo(document.documentElement.dataset.tempo);
   const onSwitch = (event: Event): void => {
     const { name, value } = (event as CustomEvent<SwitchDetail>).detail;
     if (name === 'tempo') applyTempo(value);
   };
   document.addEventListener(SWITCH_EVENT, onSwitch);
-
-  const stops = [
-    startDemo(section, 'title', titleDemo),
-    startDemo(section, 'reveal', revealDemo),
-    startBubbles(section),
-  ];
   return () => {
     document.removeEventListener(SWITCH_EVENT, onSwitch);
-    for (const stop of stops) stop();
     applyTempo('1');
   };
+}
+
+/**
+ * Starts the demos in one GSAP context: its revert() undoes the splits, the animations and the
+ * styles GSAP wrote, then runs the cleanup returned here for the rest (observers, listeners…).
+ */
+export function startDemos(section: HTMLElement): Cleanup {
+  const context = gsap.context(() => {
+    const cleanups = [
+      followTempo(),
+      startDemo(section, 'title', titleDemo),
+      startDemo(section, 'reveal', revealDemo),
+      startBubbles(section),
+    ];
+    return () => {
+      for (const cleanup of cleanups) cleanup();
+    };
+  }, section);
+  return () => context.revert();
 }
