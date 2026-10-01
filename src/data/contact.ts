@@ -17,7 +17,7 @@ export const SOCIAL_PROFILES = [
 ] as const;
 
 /** Google business profile, where the testimonials come from; « Leave a review » links to it. */
-export const GOOGLE_PROFILE_URL: string | null = null; // TODO(I-09): link of the Google profile
+export const GOOGLE_PROFILE_URL = 'https://maps.app.goo.gl/1oRvobruKNxBzU1a9';
 
 /** wa.me link, with an optional message written in advance in the chat box. */
 export function whatsappUrl(message?: string): string {

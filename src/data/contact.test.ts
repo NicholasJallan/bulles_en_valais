@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { LOCALES } from '../i18n/types.ts';
 import { blankStrings, localizedIssues } from '../test/content-checks.ts';
 import {
+  GOOGLE_PROFILE_URL,
   INTEREST_LABELS,
   INTERESTS,
   PHONE,
@@ -47,6 +48,12 @@ describe('SOCIAL_PROFILES', () => {
       expect(profile.url).toMatch(/^https:\/\//);
       expect(profile.url).toContain(profile.handle.replace(/^@/, ''));
     }
+  });
+});
+
+describe('GOOGLE_PROFILE_URL', () => {
+  it('links to the Google Maps profile over HTTPS', () => {
+    expect(GOOGLE_PROFILE_URL).toMatch(/^https:\/\/maps\.app\.goo\.gl\//);
   });
 });
 

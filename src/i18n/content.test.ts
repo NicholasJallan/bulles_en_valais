@@ -18,6 +18,15 @@ function linksOf(value: unknown): Link[] {
   return [...own, ...Object.values(record).flatMap(linksOf)];
 }
 
+describe.each(LOCALES)('%s testimonials', (locale) => {
+  it('never show two reviews of the same name side by side (two Alexandre F.)', () => {
+    const authors = getDictionary(locale).testimonials.items.map((item) => item.author);
+    for (let index = 1; index < authors.length; index += 1) {
+      expect(authors[index], `items ${index - 1} and ${index}`).not.toBe(authors[index - 1]);
+    }
+  });
+});
+
 describe.each(LOCALES)('%s links', (locale) => {
   const links = linksOf(getDictionary(locale));
 
