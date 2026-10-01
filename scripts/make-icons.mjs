@@ -40,7 +40,11 @@ async function markBox() {
   };
 }
 
-/** Square viewBox centred on the symbol, with a padding ratio. */
+/**
+ * Square viewBox centred on the symbol, with a padding ratio.
+ * @param {{ x: number, y: number, w: number, h: number }} box
+ * @param {number} padding
+ */
 function square(box, padding) {
   const side = Math.max(box.w, box.h) / (1 - 2 * padding);
   const x = box.x + box.w / 2 - side / 2;

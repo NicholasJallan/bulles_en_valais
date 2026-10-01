@@ -9,12 +9,17 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { maskSize, waterMaskSvg } from './lib/water-mask.mjs';
 
+/** @typedef {import('./lib/water-mask.mjs').Polygon} Polygon */
+
 const ROOT = path.resolve(import.meta.dirname, '..');
 const MASK_WIDTH = 512;
 const FEATHER = 3;
 const OVERLAY_WIDTH = 1200;
 
-/** Shorelines hand-tuned on each hero option (normalised coordinates). */
+/**
+ * Shorelines hand-tuned on each hero option (normalised coordinates).
+ * @type {Record<'rosel' | 'sion', { src: string, water: Polygon, holes: readonly Polygon[] }>}
+ */
 const HEROES = {
   rosel: {
     src: 'src/assets/images/hero/rosel.jpg',
