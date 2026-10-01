@@ -32,7 +32,7 @@ export const PLACES = [
       en: 'My go-to site for training dives — easy access, predictable conditions year-round.',
     },
     photo: {
-      file: 'dive_sion.jpg',
+      file: 'places/sion.jpg',
       alt: {
         fr: "Le plan d'eau des Îles, à Sion, au coucher du soleil.",
         en: 'The lake at Les Îles, in Sion, at sunset.',
@@ -50,10 +50,10 @@ export const PLACES = [
       en: 'A short drive from Martigny — clear, calm, and perfectly suited to initial training.',
     },
     photo: {
-      file: 'dive_rosel.jpg',
+      file: 'places/rosel.jpg',
       alt: {
-        fr: 'Du matériel de plongée posé sur la rive du lac du Rosel.',
-        en: 'Dive gear laid out on the shore of Lac du Rosel.',
+        fr: "L'eau limpide du lac du Rosel, au pied des montagnes enneigées.",
+        en: 'The clear water of Lac du Rosel, below snow-capped mountains.',
       },
     },
     facts: { maxDepth: 23 },
@@ -68,7 +68,7 @@ export const PLACES = [
       en: 'The great alpine blue. Deeper dives, walls, wrecks — and the unique silence of large lakes.',
     },
     photo: {
-      file: 'dive_leman.jpg',
+      file: 'places/leman.jpg',
       alt: {
         fr: 'Le château de Chillon, au bord du Léman.',
         en: 'Chillon Castle, on the shore of Lake Geneva.',
