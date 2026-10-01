@@ -9,7 +9,7 @@
 /**
  * The parts of an opentype.js Font this module needs.
  * @typedef {{ type: string, x?: number, y?: number, x1?: number, y1?: number, x2?: number, y2?: number }} Command
- * @typedef {{ advanceWidth?: number, path: { commands: readonly Command[] } }} Glyph
+ * @typedef {{ index?: number, advanceWidth?: number, path: { commands: readonly Command[] } }} Glyph
  * @typedef {{ unitsPerEm: number, charToGlyph: (char: string) => Glyph, getKerningValue: (left: Glyph, right: Glyph) => number }} Font
  */
 
@@ -50,6 +50,7 @@ export function textPath(runs, { x, y, size, tracking = 0 }) {
     let previous;
     for (const char of text) {
       const glyph = font.charToGlyph(char);
+      if (glyph.index === 0) throw new Error(`the font has no glyph for "${char}"`);
       if (glyphs > 0) cursor += tracking;
       if (previous) cursor += font.getKerningValue(previous, glyph) * scale;
       if (glyph.path.commands.length > 0)

@@ -2,6 +2,7 @@
 // @ts-check
 // Favicons from the symbol of the logo (#mark of src/assets/brand/logo.svg):
 //   public/favicon.svg            navy, foam when the browser is in dark mode
+//   public/favicon.ico            32 px navy fallback
 //   public/apple-touch-icon.png   180 px, foam symbol on a navy tile
 //   public/icon-192.png, icon-512.png (site.webmanifest)
 // Usage: node scripts/make-icons.mjs
@@ -54,6 +55,25 @@ const favicon =
   `<style>path{fill:${NAVY}}@media (prefers-color-scheme:dark){path{fill:${FOAM}}}</style>` +
   `<path d="${markPath}"/></svg>\n`;
 writeFileSync(path.join(PUBLIC, 'favicon.svg'), favicon);
+
+// favicon.ico for the browsers without SVG favicons (and the default /favicon.ico request, which
+// nginx would otherwise answer with index.html): one 32 px PNG wrapped in an ICO container.
+const png32 = await sharp(
+  Buffer.from(favicon.replace(/<style>.*<\/style>/, '').replace('<path ', `<path fill="${NAVY}" `)),
+)
+  .resize(32, 32)
+  .png({ compressionLevel: 9 })
+  .toBuffer();
+const header = Buffer.alloc(22);
+header.writeUInt16LE(1, 2); // type: icon
+header.writeUInt16LE(1, 4); // one image
+header.writeUInt8(32, 6); // width
+header.writeUInt8(32, 7); // height
+header.writeUInt16LE(1, 10); // colour planes
+header.writeUInt16LE(32, 12); // bits per pixel
+header.writeUInt32LE(png32.length, 14);
+header.writeUInt32LE(22, 18); // offset of the PNG data
+writeFileSync(path.join(PUBLIC, 'favicon.ico'), Buffer.concat([header, png32]));
 
 const tile = (/** @type {number} */ size) =>
   Buffer.from(

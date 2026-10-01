@@ -28,7 +28,7 @@ const MAX_BYTES = 200 * 1024;
 
 /** @param {string} file */
 const loadFont = (file) =>
-  opentype.parse(readFileSync(path.join(ROOT, 'scripts/fonts', file)).buffer);
+  opentype.parse(new Uint8Array(readFileSync(path.join(ROOT, 'scripts/fonts', file))).buffer);
 const roman = loadFont('InstrumentSerif-Regular.ttf');
 const italic = loadFont('InstrumentSerif-Italic.ttf');
 
@@ -38,6 +38,13 @@ const shade =
   `<linearGradient id="b" x1="0" x2="0" y1="0" y2="1"><stop offset=".45" stop-color="${ABYSS}" stop-opacity="0"/>` +
   `<stop offset="1" stop-color="${ABYSS}" stop-opacity=".6"/></linearGradient></defs>` +
   `<rect width="${W}" height="${H}" fill="url(#l)"/><rect width="${W}" height="${H}" fill="url(#b)"/>`;
+
+/** @param {string} svg */
+function inFoam(svg) {
+  const foam = svg.replace('fill="currentColor"', `fill="${FOAM}"`);
+  if (foam === svg) throw new Error('logo.svg: fill="currentColor" not found');
+  return foam;
+}
 
 /** @param {import('../src/i18n/types.ts').Locale} locale */
 function overlay(locale) {
@@ -50,7 +57,7 @@ function overlay(locale) {
   const lines = [
     textPath(
       [
-        { text: `${before} `, font: roman },
+        { text: before ? `${before} ` : '', font: roman },
         { text: em, font: italic },
       ],
       { x: MARGIN, y: first, size: TITLE.size },
@@ -85,9 +92,7 @@ async function makeOg(locale) {
     })
     .resize(W, H)
     .toBuffer();
-  const logo = await sharp(
-    Buffer.from(readFileSync(LOGO, 'utf8').replace('fill="currentColor"', `fill="${FOAM}"`)),
-  )
+  const logo = await sharp(Buffer.from(inFoam(readFileSync(LOGO, 'utf8'))))
     .resize({ height: LOGO_HEIGHT })
     .png()
     .toBuffer();

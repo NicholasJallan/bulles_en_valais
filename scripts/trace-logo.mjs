@@ -30,6 +30,7 @@ const FUSED_ARCS = [
   [330, 260],
 ];
 const MARK_MIN_PIXELS = 200_000;
+const BUBBLE_COUNT = 14;
 
 const { data, info } = await sharp(SOURCE)
   .ensureAlpha()
@@ -126,6 +127,11 @@ const fused = roots.filter((c) =>
 if (fused.length !== FUSED_ARCS.length)
   throw new Error(`expected ${FUSED_ARCS.length} fused arcs, found ${fused.length}`);
 const bubbles = roots.filter((c) => !fused.includes(c)).sort((a, b) => b.cy - a.cy);
+// guards against a changed source PNG producing a wrong logo.svg silently
+if (mark.length !== 1 || wordmark.length === 0 || bubbles.length !== BUBBLE_COUNT)
+  throw new Error(
+    `unexpected logo structure: ${mark.length} mark, ${wordmark.length} wordmark pieces, ${bubbles.length} bubbles`,
+  );
 
 const dir = mkdtempSync(path.join(tmpdir(), 'logo-'));
 try {

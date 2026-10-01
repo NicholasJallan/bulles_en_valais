@@ -85,6 +85,16 @@ describe('textPath', () => {
     expect(textPath([{ text: 'a b', font: fakeFont() }], { x: 0, y: 0, size: 10 }).width).toBe(15);
   });
 
+  it('refuses a character missing from the font (glyph 0, .notdef)', () => {
+    const font = {
+      ...fakeFont(),
+      charToGlyph: (char) => ({ ...fakeFont().charToGlyph(char), index: 0 }),
+    };
+    expect(() => textPath([{ text: '€', font }], { x: 0, y: 0, size: 10 })).toThrow(
+      /no glyph for "€"/,
+    );
+  });
+
   it('measures an empty text as zero wide', () => {
     expect(textPath([{ text: '', font: fakeFont() }], { x: 0, y: 0, size: 10 })).toEqual({
       paths: [],
