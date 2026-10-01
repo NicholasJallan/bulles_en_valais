@@ -1,0 +1,40 @@
+---
+import { ICONS, type IconName } from './icons.ts';
+
+interface Props {
+  name: IconName;
+  /** Accessible name; without it the icon is decorative and hidden from assistive technologies. */
+  label?: string;
+  class?: string;
+}
+
+const { name, label, class: className } = Astro.props;
+---
+
+<svg
+  class:list={['icon', className]}
+  viewBox="0 0 24 24"
+  width="1.25em"
+  height="1.25em"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  focusable="false"
+  role={label === undefined ? undefined : 'img'}
+  aria-label={label}
+  aria-hidden={label === undefined ? 'true' : undefined}
+>
+  {ICONS[name].map((path) => (
+    <path d={path} />
+  ))}
+</svg>
+
+<style>
+  .icon {
+    flex: none;
+    inline-size: 1.25em;
+    block-size: 1.25em;
+  }
+</style>

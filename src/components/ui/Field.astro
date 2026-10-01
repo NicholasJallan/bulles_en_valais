@@ -1,0 +1,195 @@
+---
+import Icon from './Icon.astro';
+
+interface Option {
+  readonly value: string;
+  readonly label: string;
+}
+
+/** Labelled form control with its hint and its error, wired for assistive technologies. */
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  control?: 'input' | 'textarea' | 'select';
+  type?: 'text' | 'email' | 'tel';
+  value?: string;
+  placeholder?: string;
+  autocomplete?: string;
+  hint?: string;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  options?: readonly Option[];
+  rows?: number;
+  /** Styleguide only: shows a state without the pointer or the keyboard. */
+  state?: 'hover' | 'focus';
+}
+
+const {
+  id,
+  name,
+  label,
+  control = 'input',
+  type = 'text',
+  value,
+  placeholder,
+  autocomplete,
+  hint,
+  error,
+  required = false,
+  disabled = false,
+  options = [],
+  rows = 5,
+  state,
+} = Astro.props;
+
+const hintId = `${id}-hint`;
+const errorId = `${id}-error`;
+const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
+const shared = {
+  id,
+  name,
+  required,
+  disabled,
+  class: 'field-control',
+  'data-state': state,
+  'aria-describedby': describedBy,
+  'aria-invalid': error ? ('true' as const) : undefined,
+};
+---
+
+<div class:list={['field', { 'field-invalid': error }]}>
+  <label class="field-label" for={id}>
+    {label}
+  </label>
+  {hint && (
+    <p class="field-hint" id={hintId}>
+      {hint}
+    </p>
+  )}
+  {control === 'textarea' ? (
+    <textarea {...shared} rows={rows} placeholder={placeholder}>
+        {value}
+      </textarea>
+  ) : control === 'select' ? (
+    <div class="field-select">
+      <select {...shared} autocomplete={autocomplete}>
+        {options.map((option) => (
+          <option value={option.value} selected={option.value === value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <Icon name="chevron-down" class="field-chevron" />
+    </div>
+  ) : (
+    <input
+      {...shared}
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      autocomplete={autocomplete}
+    />
+  )}
+  {error && (
+    <p class="field-error" id={errorId}>
+      <Icon name="alert" class="field-error-icon" />
+      <span>{error}</span>
+    </p>
+  )}
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .field-label {
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+  }
+
+  .field-hint {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .field-control {
+    inline-size: 100%;
+    min-block-size: var(--tap-min);
+    padding: 0.65em 0.85em;
+    border: 1px solid var(--fg-soft);
+    border-radius: var(--radius-sharp);
+    background-color: var(--bg-panel);
+    color: var(--fg);
+    font-size: max(1rem, var(--step-0)); /* never under 16 px: iOS would zoom in */
+    line-height: 1.4;
+    transition:
+      border-color var(--dur-fast) var(--ease-surface),
+      box-shadow var(--dur-base) var(--ease-surface);
+  }
+
+  .field-control::placeholder {
+    color: var(--fg-soft);
+    opacity: 1;
+  }
+
+  .field-control:is(:hover, [data-state='hover']):not(:disabled) {
+    border-color: var(--fg);
+  }
+
+  .field-control:is(:focus-visible, [data-state='focus']) {
+    border-color: var(--action);
+    outline: var(--focus-width) solid var(--action);
+    outline-offset: 1px;
+    box-shadow: var(--focus-halo);
+  }
+
+  /* Invalid: the alarm amber of a dive computer, never the red of the actions. */
+  .field-invalid .field-control {
+    border-color: var(--alert);
+    box-shadow: inset 0 0 0 1px var(--alert);
+  }
+
+  .field-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  textarea.field-control {
+    resize: vertical;
+  }
+
+  .field-select {
+    position: relative;
+  }
+
+  .field-select select {
+    appearance: none;
+    padding-inline-end: 2.75em;
+  }
+
+  .field-select :global(.field-chevron) {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0.85em;
+    margin-block: auto;
+    pointer-events: none;
+  }
+
+  .field-error {
+    display: flex;
+    gap: 0.45em;
+    align-items: flex-start;
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .field-error :global(.field-error-icon) {
+    color: var(--alert);
+    margin-block-start: 0.05em;
+  }
+</style>

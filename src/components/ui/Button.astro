@@ -1,0 +1,155 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from './icons.ts';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'link';
+
+interface Props {
+  variant?: Variant;
+  /** Renders a link; without it, a button. */
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  icon?: IconName;
+  class?: string;
+  [attribute: `data-${string}`]: string | undefined;
+  [attribute: `aria-${string}`]: string | undefined;
+}
+
+const {
+  variant = 'primary',
+  href,
+  type = 'button',
+  disabled = false,
+  icon,
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const classes = ['button', `button-${variant}`, className];
+---
+
+{href === undefined ? (
+  <button class:list={classes} type={type} disabled={disabled} {...attributes}>
+    <span class="button-label">
+      <slot />
+    </span>
+    {icon && <Icon name={icon} />}
+  </button>
+) : (
+  /* A disabled link loses its href: it can be neither followed nor focused. */
+  <a
+    class:list={classes}
+    href={disabled ? undefined : href}
+    role={disabled ? 'link' : undefined}
+    aria-disabled={disabled ? 'true' : undefined}
+    {...attributes}
+  >
+    <span class="button-label">
+      <slot />
+    </span>
+    {icon && <Icon name={icon} />}
+  </a>
+)}
+
+<style>
+  .button {
+    --button-bg: transparent;
+    --button-fg: var(--fg);
+    --button-border: transparent;
+    --button-shadow: 0 0 0 0 transparent;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    min-block-size: var(--tap-min);
+    padding: 0.7em 1.4em;
+    border: 1px solid var(--button-border);
+    border-radius: var(--radius-sharp);
+    background-color: var(--button-bg);
+    color: var(--button-fg);
+    box-shadow: var(--button-shadow);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-fast) var(--ease-surface),
+      border-color var(--dur-fast) var(--ease-surface),
+      color var(--dur-fast) var(--ease-surface),
+      box-shadow var(--dur-base) var(--ease-surface),
+      transform var(--dur-instant) var(--ease-surface);
+  }
+
+  /* Primary: the lamp. Deep red in daylight, lit and glowing in the dark tones. */
+  .button-primary {
+    --button-bg: var(--action);
+    --button-fg: var(--action-ink);
+    --button-border: var(--action);
+  }
+
+  .button-primary:is(:hover, [data-state='hover']) {
+    --button-shadow: var(--glow-lit);
+    background-image: radial-gradient(
+      120% 150% at 50% 135%,
+      color-mix(in oklch, var(--c-torch-glow) 38%, transparent),
+      transparent 62%
+    );
+  }
+
+  .button-secondary {
+    --button-border: var(--fg-soft);
+  }
+
+  .button-secondary:is(:hover, [data-state='hover']) {
+    --button-border: var(--action);
+    --button-fg: var(--action-text);
+    --button-shadow: 0 0 22px -2px var(--glow);
+  }
+
+  .button-ghost {
+    padding-inline: 1em;
+  }
+
+  .button-ghost:is(:hover, [data-state='hover']) {
+    --button-bg: color-mix(in oklch, var(--fg) 7%, transparent);
+    --button-fg: var(--action-text);
+  }
+
+  /* Link: no box, but still a 44 px target. */
+  .button-link {
+    --button-fg: var(--action-text);
+    padding-inline: 0;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+  }
+
+  .button-link:is(:hover, [data-state='hover']) {
+    text-decoration-thickness: 2px;
+    text-shadow: 0 0 14px var(--glow);
+  }
+
+  .button:is(:focus-visible, [data-state='focus']) {
+    outline: var(--focus-width) solid var(--action);
+    outline-offset: var(--focus-offset);
+    --button-shadow: var(--focus-halo);
+  }
+
+  .button:is(:active, [data-state='active']):not(:disabled, [aria-disabled='true']) {
+    --button-shadow: 0 0 0 0 transparent;
+    background-image: none;
+    transform: translateY(1px);
+  }
+
+  .button:is(:disabled, [aria-disabled='true']) {
+    --button-shadow: 0 0 0 0 transparent;
+    background-image: none;
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+</style>

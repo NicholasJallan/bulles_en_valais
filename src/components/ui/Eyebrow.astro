@@ -1,0 +1,20 @@
+---
+/** Eyebrow with the depth marker of its section: « — 12 m · Cursus » (the dash is a gauge tick). */
+interface Props {
+  /** Depth in metres, as shown by the HUD. */
+  depth: number;
+  label: string;
+  as?: 'p' | 'span' | 'div';
+  class?: string;
+}
+
+const NO_BREAK_SPACE = String.fromCharCode(0xa0);
+
+const { depth, label, as: Tag = 'p', class: className } = Astro.props;
+const depthText = `${String(depth).padStart(2, '0')}${NO_BREAK_SPACE}m`;
+---
+
+<Tag class:list={['eyebrow', className]}>
+  <span class="eyebrow-depth">{depthText}</span> <span aria-hidden="true">·</span>{' '}
+  <span>{label}</span>
+</Tag>
