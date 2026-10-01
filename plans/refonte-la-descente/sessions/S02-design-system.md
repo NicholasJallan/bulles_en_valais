@@ -40,7 +40,7 @@ Transformer la direction artistique en **système concret** : tokens (couleur pa
    > 🔁 Point de sortie possible ici : committer, journaliser « S02 tâche 6 terminée ».
 7. **Captures** à 320, 768, 1024 et 1440 px (MCP `chrome-devtools`, pages `styleguide` en haut et au milieu), enregistrées en JPEG ≤ 200 Ko dans `plans/refonte-la-descente/gates/gate-1/`.
 8. **Auto-critique** : lancer `design:design-critique` sur les captures et vérifier la checklist de `~/.claude/rules/web/design-quality.md` (au moins quatre qualités requises, aucun motif interdit). Corriger.
-9. 🛑 **Gate 1** : présenter à Nicholas l'URL LAN (`npm run dev -- --host`, puis `http://<ip-du-mac>:4321/styleguide/`), les captures et ces questions, avec une recommandation pour chacune :
+9. 🛑 **Gate 1** : présenter à Nicholas l'URL LAN (`npm run build && npm run preview -- --host`, avec son accord, puis `http://<ip-du-mac>:4321/styleguide/` ; jamais `astro dev --host`, D18), les captures et ces questions, avec une recommandation pour chacune :
    1. appariement typographique A, B ou C ;
    2. palette et tons (ajustements ?) ;
    3. sensation du mouvement (plus lent, plus rapide, juste) ;
