@@ -7,7 +7,7 @@
 | Brique | Version | Rôle |
 |---|---|---|
 | Astro | `^7.3` | Build statique, i18n, `astro:assets` (sharp), Fonts API |
-| TypeScript | strict | Contrôleurs, logique, données typées |
+| TypeScript | `^6`, strict | Contrôleurs, logique, données typées (7 pas encore pris en charge par `@astrojs/check`, D16) |
 | GSAP | `^3.15` | ScrollTrigger, SplitText, CustomEase, DrawSVG (+ Draggable et Inertia si besoin) |
 | Lenis | `^1.3` | Scroll lissé (pointeur fin seulement) |
 | OGL | `^1.0` | WebGL minimal (hero), chargé à la demande |
@@ -79,7 +79,8 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   └── assets/ images/ · brand/logo.svg · textures/water-mask.png
 ├── tests/ e2e/ · visual/ · a11y/ · php/
 ├── ops/ deploy.sh · rollback.sh · nginx/dive.conf (copie versionnée, sans secret)
-├── scripts/check-budgets.mjs          # tailles gzip de dist/_astro/*.{js,css}
+├── scripts/check-budgets.mjs          # tailles gzip du JS et du CSS de dist/ (D19)
+├── scripts/check-dist.mjs             # enchaîné par le build : ni JS inline ni ressource externe, aucun fichier interdit, contact.php présent (D17)
 ├── legacy/                            # ancien site en lecture seule, supprimé en S13
 └── plans/refonte-la-descente/
 ```
@@ -95,7 +96,11 @@ export default defineConfig({
   site: 'https://dive.bullesenvalais.ch',
   trailingSlash: 'always',
   build: { format: 'directory', inlineStylesheets: 'never' }, // CSS externe
-  i18n: {
+  vite: {
+    build: { assetsInlineLimit: 0 }, // ni script inline ni URI data: (CSP, D17)
+    server: { fs: { deny: [/* défauts de Vite 8 */, 'mail-config.php', 'settings.json'] } }, // D18
+  },
+  i18n: {                           // locales importées de src/i18n/types.ts (source unique)
     defaultLocale: 'fr',
     locales: ['fr', 'en'],
     routing: { prefixDefaultLocale: false },
@@ -275,8 +280,9 @@ export interface Course {
 | Visuel | Playwright `toHaveScreenshot` | Sections clés à 320/768/1024/1440, mouvement réduit + `animations: 'disabled'`, chiffres du HUD masqués | `npm run test:visual` |
 | Accessibilité | @axe-core/playwright | FR et EN, tags `wcag2a wcag2aa wcag21aa wcag22aa`, 0 violation sérieuse/critique | `npm run test:a11y` |
 | Performance | chrome-devtools MCP + `scripts/check-budgets.mjs` | Lighthouse mobile, trace (LCP/CLS/TBT), tailles gzip | `npm run check:budgets` |
+| `dist/` | `scripts/check-dist.mjs` | Aucun script inline (JSON-LD excepté), gestionnaire `on*`, URL `javascript:` ni script ou feuille de style d'une autre origine ; aucun fichier caché (hors `.well-known/`), clé, certificat ni `settings.json` ; sous `api/` et en PHP, seulement `api/contact.php`, qui doit être présent | enchaîné par `npm run build` (un `postbuild` sauterait avec `--ignore-scripts`) |
 
-Projets Playwright : `chromium`, `firefox`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15). `webServer` : `npm run build && npm run preview -- --port 4321`.
+Projets Playwright : `chromium`, `firefox`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15). `webServer` : `npm run build && npm run preview -- --port 4321 --ignore-lock`, avec `reuseExistingServer: false` (le port 4321 doit être libre ; voir `00-contexte` §3 pour l'arrière-plan automatique d'Astro 7 et le Firefox de Playwright sur macOS 27).
 
 ## 16. Déploiement (S12–S13)
 
@@ -297,7 +303,7 @@ Projets Playwright : `chromium`, `firefox`, `webkit` (desktop 1440×900) et `mob
 
 ## 17. Protocole de mesure de performance
 
-1. `npm run build && npm run preview -- --host`.
+1. `npm run build && npm run preview -- --host` (sous un agent, Astro 7 le lance en arrière-plan : `npx astro preview stop` pour l'arrêter).
 2. chrome-devtools MCP : `new_page` (contexte isolé), `emulate` (`390x844x3,mobile,touch`, CPU ×4, `Fast 4G`), `performance_start_trace` avec rechargement → LCP, CLS, rendu bloquant ; `lighthouse_audit` (mobile).
 3. `npm run check:budgets` (échoue si JS initial > 90 Ko, JS total > 150 Ko ou CSS > 30 Ko en gzip).
 4. Consigner les chiffres dans le journal de `PROGRESS.md` (tableau par session) pour suivre l'évolution.
