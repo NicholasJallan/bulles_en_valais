@@ -5,6 +5,7 @@ import '@/styles/global.css';
 import '@/styles/typography.css';
 import '@/styles/motion.css';
 import '@/styles/utilities.css';
+import { getDictionary } from '@/i18n/index.ts';
 import { alternates, routePath, type RouteId } from '@/i18n/routes.ts';
 import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
 
@@ -62,6 +63,7 @@ const links =
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#content">{getDictionary(locale).a11y.skipLink}</a>
     <slot />
   </body>
 </html>

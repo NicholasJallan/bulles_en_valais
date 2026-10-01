@@ -1,0 +1,25 @@
+---
+import type { Rich } from '@/i18n/types.ts';
+
+/** Inline text with links, from a `Rich` value (no HTML in the strings). */
+interface Props {
+  value: Rich;
+  /** Visually hidden note appended to links that open a new tab. */
+  newTab: string;
+}
+
+const { value, newTab } = Astro.props;
+---
+
+{value.map((part) =>
+  'text' in part ? (
+    part.text
+  ) : part.link.external ? (
+    <a href={part.link.href} target="_blank" rel="noopener noreferrer">
+      {part.link.label}
+      <span class="visually-hidden"> {newTab}</span>
+    </a>
+  ) : (
+    <a href={part.link.href}>{part.link.label}</a>
+  ),
+)}

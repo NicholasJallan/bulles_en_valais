@@ -286,6 +286,8 @@ export interface ContactFormText {
   readonly messagePlaceholder: string;
   /** Label of the hidden anti-spam field, in case assistive technology reaches it. */
   readonly honeypot: string;
+  /** Shown without JavaScript: the form cannot be sent then, the direct channels can (S10). */
+  readonly noScript: string;
   readonly submit: string;
   readonly sending: string;
   readonly success: string;

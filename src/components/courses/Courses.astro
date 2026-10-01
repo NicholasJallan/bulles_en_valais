@@ -1,0 +1,73 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import TabList from '@/components/ui/TabList.astro';
+import { AGENCIES } from '@/data/courses.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import AgencyPanel from './AgencyPanel.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).courses;
+const tabs = AGENCIES.map((agency) => ({
+  id: `agency-${agency}-tab`,
+  panelId: `agency-${agency}`,
+  label: t.agencies[agency].label,
+}));
+---
+
+<Section id="agencies" tone="lagoon" class="courses">
+  <div class="wrap courses-inner" data-controller="tabs">
+    <div class="courses-head">
+      <SectionHeader
+        id="agencies-title"
+        depth={markerDepth('agencies')}
+        eyebrow={t.eyebrow}
+        title={t.title}
+      />
+      <p class="lead courses-lead">{t.lead}</p>
+    </div>
+    <TabList label={t.tabsLabel} tabs={tabs} />
+    <div class="courses-panels">
+      {AGENCIES.map((agency, index) => (
+        <AgencyPanel locale={locale} agency={agency} active={index === 0} />
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .courses-inner {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .courses-head {
+    display: grid;
+    gap: var(--space-m) var(--grid-gap);
+  }
+
+  @media (width >= 64rem) {
+    .courses-head {
+      grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+      align-items: end;
+    }
+
+    .courses-head > :global(:first-child) {
+      grid-column: 1 / span 6;
+    }
+
+    .courses-lead {
+      grid-column: 8 / -1;
+    }
+  }
+
+  .courses-lead {
+    max-inline-size: 46ch;
+  }
+</style>

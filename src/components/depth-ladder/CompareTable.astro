@@ -1,0 +1,158 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { AGENCIES } from '@/data/courses.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/**
+ * The three schools side by side. Under 48 rem each criterion becomes a card; the explicit roles
+ * keep the table semantics that `display: block` would remove in some browsers.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.compare;
+const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies[agency].label;
+---
+
+<Section id="compare" tone="abyss" class="compare">
+  <div class="wrap compare-inner">
+    <SectionHeader
+      id="compare-title"
+      depth={markerDepth('compare')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+    />
+    <table class="compare-table" role="table">
+      <caption class="visually-hidden">{t.caption}</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">{t.criterion}</th>
+          {AGENCIES.map((agency) => (
+            <th scope="col" role="columnheader">
+              <span class="compare-agency">{label(agency)}</span>
+              <span class="compare-column-sub">{t.columns[agency]}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        {t.rows.map((row) => (
+          <tr role="row">
+            <th scope="row" role="rowheader">{row.label}</th>
+            {AGENCIES.map((agency) => (
+              <td role="cell" data-label={label(agency)}>
+                {row.values[agency]}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="compare-footnote">{t.footnote}</p>
+  </div>
+</Section>
+
+<style>
+  .compare-inner {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .compare-table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: var(--space-xs) var(--space-s);
+    text-align: start;
+    vertical-align: top;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .compare-table thead th {
+    vertical-align: bottom;
+    border-block-end-color: var(--fg-soft);
+  }
+
+  .compare-table tbody th {
+    font-weight: var(--text-strong);
+    color: var(--fg-soft);
+  }
+
+  .compare-agency {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: var(--display-weight);
+  }
+
+  .compare-column-sub {
+    font-weight: var(--text-weight);
+    color: var(--fg-soft);
+  }
+
+  /* SDI/TDI, the default path since S00, sits in a lighter column. */
+  .compare-table :is(th, td):nth-child(2) {
+    background-color: var(--bg-panel);
+  }
+
+  .compare-footnote {
+    max-inline-size: 60ch;
+    color: var(--fg-soft);
+  }
+
+  @media (width < 48rem) {
+    .compare-table thead {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .compare-table,
+    .compare-table tbody,
+    .compare-table tr,
+    .compare-table th,
+    .compare-table td {
+      display: block;
+    }
+
+    .compare-table tbody tr {
+      margin-block-end: var(--space-s);
+      padding: var(--space-xs) var(--space-s);
+      border-radius: var(--radius-soft);
+      background-color: var(--bg-panel);
+    }
+
+    .compare-table tbody :is(th, td) {
+      padding-inline: 0;
+      background: none;
+    }
+
+    .compare-table tbody td {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr;
+      gap: var(--space-xs);
+    }
+
+    .compare-table tbody td:last-child {
+      border-block-end: 0;
+    }
+
+    .compare-table td::before {
+      content: attr(data-label) / "";
+      font-weight: var(--text-strong);
+    }
+  }
+</style>

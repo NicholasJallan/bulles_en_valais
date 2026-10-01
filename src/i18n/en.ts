@@ -520,6 +520,8 @@ export const en: Dictionary = {
       message: 'Your message',
       messagePlaceholder: 'Current level, availability, questions, travel plans…',
       honeypot: 'Leave this field empty',
+      noScript:
+        'Without JavaScript, this form cannot be sent: please reach me on WhatsApp, by phone or by e-mail instead.',
       submit: 'Send the message',
       sending: 'Sending…',
       success: 'Thanks — your message is on its way. I will reply as soon as possible.',

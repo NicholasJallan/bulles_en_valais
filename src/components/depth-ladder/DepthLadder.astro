@@ -1,0 +1,146 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { ladderCourses } from '@/data/courses.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { groupByDepth, ladderPosition } from '@/lib/depth/ladder-scale.ts';
+import { formatDepth } from '@/lib/format.ts';
+
+/**
+ * Static depth ladder (E9 animates it in S08): each certification at its real maximum depth.
+ * The space between two rungs follows the scale (real to 40 m, compressed below), with a minimum
+ * so that close depths stay readable.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.depthLadder;
+const KNEE = 40;
+const groups = groupByDepth(ladderCourses());
+const rungs = groups.map((group, index) => ({
+  ...group,
+  gap: ladderPosition(group.depth) - ladderPosition(groups[index - 1]?.depth ?? 0),
+  compressed: group.depth > KNEE && (groups[index - 1]?.depth ?? 0) <= KNEE,
+}));
+---
+
+<Section id="depth" tone="deep" class="ladder-section">
+  <div class="wrap split">
+    <SectionHeader
+      id="depth-title"
+      depth={markerDepth('depth')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+      class="ladder-head"
+    />
+    <figure class="ladder-figure">
+      <figcaption class="fine">{t.legend}</figcaption>
+      <ol class="bare-list ladder">
+        {rungs.map((rung) => (
+          <li
+            class:list={['rung', { 'rung-compressed': rung.compressed }]}
+            style={`--gap: ${rung.gap.toFixed(3)}`}
+          >
+            <span class="rung-depth tabular">{formatDepth(rung.depth, locale)}</span>
+            <ul class="bare-list rung-courses">
+              {rung.items.map((course) => (
+                <li>
+                  <span class="rung-agency">
+                    {dictionary.courses.agencies[course.agency].label}
+                  </span>{' '}
+                  {localize(course.name, locale)}
+                </li>
+              ))}
+            </ul>
+            {rung.compressed && <p class="rung-note fine">{t.scaleNote}</p>}
+          </li>
+        ))}
+      </ol>
+    </figure>
+  </div>
+</Section>
+
+<style>
+  .ladder-section {
+    /* Height that one unit of the scale (0 → 120 m) takes on screen. */
+    --ladder-span: clamp(36rem, 26rem + 40vw, 64rem);
+  }
+
+  @media (width >= 64rem) {
+    .ladder-section :global(.ladder-head) {
+      position: sticky;
+      inset-block-start: var(--space-xl);
+    }
+  }
+
+  .ladder-figure {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  /* The rope of the ladder, from the surface down. */
+  .ladder {
+    position: relative;
+    padding-inline-start: var(--space-l);
+    border-inline-start: 1px solid var(--line);
+  }
+
+  .rung {
+    position: relative;
+    display: grid;
+    grid-template-columns: 5.5ch 1fr;
+    gap: var(--space-s);
+    align-items: baseline;
+    padding-block-start: max(var(--space-s), calc(var(--gap) * var(--ladder-span)));
+  }
+
+  /* Graduation: a tick on the rope at the depth of the rung. */
+  .rung::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(-1 * var(--space-l));
+    inline-size: calc(var(--space-l) - var(--space-2xs));
+    block-size: 1px;
+    margin-block-start: 0.8em;
+    background-color: var(--fg-soft);
+  }
+
+  .rung-compressed::after {
+    content: '';
+    position: absolute;
+    inset-block-start: calc(var(--space-s) / 2);
+    inset-inline-start: calc(-1 * var(--space-l) - 4px);
+    inline-size: 7px;
+    block-size: max(var(--space-s), calc(var(--gap) * var(--ladder-span))) ;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--bg) 0 4px,
+      var(--line) 4px 6px
+    );
+  }
+
+  .rung-depth {
+    font-size: var(--step-1);
+    font-weight: var(--text-strong);
+  }
+
+  .rung-courses {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .rung-agency {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .rung-note {
+    grid-column: 2;
+  }
+</style>

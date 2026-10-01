@@ -3,6 +3,8 @@ import { mountControllers, type ControllerRegistry } from '@/lib/controllers.ts'
 
 /** `data-controller` name → module exporting `init(element)`, loaded on demand. */
 const CONTROLLERS: ControllerRegistry = {
+  nav: () => import('@/components/nav/nav.ts'),
+  tabs: () => import('@/components/ui/tabs.ts'),
   // Styleguide only (S02): removed with it in S13.
   'styleguide-switch': () => import('@/components/styleguide/switch.ts'),
   'styleguide-motion': () => import('@/components/styleguide/motion.ts'),

@@ -1,0 +1,90 @@
+---
+import descentWide from '@/assets/images/interludes/descent-16x9.jpg';
+import descentTall from '@/assets/images/interludes/descent-4x5.jpg';
+import light from '@/assets/images/interludes/light.jpg';
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import { DIVE_PROFILE } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/** Full-width image between two sections, with its quote and its credit (not a section). */
+interface Props {
+  locale: Locale;
+  variant: 'descent' | 'light';
+}
+
+const { locale, variant } = Astro.props;
+const t = getDictionary(locale).interludes[variant];
+const id = variant === 'descent' ? 'interlude-descent' : 'interlude-light';
+const hud = DIVE_PROFILE.find((section) => section.id === id)?.hud;
+// Descent: 16:9 from 48 rem, 4:5 on phones (D34). Light: one landscape crop (D33).
+const crops =
+  variant === 'descent'
+    ? {
+        sources: [{ media: '(width >= 48rem)', src: descentWide, widths: [960, 1440, 1707] }],
+        fallback: { src: descentTall, widths: [480, 720, 952] },
+      }
+    : { sources: [], fallback: { src: light, widths: [640, 960, 1440, 1920, 2752] } };
+---
+
+<figure
+  id={id}
+  class:list={['interlude', `interlude-${variant}`]}
+  data-tone="abyss"
+  data-depth-start={hud?.start}
+  data-depth-end={hud?.end}
+>
+  <ArtPicture {...crops} sizes="100vw" alt={t.imageAlt} class="interlude-image" />
+  <div class="interlude-veil" aria-hidden="true"></div>
+  <blockquote class="interlude-quote wrap">
+    <p class="display">{t.quote}</p>
+  </blockquote>
+  <figcaption class="interlude-credit wrap fine">{t.credit}</figcaption>
+</figure>
+
+<style>
+  .interlude {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: end;
+    min-block-size: min(100svh, 56rem);
+    padding-block: var(--space-section) var(--space-m);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .interlude :global(.interlude-image),
+  .interlude :global(.interlude-image img) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .interlude-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to top,
+      oklch(14% 0.03 245 / 0.88),
+      oklch(14% 0.03 245 / 0.35) 55%,
+      oklch(14% 0.03 245 / 0.1)
+    );
+  }
+
+  .interlude-quote p {
+    max-inline-size: 22ch;
+    font-size: var(--step-4);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .interlude-credit {
+    margin-block-start: var(--space-xl);
+    color: var(--fg-soft);
+  }
+</style>

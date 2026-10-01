@@ -4,6 +4,8 @@ import { DEFAULT_LOCALE, LANG_TAGS, LOCALES, type Locale, type Localized } from 
 /** Path of each page per locale, before the locale prefix (used by the language switch). */
 export const ROUTES = {
   home: { fr: '/', en: '/' },
+  privacy: { fr: '/confidentialite/', en: '/privacy/' },
+  legalNotice: { fr: '/mentions-legales/', en: '/legal-notice/' },
 } as const satisfies Readonly<Record<string, Localized>>;
 
 export type RouteId = keyof typeof ROUTES;

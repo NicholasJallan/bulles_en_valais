@@ -1,22 +1,35 @@
 ---
+import CompareTable from '@/components/depth-ladder/CompareTable.astro';
+import DepthLadder from '@/components/depth-ladder/DepthLadder.astro';
+import Courses from '@/components/courses/Courses.astro';
+import Hero from '@/components/hero/Hero.astro';
+import Instructor from '@/components/instructor/Instructor.astro';
+import Interlude from '@/components/interlude/Interlude.astro';
+import Manifesto from '@/components/manifesto/Manifesto.astro';
+import Nav from '@/components/nav/Nav.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
 
+/** The one page, in the order of the dive profile (01-direction-artistique.md §2). */
 interface Props {
   locale: Locale;
 }
 
 const { locale } = Astro.props;
 const t = getDictionary(locale);
-const { title } = t.hero;
 ---
 
 <BaseLayout locale={locale} route="home" title={t.meta.title} description={t.meta.description}>
-  <main>
-    <h1>
-      {title.before} <em>{title.em}</em>
-      {title.after && <> {title.after}</>}
-    </h1>
+  <Nav locale={locale} />
+  <main id="content">
+    <Hero locale={locale} />
+    <Manifesto locale={locale} />
+    <Instructor locale={locale} />
+    <Courses locale={locale} />
+    <Interlude locale={locale} variant="descent" />
+    <DepthLadder locale={locale} />
+    <CompareTable locale={locale} />
+    <Interlude locale={locale} variant="light" />
   </main>
 </BaseLayout>

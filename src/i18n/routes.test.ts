@@ -7,6 +7,13 @@ describe('routePath', () => {
     expect(routePath('home', 'fr')).toBe('/');
     expect(routePath('home', 'en')).toBe('/en/');
   });
+
+  it('resolves the legal pages under their translated paths', () => {
+    expect(routePath('privacy', 'fr')).toBe('/confidentialite/');
+    expect(routePath('privacy', 'en')).toBe('/en/privacy/');
+    expect(routePath('legalNotice', 'fr')).toBe('/mentions-legales/');
+    expect(routePath('legalNotice', 'en')).toBe('/en/legal-notice/');
+  });
 });
 
 describe('alternates', () => {

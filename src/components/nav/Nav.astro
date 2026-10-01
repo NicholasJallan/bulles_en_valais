@@ -1,0 +1,252 @@
+---
+import Logo from '@/assets/brand/logo.svg';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getDictionary, localePath } from '@/i18n/index.ts';
+import type { RouteId } from '@/i18n/routes.ts';
+import type { Locale } from '@/i18n/types.ts';
+import LanguageSwitch from './LanguageSwitch.astro';
+
+/**
+ * Masthead laid over the hero. Below 1024 px the links move into a modal <dialog> (nav.ts);
+ * without JavaScript they stay in the masthead, wrapped.
+ */
+interface Props {
+  locale: Locale;
+  route?: RouteId;
+}
+
+const { locale, route = 'home' } = Astro.props;
+const t = getDictionary(locale);
+const home = localePath(locale, '/');
+// On the home page the anchors stay in the page; elsewhere they lead back to it.
+const anchor = (id: string) => (route === 'home' ? `#${id}` : `${home}#${id}`);
+const links = [
+  { id: 'about', label: t.nav.about },
+  { id: 'agencies', label: t.nav.courses },
+  { id: 'specialties', label: t.nav.specialties },
+  { id: 'places', label: t.nav.places },
+  { id: 'faq', label: t.nav.faq },
+];
+---
+
+<header class="site-header" data-controller="nav">
+  <div class="wrap site-header-inner">
+    <a class="brand" href={anchor('top')} aria-label={t.a11y.home}>
+      <Logo class="brand-logo" aria-hidden="true" focusable="false" />
+    </a>
+    <nav class="nav-inline" aria-label={t.a11y.mainNav}>
+      <ul class="bare-list nav-links">
+        {links.map((link) => (
+          <li>
+            <a href={anchor(link.id)}>{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="nav-tools">
+      <LanguageSwitch locale={locale} route={route} class="nav-language" />
+      <Button href={anchor('contact')} class="nav-cta">{t.nav.contact}</Button>
+      <button
+        class="menu-button js-only"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-menu-open
+      >
+        <Icon name="menu" />
+        <span class="visually-hidden">{t.a11y.openMenu}</span>
+      </button>
+    </div>
+  </div>
+
+  <dialog id="site-menu" class="menu" aria-label={t.a11y.mainNav} data-tone="deep">
+    <div class="menu-inner">
+      <button class="menu-close" type="button" data-menu-close>
+        <Icon name="close" />
+        <span class="visually-hidden">{t.a11y.closeMenu}</span>
+      </button>
+      <nav aria-label={t.a11y.mainNav}>
+        <ul class="bare-list menu-links">
+          {links.map((link) => (
+            <li>
+              <a href={anchor(link.id)} data-menu-link>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="menu-footer">
+        <Button href={anchor('contact')} data-menu-link>
+          {t.nav.contact}
+        </Button>
+        <LanguageSwitch locale={locale} route={route} />
+      </div>
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .site-header {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-nav);
+    color: var(--c-foam);
+  }
+
+  .site-header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-m);
+    padding-block: var(--space-s);
+  }
+
+  .brand {
+    display: block;
+    color: inherit;
+    margin-inline-end: auto;
+  }
+
+  .brand :global(.brand-logo) {
+    inline-size: auto;
+    block-size: clamp(3rem, 2.6rem + 2vw, 4.25rem);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+  }
+
+  .nav-links a,
+  .menu-links a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    padding-inline: var(--space-3xs);
+    font-size: var(--step--1);
+    font-weight: 500;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px;
+    background-position: 0 calc(50% + 0.85em);
+    background-repeat: no-repeat;
+    background-clip: content-box;
+    background-size: 0% 1px;
+    transition: background-size var(--dur-fast) var(--ease-surface);
+  }
+
+  @media (hover: hover) {
+    .nav-links a:hover {
+      background-size: 100% 1px;
+    }
+  }
+
+  .nav-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  /* The CTA is a dark-water button on the photo: the lamp, lit. */
+  .nav-tools :global(.nav-cta) {
+    --action: var(--c-torch);
+    --action-ink: var(--c-ink);
+  }
+
+  .menu-button,
+  .menu-close {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    padding: 0;
+    border: 1px solid color-mix(in oklch, currentColor 40%, transparent);
+    border-radius: var(--radius-round);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Phones and tablets: the links and the CTA live in the menu (with JavaScript). */
+  @media (width < 64rem) {
+    html.js .nav-inline,
+    html.js .nav-tools :global(.nav-cta),
+    html.js .nav-tools :global(.nav-language) {
+      display: none;
+    }
+
+    html:not(.js) .nav-inline {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    html:not(.js) .nav-tools :global(.nav-cta) {
+      display: none;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .menu-button {
+      display: none;
+    }
+
+    .nav-inline {
+      margin-inline-end: var(--space-s);
+    }
+  }
+
+  .menu {
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 100dvh;
+    max-block-size: none;
+    padding: 0;
+    border: 0;
+  }
+
+  .menu::backdrop {
+    background-color: var(--c-abyss);
+  }
+
+  .menu-inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--space-l);
+    min-block-size: 100%;
+    padding: var(--space-s) var(--gutter) var(--space-xl);
+  }
+
+  .menu-close {
+    justify-self: end;
+  }
+
+  .menu-links {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: center;
+  }
+
+  .menu-links a {
+    display: block;
+    padding-block: var(--space-3xs);
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-snug);
+  }
+
+  .menu-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+</style>

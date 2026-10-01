@@ -1,0 +1,85 @@
+---
+/**
+ * Tab list of the WAI-ARIA APG (tabs.ts drives it). Shown with JavaScript only: without it the
+ * panels are stacked, each with its own heading. A panel carries `data-tab-panel`, its id,
+ * `role="tabpanel"`, `aria-labelledby` (the id of its tab) and `data-active` for the first one.
+ */
+interface Tab {
+  id: string;
+  panelId: string;
+  label: string;
+}
+
+interface Props {
+  label: string;
+  tabs: Tab[];
+  class?: string;
+}
+
+const { label, tabs, class: className } = Astro.props;
+---
+
+<div class:list={['tab-list', 'js-only', className]} role="tablist" aria-label={label}>
+  {tabs.map((tab, index) => (
+    <button
+      id={tab.id}
+      class="tab"
+      type="button"
+      role="tab"
+      aria-selected={index === 0 ? 'true' : 'false'}
+      aria-controls={tab.panelId}
+      tabindex={index === 0 ? 0 : -1}
+    >
+      {tab.label}
+    </button>
+  ))}
+</div>
+
+<style>
+  .tab-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+    padding: var(--space-3xs);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-round);
+    inline-size: fit-content;
+    max-inline-size: 100%;
+  }
+
+  .tab {
+    min-block-size: var(--tap-min);
+    padding: 0.5em 1.2em;
+    border: 0;
+    border-radius: var(--radius-round);
+    background: none;
+    color: var(--fg-soft);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-surface),
+      color var(--dur-fast) var(--ease-surface);
+  }
+
+  @media (hover: hover) {
+    .tab:hover {
+      color: var(--fg);
+      background-color: var(--veil-hover);
+    }
+  }
+
+  /* The selected tab is lit like an action: it is the state the visitor chose. */
+  .tab[aria-selected='true'] {
+    background-color: var(--action);
+    color: var(--action-ink);
+  }
+</style>
+
+<style is:global>
+  /* With JavaScript, only the selected panel shows (tabs.ts moves data-active). */
+  html.js [data-tab-panel]:not([data-active]) {
+    display: none;
+  }
+</style>
