@@ -64,6 +64,12 @@ h6 {
   color-scheme: dark;
 }
 
+/* A light tone nested in dark water gets its light controls back. */
+[data-tone='surface'],
+[data-tone='lagoon'] {
+  color-scheme: light;
+}
+
 ::selection {
   background-color: color-mix(in oklch, var(--action) 28%, var(--bg));
   color: var(--fg);
@@ -75,11 +81,12 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.22em;
-  transition: text-decoration-thickness var(--dur-fast) var(--ease-surface);
 }
 
-a:hover {
-  text-decoration-thickness: 2px;
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 
 /* The keyboard focus is a halo of light, on every tone. */

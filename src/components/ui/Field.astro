@@ -22,7 +22,7 @@ interface Props {
   disabled?: boolean;
   options?: readonly Option[];
   rows?: number;
-  /** Styleguide only: shows a state without the pointer or the keyboard. */
+  /** Styleguide only (data-sg-state): shows a state without the pointer or the keyboard. */
   state?: 'hover' | 'focus';
 }
 
@@ -53,7 +53,7 @@ const shared = {
   required,
   disabled,
   class: 'field-control',
-  'data-state': state,
+  'data-sg-state': state,
   'aria-describedby': describedBy,
   'aria-invalid': error ? ('true' as const) : undefined,
 };
@@ -126,9 +126,6 @@ const shared = {
     color: var(--fg);
     font-size: max(1rem, var(--step-0)); /* never under 16 px: iOS would zoom in */
     line-height: 1.4;
-    transition:
-      border-color var(--dur-fast) var(--ease-surface),
-      box-shadow var(--dur-base) var(--ease-surface);
   }
 
   .field-control::placeholder {
@@ -136,11 +133,17 @@ const shared = {
     opacity: 1;
   }
 
-  .field-control:is(:hover, [data-state='hover']):not(:disabled) {
+  .field-control[data-sg-state='hover'] {
     border-color: var(--fg);
   }
 
-  .field-control:is(:focus-visible, [data-state='focus']) {
+  @media (hover: hover) {
+    .field-control:hover:not(:disabled) {
+      border-color: var(--fg);
+    }
+  }
+
+  .field-control:is(:focus-visible, [data-sg-state='focus']) {
     border-color: var(--action);
     outline: var(--focus-width) solid var(--action);
     outline-offset: 1px;

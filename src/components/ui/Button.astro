@@ -57,7 +57,8 @@ const classes = ['button', `button-${variant}`, className];
     --button-bg: transparent;
     --button-fg: var(--fg);
     --button-border: transparent;
-    --button-shadow: 0 0 0 0 transparent;
+    --button-glow: var(--glow-soft);
+    --glow-opacity: 0;
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -69,7 +70,6 @@ const classes = ['button', `button-${variant}`, className];
     border-radius: var(--radius-sharp);
     background-color: var(--button-bg);
     color: var(--button-fg);
-    box-shadow: var(--button-shadow);
     font-family: var(--font-sans);
     font-size: var(--step-0);
     font-weight: var(--text-strong);
@@ -77,12 +77,20 @@ const classes = ['button', `button-${variant}`, className];
     text-decoration: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition:
-      background-color var(--dur-fast) var(--ease-surface),
-      border-color var(--dur-fast) var(--ease-surface),
-      color var(--dur-fast) var(--ease-surface),
-      box-shadow var(--dur-base) var(--ease-surface),
-      transform var(--dur-instant) var(--ease-surface);
+    /* Only composited properties move: this press, and the opacity of the glow below. */
+    transition: transform var(--dur-instant) var(--ease-surface);
+  }
+
+  /* The glow lives on its own layer: lighting up only animates its opacity. */
+  .button::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: var(--button-glow);
+    opacity: var(--glow-opacity);
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-surface);
   }
 
   /* Primary: the lamp. Deep red in daylight, lit and glowing in the dark tones. */
@@ -90,66 +98,84 @@ const classes = ['button', `button-${variant}`, className];
     --button-bg: var(--action);
     --button-fg: var(--action-ink);
     --button-border: var(--action);
-  }
-
-  .button-primary:is(:hover, [data-state='hover']) {
-    --button-shadow: var(--glow-lit);
-    background-image: radial-gradient(
-      120% 150% at 50% 135%,
-      color-mix(in oklch, var(--c-torch-glow) 38%, transparent),
-      transparent 62%
-    );
+    --button-glow: var(--glow-lit);
   }
 
   .button-secondary {
     --button-border: var(--fg-soft);
   }
 
-  .button-secondary:is(:hover, [data-state='hover']) {
-    --button-border: var(--action);
-    --button-fg: var(--action-text);
-    --button-shadow: 0 0 22px -2px var(--glow);
-  }
-
   .button-ghost {
     padding-inline: 1em;
-  }
-
-  .button-ghost:is(:hover, [data-state='hover']) {
-    --button-bg: color-mix(in oklch, var(--fg) 7%, transparent);
-    --button-fg: var(--action-text);
   }
 
   /* Link: no box, but still a 44 px target. */
   .button-link {
     --button-fg: var(--action-text);
+    --button-glow: none;
     padding-inline: 0;
     text-decoration-line: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.3em;
   }
 
-  .button-link:is(:hover, [data-state='hover']) {
-    text-decoration-thickness: 2px;
-    text-shadow: 0 0 14px var(--glow);
+  /* Hover states. The ghost keeps --fg on its veil: --action-text there fell under 4.5:1.
+     data-sg-state shows them in the styleguide, on touch screens too. */
+  .button-primary[data-sg-state='hover'] {
+    --glow-opacity: 1;
   }
 
-  .button:is(:focus-visible, [data-state='focus']) {
+  .button-secondary[data-sg-state='hover'] {
+    --button-border: var(--action);
+    --button-fg: var(--action-text);
+    --glow-opacity: 1;
+  }
+
+  .button-ghost[data-sg-state='hover'] {
+    --button-bg: var(--veil-hover);
+  }
+
+  .button-link[data-sg-state='hover'] {
+    text-decoration-thickness: 2px;
+    text-shadow: var(--glow-text);
+  }
+
+  /* A real pointer only (no glow left behind by a tap), never on a disabled button. */
+  @media (hover: hover) {
+    .button-primary:hover:not(:disabled, [aria-disabled='true']) {
+      --glow-opacity: 1;
+    }
+
+    .button-secondary:hover:not(:disabled, [aria-disabled='true']) {
+      --button-border: var(--action);
+      --button-fg: var(--action-text);
+      --glow-opacity: 1;
+    }
+
+    .button-ghost:hover:not(:disabled, [aria-disabled='true']) {
+      --button-bg: var(--veil-hover);
+    }
+
+    .button-link:hover:not(:disabled, [aria-disabled='true']) {
+      text-decoration-thickness: 2px;
+      text-shadow: var(--glow-text);
+    }
+  }
+
+  .button:is(:focus-visible, [data-sg-state='focus']) {
     outline: var(--focus-width) solid var(--action);
     outline-offset: var(--focus-offset);
-    --button-shadow: var(--focus-halo);
+    box-shadow: var(--focus-halo);
   }
 
-  .button:is(:active, [data-state='active']):not(:disabled, [aria-disabled='true']) {
-    --button-shadow: 0 0 0 0 transparent;
-    background-image: none;
+  .button:is(:active, [data-sg-state='active']):not(:disabled, [aria-disabled='true']) {
+    --glow-opacity: 0;
     transform: translateY(1px);
   }
 
   /* Disabled: the lamp is off (no glow, no colour), not just paler. */
   .button:is(:disabled, [aria-disabled='true']) {
-    --button-shadow: 0 0 0 0 transparent;
-    background-image: none;
+    --glow-opacity: 0;
     opacity: 0.5;
     filter: grayscale(1);
     cursor: not-allowed;

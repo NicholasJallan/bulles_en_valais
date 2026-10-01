@@ -69,9 +69,6 @@ const { name, legend, options, value, class: className } = Astro.props;
     font-weight: 500;
     line-height: 1.3;
     cursor: pointer;
-    transition:
-      background-color var(--dur-fast) var(--ease-surface),
-      color var(--dur-fast) var(--ease-surface);
   }
 
   .switch-option input {
@@ -82,8 +79,10 @@ const { name, legend, options, value, class: className } = Astro.props;
     cursor: pointer;
   }
 
-  .switch-option:hover {
-    color: var(--action-text);
+  @media (hover: hover) {
+    .switch-option:hover {
+      color: var(--action-text);
+    }
   }
 
   .switch-option:has(input:checked) {
