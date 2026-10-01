@@ -8,14 +8,18 @@ import '@/styles/utilities.css';
 import { alternates, routePath, type RouteId } from '@/i18n/routes.ts';
 import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
 
-interface Props {
+interface PageProps {
   locale: Locale;
-  /** Localised page; a page outside the routes (the styleguide) gets no canonical nor alternates. */
-  route?: RouteId;
   title: string;
   description: string;
-  noindex?: boolean;
 }
+
+/**
+ * A localised page has a route (canonical and hreflang). A page outside the routes (the
+ * styleguide) has neither, so it must not be indexed: TypeScript refuses it without noindex.
+ */
+type Props = PageProps &
+  ({ route: RouteId; noindex?: boolean } | { route?: undefined; noindex: true });
 
 const { locale, route, title, description, noindex = false } = Astro.props;
 const { site } = Astro;
