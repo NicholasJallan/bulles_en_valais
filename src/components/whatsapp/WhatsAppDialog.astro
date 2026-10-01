@@ -1,0 +1,175 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { whatsappUrl } from '@/data/contact.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/**
+ * Floating WhatsApp bubble. Without JavaScript it is a plain wa.me link; with it, it opens a
+ * <dialog> to write the first message (whatsapp.ts).
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.whatsapp;
+const href = whatsappUrl(t.defaultMessage);
+---
+
+<div class="whatsapp" data-controller="whatsapp" data-default-message={t.defaultMessage}>
+  <a
+    class="whatsapp-fab"
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-haspopup="dialog"
+    data-whatsapp-open
+  >
+    <Icon name="message" />
+    <span class="visually-hidden">{t.open}</span>
+  </a>
+  <dialog class="whatsapp-dialog" aria-labelledby="whatsapp-title" data-tone="surface">
+    <div class="whatsapp-head">
+      <div>
+        <h2 id="whatsapp-title" class="whatsapp-title">
+          {t.title}
+        </h2>
+        <p class="fine">{t.subtitle}</p>
+      </div>
+      <button class="whatsapp-close" type="button" data-whatsapp-close>
+        <Icon name="close" />
+        <span class="visually-hidden">{dictionary.a11y.closeDialog}</span>
+      </button>
+    </div>
+    <p class="whatsapp-intro">{t.intro}</p>
+    <label class="visually-hidden" for="whatsapp-message">
+      {t.placeholder}
+    </label>
+    <textarea
+      id="whatsapp-message"
+      class="whatsapp-message"
+      rows="3"
+      maxlength="1000"
+      placeholder={t.placeholder}
+      data-whatsapp-message
+    ></textarea>
+    <a
+      class="whatsapp-send"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-whatsapp-send
+    >
+      {t.send}
+      <span class="visually-hidden"> {dictionary.a11y.newTab}</span>
+      <Icon name="arrow-up-right" />
+    </a>
+  </dialog>
+</div>
+
+<style>
+  .whatsapp-fab {
+    position: fixed;
+    inset-block-end: max(var(--space-s), env(safe-area-inset-bottom));
+    inset-inline-end: max(var(--space-s), env(safe-area-inset-right));
+    z-index: var(--z-sticky);
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--radius-round);
+    background-color: var(--c-torch-deep);
+    color: var(--c-foam);
+    box-shadow: var(--shadow-drift);
+    transition: transform var(--dur-fast) var(--ease-buoyant);
+  }
+
+  .whatsapp-fab :global(.icon) {
+    inline-size: 1.6rem;
+    block-size: 1.6rem;
+  }
+
+  @media (hover: hover) {
+    .whatsapp-fab:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .whatsapp-fab:focus-visible {
+    outline-color: var(--c-torch-deep);
+  }
+
+  .whatsapp-dialog {
+    inline-size: min(100% - 2 * var(--gutter), 24rem);
+    margin: auto var(--space-s) var(--space-s) auto;
+    padding: var(--space-m);
+    border: 0;
+    border-radius: var(--radius-soft);
+    box-shadow: var(--shadow-depth);
+  }
+
+  .whatsapp-dialog[open] {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .whatsapp-dialog::backdrop {
+    background-color: oklch(14% 0.03 245 / 0.45);
+  }
+
+  .whatsapp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--space-s);
+  }
+
+  .whatsapp-title {
+    font-size: var(--step-2);
+  }
+
+  .whatsapp-close {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    border: 0;
+    border-radius: var(--radius-round);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .whatsapp-intro {
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--radius-soft) var(--radius-soft) var(--radius-soft) var(--radius-sharp);
+    background-color: var(--c-lagoon);
+  }
+
+  .whatsapp-message {
+    inline-size: 100%;
+    padding: 0.65em 0.85em;
+    border: 1px solid var(--fg-soft);
+    border-radius: var(--radius-sharp);
+    background-color: var(--bg-panel);
+    color: var(--fg);
+    font-size: max(1rem, var(--step-0));
+    resize: vertical;
+  }
+
+  .whatsapp-send {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    min-block-size: var(--tap-min);
+    border-radius: var(--radius-sharp);
+    background-color: var(--action);
+    color: var(--action-ink);
+    font-weight: var(--text-strong);
+    text-decoration: none;
+  }
+</style>

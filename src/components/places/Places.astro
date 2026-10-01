@@ -1,0 +1,70 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { PLACES } from '@/data/places.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import PlaceCard from './PlaceCard.astro';
+import RhoneMap from './RhoneMap.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).places;
+---
+
+<Section id="places" tone="deep" class="places">
+  <div class="wrap places-inner">
+    <div class="split places-head">
+      <SectionHeader
+        id="places-title"
+        depth={markerDepth('places')}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        lead={t.lead}
+      />
+      <RhoneMap locale={locale} />
+    </div>
+    {/* In the order of the Rhône: each site sits a little lower, downstream. */}
+    <ol class="bare-list places-list">
+      {PLACES.map((place) => (
+        <PlaceCard locale={locale} place={place} />
+      ))}
+    </ol>
+  </div>
+</Section>
+
+<style>
+  .places-inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  .places-list {
+    display: grid;
+    gap: var(--space-2xl) var(--grid-gap);
+  }
+
+  @media (width >= 40rem) and (width < 64rem) {
+    .places-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .places-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .places-list > :global(:nth-child(2)) {
+      margin-block-start: var(--space-3xl);
+    }
+
+    .places-list > :global(:nth-child(3)) {
+      margin-block-start: calc(2 * var(--space-3xl));
+    }
+  }
+</style>

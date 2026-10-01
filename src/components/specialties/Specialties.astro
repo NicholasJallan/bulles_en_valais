@@ -1,0 +1,96 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import TabList from '@/components/ui/TabList.astro';
+import { markerDepth } from '@/data/sections.ts';
+import { SPECIALTIES, SPECIALTY_TABS } from '@/data/specialties.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import SpecialtyCard from './SpecialtyCard.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).specialties;
+const tabs = SPECIALTY_TABS.map((tab) => ({
+  id: `specialties-${tab}-tab`,
+  panelId: `specialties-${tab}`,
+  label: t.tabs[tab].label,
+}));
+---
+
+<Section id="specialties" tone="abyss" class="specialties">
+  <div class="wrap specialties-inner" data-controller="tabs">
+    <SectionHeader
+      id="specialties-title"
+      depth={markerDepth('specialties')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+    />
+    <TabList label={t.tabsLabel} tabs={tabs} />
+    <div>
+      {SPECIALTY_TABS.map((tab, index) => (
+        <div
+          id={`specialties-${tab}`}
+          class="specialty-panel"
+          role="tabpanel"
+          aria-labelledby={`specialties-${tab}-tab`}
+          data-tab-panel
+          data-active={index === 0 ? '' : undefined}
+        >
+          <div class="specialty-panel-head">
+            <h3>{t.tabs[tab].label}</h3>
+            <p>{t.tabs[tab].lead}</p>
+          </div>
+          <ul class="bare-list specialty-list">
+            {SPECIALTIES[tab].map((card) => (
+              <SpecialtyCard locale={locale} card={card} />
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .specialties-inner {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .specialty-panel {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .specialty-panel + .specialty-panel {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .specialty-panel-head {
+    display: grid;
+    gap: var(--space-xs);
+    max-inline-size: 60ch;
+    color: var(--fg-soft);
+  }
+
+  .specialty-panel-head h3 {
+    color: var(--fg);
+  }
+
+  /* Two columns of an index, not a grid of boxes: the abyss is bare. */
+  .specialty-list {
+    display: grid;
+    column-gap: var(--grid-gap);
+  }
+
+  @media (width >= 64rem) {
+    .specialty-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

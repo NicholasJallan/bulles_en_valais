@@ -5,6 +5,10 @@ import { mountControllers, type ControllerRegistry } from '@/lib/controllers.ts'
 const CONTROLLERS: ControllerRegistry = {
   nav: () => import('@/components/nav/nav.ts'),
   tabs: () => import('@/components/ui/tabs.ts'),
+  rail: () => import('@/components/testimonials/rail.ts'),
+  'contact-form': () => import('@/components/contact/contact-form.ts'),
+  whatsapp: () => import('@/components/whatsapp/whatsapp.ts'),
+  'calm-mode': () => import('@/components/footer/calm-mode.ts'),
   // Styleguide only (S02): removed with it in S13.
   'styleguide-switch': () => import('@/components/styleguide/switch.ts'),
   'styleguide-motion': () => import('@/components/styleguide/motion.ts'),

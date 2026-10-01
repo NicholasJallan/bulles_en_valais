@@ -22,6 +22,10 @@ interface Props {
   disabled?: boolean;
   options?: readonly Option[];
   rows?: number;
+  /** Renders an empty, hidden error line that a script fills in (contact-form.ts). */
+  liveError?: boolean;
+  /** Extra attributes of the control (`maxlength`, `data-*`). */
+  attributes?: Record<string, string | number | undefined>;
   /** Styleguide only (data-sg-state): shows a state without the pointer or the keyboard. */
   state?: 'hover' | 'focus';
 }
@@ -42,6 +46,8 @@ const {
   options = [],
   rows = 5,
   state,
+  liveError = false,
+  attributes = {},
 } = Astro.props;
 
 const hintId = `${id}-hint`;
@@ -56,6 +62,7 @@ const shared = {
   'data-sg-state': state,
   'aria-describedby': describedBy,
   'aria-invalid': error ? ('true' as const) : undefined,
+  ...attributes,
 };
 ---
 
@@ -91,10 +98,10 @@ const shared = {
       autocomplete={autocomplete}
     />
   )}
-  {error && (
-    <p class="field-error" id={errorId}>
+  {(error || liveError) && (
+    <p class="field-error" id={errorId} hidden={!error}>
       <Icon name="alert" class="field-error-icon" />
-      <span>{error}</span>
+      <span data-error-text>{error}</span>
     </p>
   )}
 </div>
@@ -182,7 +189,7 @@ const shared = {
     pointer-events: none;
   }
 
-  .field-error {
+  .field-error:not([hidden]) {
     display: flex;
     gap: 0.45em;
     align-items: flex-start;

@@ -519,7 +519,7 @@ export const fr: Dictionary = {
       messagePlaceholder: 'Niveau actuel, disponibilités, questions, projet de voyage…',
       honeypot: 'Laissez ce champ vide',
       noScript:
-        "Sans JavaScript, ce formulaire ne peut pas partir : écrivez-moi plutôt par WhatsApp, par téléphone ou par e-mail.",
+        'Sans JavaScript, ce formulaire ne peut pas partir : écrivez-moi plutôt par WhatsApp, par téléphone ou par e-mail.',
       submit: 'Envoyer le message',
       sending: 'Envoi en cours…',
       success: 'Merci — votre message a bien été envoyé. Je vous réponds au plus vite.',

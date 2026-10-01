@@ -44,7 +44,7 @@ const rungs = groups.map((group, index) => ({
       <ol class="bare-list ladder">
         {rungs.map((rung) => (
           <li
-            class:list={['rung', { 'rung-compressed': rung.compressed }]}
+            class:list={['rung', { 'rung-deep': rung.depth > KNEE }]}
             style={`--gap: ${rung.gap.toFixed(3)}`}
           >
             <span class="rung-depth tabular">{formatDepth(rung.depth, locale)}</span>
@@ -100,29 +100,29 @@ const rungs = groups.map((group, index) => ({
     padding-block-start: max(var(--space-s), calc(var(--gap) * var(--ladder-span)));
   }
 
-  /* Graduation: a tick on the rope at the depth of the rung. */
-  .rung::before {
+  .rung-depth {
+    position: relative;
+  }
+
+  /* Graduation: a tick on the rope, level with the depth of the rung. */
+  .rung-depth::before {
     content: '';
     position: absolute;
+    inset-block-start: 0.7em;
     inset-inline-start: calc(-1 * var(--space-l));
     inline-size: calc(var(--space-l) - var(--space-2xs));
     block-size: 1px;
-    margin-block-start: 0.8em;
     background-color: var(--fg-soft);
   }
 
-  .rung-compressed::after {
+  /* Below 40 m the scale tightens: the rope turns to dashes. */
+  .rung-deep::after {
     content: '';
     position: absolute;
-    inset-block-start: calc(var(--space-s) / 2);
-    inset-inline-start: calc(-1 * var(--space-l) - 4px);
-    inline-size: 7px;
-    block-size: max(var(--space-s), calc(var(--gap) * var(--ladder-span))) ;
-    background: repeating-linear-gradient(
-      to bottom,
-      var(--bg) 0 4px,
-      var(--line) 4px 6px
-    );
+    inset-block: 0;
+    inset-inline-start: calc(-1 * var(--space-l) - 1px);
+    inline-size: 1px;
+    background: repeating-linear-gradient(to bottom, var(--fg-soft) 0 4px, var(--bg) 4px 9px);
   }
 
   .rung-depth {

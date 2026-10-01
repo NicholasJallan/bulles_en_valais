@@ -22,7 +22,9 @@ const price = (course: Course) =>
 ---
 
 <div class="price-list">
-  <h4 id={headingId} class="price-list-title">{t.priceListTitle}</h4>
+  <h4 id={headingId} class="price-list-title">
+    {t.priceListTitle}
+  </h4>
   <ul class="bare-list" aria-labelledby={headingId}>
     {courses.map((course) => (
       <li class="price-row">
@@ -30,7 +32,13 @@ const price = (course: Course) =>
           {localize(course.name, locale)}
           {course.meta && <span class="price-meta">{localize(course.meta, locale)}</span>}
         </span>
-        <span class:list={['price-amount', 'tabular', { 'price-on-request': isOnRequest(course.price) }]}>
+        <span
+          class:list={[
+            'price-amount',
+            'tabular',
+            { 'price-on-request': isOnRequest(course.price) },
+          ]}
+        >
           {price(course)}
         </span>
         {course.formInterest && (

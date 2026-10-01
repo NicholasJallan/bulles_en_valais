@@ -1,0 +1,145 @@
+---
+import { Picture } from 'astro:assets';
+import gearPhoto from '@/assets/images/prepare/gears.jpg';
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import RichText from '@/components/ui/RichText.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/** Gear and insurance; `#gear` and `#insurance` keep the historical anchors working. */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.prepare;
+---
+
+<Section id="prepare" tone="emerald" class="prepare">
+  <div class="wrap prepare-inner">
+    <SectionHeader
+      id="prepare-title"
+      depth={markerDepth('prepare')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+    />
+
+    <div id="gear" class="prepare-block split">
+      <div class="prepare-block-head">
+        <h3>
+          <EmphasisText value={t.gear.title} />
+        </h3>
+        <p>{t.gear.lead}</p>
+        <Picture
+          src={gearPhoto}
+          alt={t.gear.imageAlt}
+          formats={['avif', 'webp']}
+          widths={[400, 600, 800]}
+          sizes="(width >= 64rem) 30vw, 100vw"
+          class="prepare-photo"
+        />
+      </div>
+      <ul class="bare-list prepare-items">
+        {t.gear.items.map((item) => (
+          <li class="prepare-item">
+            <h4>{item.title}</h4>
+            <p>
+              <RichText value={item.text} newTab={dictionary.a11y.newTab} />
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div id="insurance" class="prepare-block split">
+      <div class="prepare-block-head">
+        <h3>
+          <EmphasisText value={t.insurance.title} />
+        </h3>
+        <p>{t.insurance.lead}</p>
+      </div>
+      <ul class="bare-list prepare-items">
+        {t.insurance.items.map((item) => (
+          <li class="prepare-item">
+            <p class="prepare-badge">{item.badge}</p>
+            <h4>{item.title}</h4>
+            <p>{item.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .prepare-inner {
+    display: grid;
+    gap: var(--space-3xl);
+  }
+
+  .prepare-block {
+    scroll-margin-block-start: var(--space-l);
+  }
+
+  .prepare-block-head {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    color: var(--fg-soft);
+  }
+
+  .prepare-block-head h3 {
+    color: var(--fg);
+    font-size: var(--step-3);
+  }
+
+  .prepare-block :global(.prepare-photo) {
+    inline-size: 100%;
+    max-inline-size: 24rem;
+    block-size: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin-block-start: var(--space-m);
+    border-radius: var(--radius-soft);
+    box-shadow: var(--shadow-drift);
+  }
+
+  .prepare-items {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .prepare-item {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-float);
+  }
+
+  .prepare-item h4 {
+    font-size: var(--step-1);
+    font-weight: var(--text-strong);
+  }
+
+  .prepare-item p {
+    color: var(--fg-soft);
+  }
+
+  .prepare-item p:is(.prepare-badge) {
+    justify-self: start;
+    padding: 0.15em 0.75em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-round);
+    font-size: var(--step--2);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+    color: var(--fg);
+  }
+</style>

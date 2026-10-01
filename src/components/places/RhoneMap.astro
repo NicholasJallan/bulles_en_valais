@@ -1,0 +1,112 @@
+---
+import { PLACES } from '@/data/places.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { frameHeight, projectPoint, type MapFrame } from '@/lib/geo.ts';
+
+/**
+ * The Rhône from Sion to the Léman, with the three sites (static; E10 draws it in S09).
+ * Schematic: a few points of the river and of the east end of the lake, not a survey.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).places;
+const FRAME: MapFrame = { north: 46.53, south: 46.06, west: 6.52, east: 7.42, width: 600 };
+const RHONE = [
+  [46.226, 7.355],
+  [46.19, 7.28],
+  [46.168, 7.22],
+  [46.14, 7.15],
+  [46.106, 7.077],
+  [46.15, 7.012],
+  [46.214, 7.0],
+  [46.258, 6.952],
+  [46.3, 6.925],
+  [46.35, 6.893],
+  [46.388, 6.858],
+] as const;
+const LAKE = [
+  [46.386, 6.856],
+  [46.398, 6.927],
+  [46.433, 6.911],
+  [46.461, 6.843],
+  [46.49, 6.72],
+  [46.508, 6.62],
+  [46.505, 6.52],
+  [46.43, 6.52],
+  [46.402, 6.59],
+  [46.41, 6.73],
+  [46.392, 6.805],
+] as const;
+
+const toPath = (points: readonly (readonly [number, number])[], close = false) =>
+  points
+    .map(([lat, lng], index) => {
+      const { x, y } = projectPoint({ lat, lng }, FRAME);
+      return `${index === 0 ? 'M' : 'L'}${x} ${y}`;
+    })
+    .join(' ') + (close ? ' Z' : '');
+const height = frameHeight(FRAME);
+const sites = PLACES.map((place) => ({
+  ...projectPoint(place.coords, FRAME),
+  name: localize(place.name, locale),
+}));
+const titleId = 'rhone-map-title';
+---
+
+<svg
+  class="rhone-map"
+  viewBox={`0 0 ${FRAME.width} ${height}`}
+  role="img"
+  aria-labelledby={titleId}
+>
+  <title id={titleId}>{t.route}</title>
+  <path class="rhone-lake" d={toPath(LAKE, true)}></path>
+  <path class="rhone-river" d={toPath(RHONE)}></path>
+  {sites.map((site) => (
+    <g class="rhone-site" transform={`translate(${site.x} ${site.y})`}>
+      <circle r="6"></circle>
+      <text x="14" y="5">
+        {site.name}
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .rhone-map {
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .rhone-lake {
+    fill: var(--line-faint);
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .rhone-river {
+    fill: none;
+    stroke: var(--fg-soft);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .rhone-site circle {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+
+  .rhone-site text {
+    fill: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 500;
+  }
+</style>

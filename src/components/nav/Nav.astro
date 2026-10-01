@@ -30,7 +30,7 @@ const links = [
 ];
 ---
 
-<header class="site-header" data-controller="nav">
+<header class="site-header" data-controller="nav" data-tone="deep">
   <div class="wrap site-header-inner">
     <a class="brand" href={anchor('top')} aria-label={t.a11y.home}>
       <Logo class="brand-logo" aria-hidden="true" focusable="false" />
@@ -46,7 +46,9 @@ const links = [
     </nav>
     <div class="nav-tools">
       <LanguageSwitch locale={locale} route={route} class="nav-language" />
-      <Button href={anchor('contact')} class="nav-cta">{t.nav.contact}</Button>
+      <Button href={anchor('contact')} class="nav-cta">
+        {t.nav.contact}
+      </Button>
       <button
         class="menu-button js-only"
         type="button"
@@ -93,7 +95,8 @@ const links = [
     inset-block-start: 0;
     inset-inline: 0;
     z-index: var(--z-nav);
-    color: var(--c-foam);
+    /* Dark water for its roles (the CTA is the lit lamp), but the photo shows through. */
+    background-color: transparent;
   }
 
   .site-header-inner {
@@ -153,12 +156,6 @@ const links = [
     display: flex;
     align-items: center;
     gap: var(--space-2xs);
-  }
-
-  /* The CTA is a dark-water button on the photo: the lamp, lit. */
-  .nav-tools :global(.nav-cta) {
-    --action: var(--c-torch);
-    --action-ink: var(--c-ink);
   }
 
   .menu-button,

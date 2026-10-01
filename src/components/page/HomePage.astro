@@ -1,12 +1,21 @@
 ---
+import Contact from '@/components/contact/Contact.astro';
 import CompareTable from '@/components/depth-ladder/CompareTable.astro';
 import DepthLadder from '@/components/depth-ladder/DepthLadder.astro';
 import Courses from '@/components/courses/Courses.astro';
+import Faq from '@/components/faq/Faq.astro';
+import Footer from '@/components/footer/Footer.astro';
+import Gifts from '@/components/gifts/Gifts.astro';
 import Hero from '@/components/hero/Hero.astro';
 import Instructor from '@/components/instructor/Instructor.astro';
 import Interlude from '@/components/interlude/Interlude.astro';
 import Manifesto from '@/components/manifesto/Manifesto.astro';
 import Nav from '@/components/nav/Nav.astro';
+import Places from '@/components/places/Places.astro';
+import Prepare from '@/components/prepare/Prepare.astro';
+import Specialties from '@/components/specialties/Specialties.astro';
+import Testimonials from '@/components/testimonials/Testimonials.astro';
+import WhatsAppDialog from '@/components/whatsapp/WhatsAppDialog.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
@@ -31,5 +40,14 @@ const t = getDictionary(locale);
     <DepthLadder locale={locale} />
     <CompareTable locale={locale} />
     <Interlude locale={locale} variant="light" />
+    <Specialties locale={locale} />
+    <Places locale={locale} />
+    <Prepare locale={locale} />
+    <Gifts locale={locale} />
+    <Testimonials locale={locale} />
+    <Faq locale={locale} />
+    <Contact locale={locale} />
   </main>
+  <Footer locale={locale} />
+  <WhatsAppDialog locale={locale} />
 </BaseLayout>

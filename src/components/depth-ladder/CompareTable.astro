@@ -33,7 +33,9 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
       <caption class="visually-hidden">{t.caption}</caption>
       <thead role="rowgroup">
         <tr role="row">
-          <th scope="col" role="columnheader">{t.criterion}</th>
+          <th scope="col" role="columnheader">
+            {t.criterion}
+          </th>
           {AGENCIES.map((agency) => (
             <th scope="col" role="columnheader">
               <span class="compare-agency">{label(agency)}</span>
@@ -45,7 +47,9 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
       <tbody role="rowgroup">
         {t.rows.map((row) => (
           <tr role="row">
-            <th scope="row" role="rowheader">{row.label}</th>
+            <th scope="row" role="rowheader">
+              {row.label}
+            </th>
             {AGENCIES.map((agency) => (
               <td role="cell" data-label={label(agency)}>
                 {row.values[agency]}
@@ -151,7 +155,7 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
     }
 
     .compare-table td::before {
-      content: attr(data-label) / "";
+      content: attr(data-label) / '';
       font-weight: var(--text-strong);
     }
   }

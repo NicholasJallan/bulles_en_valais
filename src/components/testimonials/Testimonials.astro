@@ -1,0 +1,189 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { GOOGLE_PROFILE_URL } from '@/data/contact.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
+
+/** Google reviews on a rail (scroll-snap); the buttons come with JavaScript (rail.ts). */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.testimonials;
+const showLanguageNote = t.items.some((item) => item.lang !== locale || item.translated);
+---
+
+<Section id="testimonials" tone="surface" class="testimonials">
+  <div class="wrap testimonials-head">
+    <SectionHeader
+      id="testimonials-title"
+      depth={markerDepth('testimonials')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+    />
+    <p class="fine testimonials-source">
+      {t.source}
+      {showLanguageNote && <> · {t.languageNote}</>}
+    </p>
+  </div>
+  <div class="testimonials-rail-wrap" data-controller="rail">
+    <ul class="bare-list rail" tabindex="0" aria-labelledby="testimonials-title" data-rail>
+      {t.items.map((item) => (
+        <li class="testimonial">
+          <figure>
+            <blockquote lang={item.lang === locale ? undefined : LANG_TAGS[item.lang]}>
+              {item.text.map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </blockquote>
+            <figcaption>
+              <span class="testimonial-author">{item.author}</span>
+              <span class="testimonial-course">{item.course}</span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+    <div class="wrap rail-controls js-only">
+      <button class="rail-button" type="button" data-rail-previous>
+        <Icon name="arrow-left" />
+        <span class="visually-hidden">{t.previous}</span>
+      </button>
+      <button class="rail-button" type="button" data-rail-next>
+        <Icon name="arrow-right" />
+        <span class="visually-hidden">{t.next}</span>
+      </button>
+    </div>
+  </div>
+  <div class="wrap testimonials-cta">
+    <p>{t.prompt}</p>
+    <Button
+      href={GOOGLE_PROFILE_URL}
+      variant="secondary"
+      icon="arrow-up-right"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {t.cta}
+      <span class="visually-hidden"> {dictionary.a11y.newTab}</span>
+    </Button>
+  </div>
+</Section>
+
+<style>
+  .testimonials {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+  }
+
+  .testimonials-head {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .rail {
+    --rail-inset: max(var(--gutter), (100% - var(--page-max)) / 2);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(85%, 26rem);
+    align-items: start;
+    gap: var(--grid-gap);
+    padding-inline: var(--rail-inset);
+    padding-block: var(--space-2xs) var(--space-m);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scroll-padding-inline: var(--rail-inset);
+    scrollbar-width: thin;
+  }
+
+  .testimonial {
+    scroll-snap-align: start;
+  }
+
+  .testimonial figure {
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-float);
+  }
+
+  .testimonial blockquote {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .testimonial blockquote p:first-child {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: var(--leading-lead);
+  }
+
+  .testimonial blockquote p:not(:first-child) {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .testimonial figcaption {
+    display: grid;
+    padding-block-start: var(--space-xs);
+    border-block-start: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .testimonial-author {
+    font-weight: var(--text-strong);
+  }
+
+  .testimonial-course {
+    color: var(--fg-soft);
+  }
+
+  .rail-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2xs);
+  }
+
+  .rail-button {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    border: 1px solid var(--fg-soft);
+    border-radius: var(--radius-round);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  @media (hover: hover) {
+    .rail-button:hover:not(:disabled) {
+      border-color: var(--action);
+      color: var(--action-text);
+    }
+  }
+
+  .rail-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .testimonials-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+  }
+</style>

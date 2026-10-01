@@ -1,0 +1,103 @@
+---
+import Footer from '@/components/footer/Footer.astro';
+import Nav from '@/components/nav/Nav.astro';
+import RichText from '@/components/ui/RichText.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getDictionary, localePath } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/** Privacy and legal notice pages: texts of src/i18n/legal (S03), read as a plain document. */
+interface Props {
+  locale: Locale;
+  route: 'privacy' | 'legalNotice';
+}
+
+const { locale, route } = Astro.props;
+const dictionary = getDictionary(locale);
+const page = dictionary.legal[route];
+---
+
+<BaseLayout
+  locale={locale}
+  route={route}
+  title={page.meta.title}
+  description={page.meta.description}
+>
+  <div class="legal-masthead" data-tone="deep" id="top">
+    <Nav locale={locale} route={route} />
+    <div class="wrap legal-heading">
+      <h1>{page.title}</h1>
+      <p class="fine">{page.updated}</p>
+    </div>
+  </div>
+  <main id="content" class="wrap legal" data-tone="surface">
+    <p class="lead legal-intro">{page.intro}</p>
+    {page.sections.map((section) => (
+      <section class="legal-section">
+        <h2>{section.heading}</h2>
+        {section.paragraphs.map((paragraph) => (
+          <p>
+            <RichText value={paragraph} newTab={dictionary.a11y.newTab} />
+          </p>
+        ))}
+        {section.list && (
+          <ul>
+            {section.list.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+    <p class="legal-back">
+      <a href={localePath(locale, '/')}>{dictionary.notFound.back}</a>
+    </p>
+  </main>
+  <Footer locale={locale} route={route} />
+</BaseLayout>
+
+<style>
+  .legal-masthead {
+    position: relative;
+    padding-block: calc(var(--space-section) + var(--space-l)) var(--space-xl);
+  }
+
+  .legal-heading {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .legal-heading h1 {
+    font-size: var(--step-5);
+  }
+
+  .legal-heading p {
+    color: var(--fg-soft);
+  }
+
+  .legal {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl) var(--space-section);
+  }
+
+  .legal-intro {
+    max-inline-size: 60ch;
+  }
+
+  .legal-section {
+    display: grid;
+    gap: var(--space-s);
+    max-inline-size: var(--measure);
+  }
+
+  .legal-section h2 {
+    font-size: var(--step-3);
+  }
+
+  .legal-section ul {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-inline-start: 1.2em;
+  }
+</style>

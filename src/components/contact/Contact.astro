@@ -1,0 +1,155 @@
+---
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { EMAIL, PHONE, whatsappUrl } from '@/data/contact.ts';
+import { CREDENTIALS } from '@/data/credentials.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import ContactForm from './ContactForm.astro';
+
+/** Back at the surface: the direct channels first, then the form. */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.contact;
+const channels = [
+  {
+    label: t.channels.whatsapp,
+    value: PHONE.display,
+    href: whatsappUrl(dictionary.whatsapp.defaultMessage),
+    icon: 'message',
+    external: true,
+  },
+  {
+    label: t.channels.phone,
+    value: PHONE.display,
+    href: PHONE.href,
+    icon: 'phone',
+    external: false,
+  },
+  { label: t.channels.email, value: EMAIL, href: `mailto:${EMAIL}`, icon: 'mail', external: false },
+] as const;
+---
+
+<Section id="contact" tone="surface" class="contact">
+  <div class="wrap contact-inner">
+    <SectionHeader
+      id="contact-title"
+      depth={markerDepth('contact')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      class="contact-head"
+    />
+    <div class="split">
+      <div class="contact-direct">
+        <h3 class="contact-subtitle">
+          <EmphasisText value={t.subtitle} />
+        </h3>
+        <p>{t.lead}</p>
+        <ul class="bare-list contact-channels">
+          {channels.map((channel) => (
+            <li>
+              <a
+                class="contact-channel"
+                href={channel.href}
+                target={channel.external ? '_blank' : undefined}
+                rel={channel.external ? 'noopener noreferrer' : undefined}
+              >
+                <Icon name={channel.icon} class="contact-channel-icon" />
+                <span class="contact-channel-label">{channel.label}</span>
+                <span class="contact-channel-value tabular">{channel.value}</span>
+                {channel.external && <span class="visually-hidden">{dictionary.a11y.newTab}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="contact-credentials">
+          <h3 class="fine">{t.credentialsTitle}</h3>
+          <p class="fine">
+            {CREDENTIALS.map((credential) => `${credential.issuer} ${credential.detail}`).join(
+              ' · ',
+            )}
+          </p>
+        </div>
+      </div>
+      <ContactForm locale={locale} />
+    </div>
+  </div>
+</Section>
+
+<style>
+  .contact-inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  .contact :global(.contact-head .section-title) {
+    font-size: var(--step-5);
+    max-inline-size: 18ch;
+  }
+
+  .contact-direct {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .contact-subtitle {
+    font-size: var(--step-3);
+  }
+
+  .contact-channels {
+    display: grid;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .contact-channel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: 'icon label' 'icon value';
+    column-gap: var(--space-s);
+    align-items: center;
+    padding-block: var(--space-s);
+    border-block-end: 1px solid var(--line);
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .contact-channel :global(.contact-channel-icon) {
+    grid-area: icon;
+    inline-size: 1.5em;
+    block-size: 1.5em;
+    color: var(--action-text);
+  }
+
+  .contact-channel-label {
+    grid-area: label;
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .contact-channel-value {
+    grid-area: value;
+    font-size: var(--step-1);
+    font-weight: var(--text-strong);
+    overflow-wrap: anywhere;
+  }
+
+  /* Hover lights the value like the lamp (colour only, nothing moves in the layout). */
+  @media (hover: hover) {
+    .contact-channel:hover .contact-channel-value {
+      color: var(--action-text);
+    }
+  }
+
+  .contact-credentials h3 {
+    font-family: var(--font-sans);
+    font-weight: var(--text-strong);
+  }
+</style>

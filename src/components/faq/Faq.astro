@@ -1,0 +1,96 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/** The safety stop: questions in exclusive <details> (one open at a time, without JavaScript). */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).faq;
+---
+
+<Section id="faq" tone="surface" class="faq">
+  <div class="wrap split">
+    <SectionHeader
+      id="faq-title"
+      depth={markerDepth('faq')}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      lead={t.lead}
+      class="faq-head"
+    />
+    <div class="faq-list">
+      {t.items.map((item) => (
+        <details name="faq" class="faq-item">
+          <summary>
+            <span>{item.question}</span>
+            <Icon name="chevron-down" class="faq-chevron" />
+          </summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  @media (width >= 64rem) {
+    .faq :global(.faq-head) {
+      position: sticky;
+      inset-block-start: var(--space-xl);
+    }
+  }
+
+  .faq-list {
+    border-block-start: 1px solid var(--line);
+  }
+
+  .faq-item {
+    border-block-end: 1px solid var(--line);
+  }
+
+  .faq-item summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-s);
+    min-block-size: var(--tap-min);
+    padding-block: var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: var(--leading-snug);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item :global(.faq-chevron) {
+    flex: none;
+    color: var(--action-text);
+    transition: transform var(--dur-base) var(--ease-buoyant);
+  }
+
+  .faq-item[open] :global(.faq-chevron) {
+    transform: rotate(180deg);
+  }
+
+  @media (hover: hover) {
+    .faq-item summary:hover {
+      color: var(--action-text);
+    }
+  }
+
+  .faq-item p {
+    padding-block-end: var(--space-m);
+    color: var(--fg-soft);
+  }
+</style>

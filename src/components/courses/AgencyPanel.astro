@@ -34,7 +34,9 @@ const panelId = `agency-${agency}`;
     </h3>
     <p>{t.description}</p>
     <ul class="agency-highlights">
-      {t.highlights.map((highlight) => <li>{highlight}</li>)}
+      {t.highlights.map((highlight) => (
+        <li>{highlight}</li>
+      ))}
     </ul>
   </div>
   <div class="agency-prices">
@@ -51,6 +53,7 @@ const panelId = `agency-${agency}`;
 <style>
   .agency-panel {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-xl) var(--grid-gap);
     padding: clamp(var(--space-m), 4vw, var(--space-2xl));
     border-radius: var(--radius-soft);

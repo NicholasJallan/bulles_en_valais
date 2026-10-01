@@ -12,6 +12,9 @@ interface Props {
   disabled?: boolean;
   icon?: IconName;
   class?: string;
+  /** Links only: `_blank` with `rel="noopener noreferrer"` for another site. */
+  target?: '_blank';
+  rel?: string;
   [attribute: `data-${string}`]: string | undefined;
   [attribute: `aria-${string}`]: string | undefined;
 }

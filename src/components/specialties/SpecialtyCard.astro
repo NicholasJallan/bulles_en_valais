@@ -1,0 +1,101 @@
+---
+import { courseById, isOnRequest } from '@/data/courses.ts';
+import type { SpecialtyCard } from '@/data/specialties.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { formatCHF } from '@/lib/format.ts';
+
+/** One specialty: number, name, depth or mix, description, price (from courses.ts). */
+interface Props {
+  locale: Locale;
+  card: SpecialtyCard;
+}
+
+const { locale, card } = Astro.props;
+const t = getDictionary(locale);
+const course = courseById(card.course);
+const title = localize(card.title ?? course.name, locale);
+const price = isOnRequest(course.price)
+  ? t.courses.onRequest
+  : formatCHF(course.price.amount, locale);
+const equivalent = card.equivalent && localize(courseById(card.equivalent).name, locale);
+---
+
+<li class="specialty">
+  <p class="specialty-num tabular" aria-hidden="true">
+    {card.num}
+  </p>
+  <h4 class="specialty-title">{title}</h4>
+  <p class="specialty-sub">{localize(card.sub, locale)}</p>
+  <p class="specialty-text">{localize(card.description, locale)}</p>
+  {equivalent && (
+    <p class="specialty-equivalent fine">
+      {t.specialties.equivalent} {equivalent}
+    </p>
+  )}
+  <p class="specialty-price tabular">{price}</p>
+</li>
+
+<style>
+  .specialty {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr auto;
+    grid-template-areas:
+      'num title price'
+      'num sub sub'
+      'num text text'
+      'num equivalent equivalent';
+    gap: var(--space-3xs) var(--space-s);
+    padding-block: var(--space-m);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .specialty-num {
+    grid-area: num;
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    padding-block-start: 0.4em;
+  }
+
+  .specialty-title {
+    grid-area: title;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: var(--display-weight);
+    line-height: var(--leading-snug);
+  }
+
+  .specialty-sub {
+    grid-area: sub;
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .specialty-text {
+    grid-area: text;
+    color: var(--fg-soft);
+  }
+
+  .specialty-equivalent {
+    grid-area: equivalent;
+  }
+
+  .specialty-price {
+    grid-area: price;
+    align-self: baseline;
+    white-space: nowrap;
+  }
+
+  @media (width < 30rem) {
+    .specialty {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'num price'
+        'title title'
+        'sub sub'
+        'text text'
+        'equivalent equivalent';
+    }
+  }
+</style>
