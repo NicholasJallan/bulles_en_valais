@@ -21,8 +21,14 @@ const DEV_SERVER_DENY = [
 // allowed, subsetting and format conversion forbidden, so the Fontshare files are used as served).
 const STYLES = /** @type {['normal', 'italic']} */ (['normal', 'italic']);
 const LATIN = /** @type {['latin']} */ (['latin']);
-// HUD glyphs only (digits, units, capitals, separators): the mono stays under 15 KB.
-const HUD_GLYPHS = ['0123456789 ,.:/+-−–—°·▲%', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ms'];
+// HUD glyphs only (digits, units, capitals, separators, and the no-break space between a
+// number and its unit): the mono stays under 15 KB.
+const HUD_GLYPHS = [
+  '0123456789 ,.:/+-−–—°·▲%',
+  String.fromCharCode(0xa0),
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  'ms',
+];
 
 /**
  * Fraunces with its five axes weighs 118 KB (roman) + 146 KB (italic). Fixing the optical size

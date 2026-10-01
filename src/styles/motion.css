@@ -1,4 +1,5 @@
-/* Motion baseline. Reveal states (html.motion-ok) and motion tokens come in S02 and S06. */
+/* Motion baseline. The motion tokens are in tokens.css (mirror: src/lib/motion/tokens.ts);
+   the reveal states under html.motion-ok come in S06. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
