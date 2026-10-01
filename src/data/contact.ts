@@ -14,8 +14,10 @@ export const SOCIAL_PROFILES = [
     handle: '@nicho_dive',
     url: 'https://www.instagram.com/nicho_dive/',
   },
-  // TODO(I-14): address of the Facebook page « Bulles en Valais ».
 ] as const;
+
+/** Google business profile, where the testimonials come from; « Leave a review » links to it. */
+export const GOOGLE_PROFILE_URL: string | null = null; // TODO(I-09): link of the Google profile
 
 /** wa.me link, with an optional message written in advance in the chat box. */
 export function whatsappUrl(message?: string): string {

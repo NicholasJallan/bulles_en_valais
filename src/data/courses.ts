@@ -85,7 +85,7 @@ const SDI_TDI_COURSES = [
     group: 'tech',
     name: same('TDI Decompression Procedures'),
     meta: { fr: 'Plongée avec paliers', en: 'Staged decompression' },
-    price: chf(290),
+    price: chf(250),
     cursus: 'row',
     maxDepth: 45,
     inLadder: true,

@@ -20,9 +20,9 @@ const LEGACY_PRICES: Readonly<Record<string, number>> = {
   'sdi-owsd': 690,
   'sdi-aad': 450,
   'sdi-rescue': 890,
-  // TDI Advanced Nitrox and Decompression Procedures: CHF 250 before I-10 c.
+  // TDI Advanced Nitrox: CHF 250 before I-10 c; Decompression Procedures stays at CHF 250.
   'tdi-advanced-nitrox': 290,
-  'tdi-deco': 290,
+  'tdi-deco': 250,
   'tdi-nitrox': 290,
   'tdi-dpv': 150,
   'padi-dsd': 90,

@@ -54,7 +54,7 @@ export const fr: Dictionary = {
     lead: 'Cours multi-écoles SDI/TDI, PADI et FFESSM au lac du Rosel, aux Îles de Sion et sur le Léman. Un instructeur, trois certifications, votre rythme.',
     primaryCta: 'Planifier une session',
     secondaryCta: 'Découvrir les cursus',
-    places: 'Lac du Rosel · Les Îles, Sion · Léman S-E',
+    places: 'Lac du Rosel · Les Îles, Sion · Léman',
     imageAlt:
       "Le lac du Rosel, près de Martigny : une eau si claire qu'on voit le fond depuis la rive.",
   },
@@ -247,7 +247,7 @@ export const fr: Dictionary = {
   places: {
     eyebrow: 'Lieux',
     title: { before: "Trois plans d'eau,", em: 'trois ambiances.' },
-    lead: "Les cours se donnent principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur la partie sud-est du Léman. Des stages avec hébergement sont possibles — n'hésitez pas à demander.",
+    lead: "Les cours se donnent principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur le Léman. Des stages avec hébergement sont possibles — n'hésitez pas à demander.",
     route: 'Le Rhône, de Sion au Léman',
     facts: {
       maxDepth: 'Profondeur max',
@@ -363,7 +363,7 @@ export const fr: Dictionary = {
     title: { before: 'Ils sont passés', em: 'par ici.' },
     lead: 'Ils ont plongé avec moi — leurs mots valent mieux que les miens.',
     prompt: 'Vous venez de plonger avec moi ?',
-    cta: 'Partager un retour',
+    cta: 'Laisser un avis Google',
     previous: 'Témoignage précédent',
     next: 'Témoignage suivant',
     source: 'Avis publiés sur Google',
@@ -390,10 +390,9 @@ export const fr: Dictionary = {
       },
       {
         author: 'Alexandre F.',
-        course: 'Open Water · Nitrox',
+        course: 'PADI Open Water',
         text: [
-          "J'ai passé mon Open Waters et Nitrox avec Nicholas et cela a été une super expérience ! Très bon instructeur et sa formation est très complète !",
-          'Si vous cherchez à passer votre formation en Suisse Romande, je vous recommande à la passer avec Nicholas.',
+          'Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘',
         ],
         lang: 'fr',
         translated: false,
@@ -443,6 +442,16 @@ export const fr: Dictionary = {
         lang: 'fr',
         translated: false,
       },
+      {
+        author: 'Alexandre F.',
+        course: 'Open Water · Nitrox',
+        text: [
+          "J'ai passé mon Open Waters et Nitrox avec Nicholas et cela a été une super expérience ! Très bon instructeur et sa formation est très complète !",
+          'Si vous cherchez à passer votre formation en Suisse Romande, je vous recommande à la passer avec Nicholas.',
+        ],
+        lang: 'fr',
+        translated: false,
+      },
     ],
   },
   faq: {
@@ -473,7 +482,7 @@ export const fr: Dictionary = {
       {
         question: 'Où se déroulent les cours ?',
         answer:
-          'Principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur la partie sud-est du Léman. Des formations en mode stage, avec hébergement, sont également possibles — contactez-moi pour en discuter.',
+          'Principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur le Léman. Des formations en mode stage, avec hébergement, sont également possibles — contactez-moi pour en discuter.',
       },
       {
         question: 'Combien de temps dure une formation ?',
