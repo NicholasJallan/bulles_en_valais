@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildPayload, mailtoHref, sendContact, type MailLabels } from './submit.ts';
+import {
+  buildPayload,
+  MAILTO_MESSAGE_CHARS,
+  mailtoHref,
+  sendContact,
+  type MailLabels,
+} from './submit.ts';
 import type { ContactFields } from './validate.ts';
 
 const FIELDS: ContactFields = {
@@ -32,14 +38,25 @@ describe('buildPayload', () => {
 });
 
 describe('sendContact', () => {
-  it('posts JSON to /api/contact', async () => {
+  it('posts JSON to /api/contact, with a time limit', async () => {
     const fetcher = respond(200, { ok: true });
     await sendContact(PAYLOAD, fetcher);
     expect(fetcher).toHaveBeenCalledWith('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(PAYLOAD),
+      signal: expect.any(AbortSignal),
     });
+  });
+
+  it('fails when the server does not answer in time', async () => {
+    const fetcher = vi.fn(
+      (_url: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(init.signal?.reason));
+        }),
+    );
+    expect(await sendContact(PAYLOAD, fetcher as typeof fetch, 10)).toEqual({ kind: 'failure' });
   });
 
   it('succeeds on 200 with ok: true', async () => {
@@ -88,6 +105,13 @@ describe('mailtoHref', () => {
       'Un bon pour deux.\n\nNom : Ana\nE-mail : ana@example.ch\nIntérêt : Un bon cadeau',
     );
     expect(href).not.toContain('+');
+  });
+
+  it('shortens a long message so that mail clients accept the link', () => {
+    const long = { ...FIELDS, message: 'x'.repeat(5000) };
+    const body = new URL(mailtoHref('n@example.ch', long, labels, 'Gift')).searchParams.get('body');
+    expect(body?.startsWith(`${'x'.repeat(MAILTO_MESSAGE_CHARS)}…`)).toBe(true);
+    expect(body?.length).toBeLessThan(MAILTO_MESSAGE_CHARS + 200);
   });
 
   it('separates label and value the English way in English', () => {

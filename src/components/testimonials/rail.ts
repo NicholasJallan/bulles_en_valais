@@ -17,13 +17,20 @@ export function init(element: HTMLElement): Cleanup {
     const gap = Number.parseFloat(getComputedStyle(rail).columnGap) || 0;
     return first.getBoundingClientRect().width + gap;
   };
-  const onPrevious = () => rail.scrollBy({ left: -step(), behavior: 'smooth' });
-  const onNext = () => rail.scrollBy({ left: step(), behavior: 'smooth' });
+  // Smooth only when motion is allowed (reduced motion and calm mode remove motion-ok).
+  const behavior = (): ScrollBehavior =>
+    document.documentElement.classList.contains('motion-ok') ? 'smooth' : 'auto';
+  const onPrevious = () => rail.scrollBy({ left: -step(), behavior: behavior() });
+  const onNext = () => rail.scrollBy({ left: step(), behavior: behavior() });
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         const button = entry.target === first ? previous : next;
-        button.disabled = entry.intersectionRatio >= FULLY_VISIBLE;
+        const other = button === previous ? next : previous;
+        const atEnd = entry.intersectionRatio >= FULLY_VISIBLE;
+        // A disabled button drops the focus to <body>: hand it to the other one first.
+        if (atEnd && document.activeElement === button) other.focus();
+        button.disabled = atEnd;
       }
     },
     { root: rail, threshold: [0, FULLY_VISIBLE] },

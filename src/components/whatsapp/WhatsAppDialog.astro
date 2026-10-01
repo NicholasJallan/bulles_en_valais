@@ -19,14 +19,7 @@ const href = whatsappUrl(t.defaultMessage);
 ---
 
 <div class="whatsapp" data-controller="whatsapp" data-default-message={t.defaultMessage}>
-  <a
-    class="whatsapp-fab"
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-haspopup="dialog"
-    data-whatsapp-open
-  >
+  <a class="whatsapp-fab" href={href} target="_blank" rel="noopener noreferrer" data-whatsapp-open>
     <Icon name="message" />
     <span class="visually-hidden">{t.open}</span>
   </a>

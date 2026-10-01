@@ -4,6 +4,10 @@ import type { Locale } from '../../i18n/types.ts';
 import { normalizeFields, type CheckedField, type ContactFields } from './validate.ts';
 
 export const CONTACT_ENDPOINT = '/api/contact';
+/** Past this delay the visitor gets the alternatives instead of a spinner that never stops. */
+export const SEND_TIMEOUT_MS = 15_000;
+/** Mail clients refuse or cut long mailto: links (about 2000 characters): the message is cut. */
+export const MAILTO_MESSAGE_CHARS = 1200;
 
 export interface ContactPayload extends ContactFields {
   /** Honeypot: humans never see it, so it stays empty. */
@@ -70,12 +74,14 @@ function outcomeOf(status: number, body: Record<string, unknown> | undefined): S
 export async function sendContact(
   payload: ContactPayload,
   fetcher: typeof fetch = fetch,
+  timeoutMs: number = SEND_TIMEOUT_MS,
 ): Promise<SubmitOutcome> {
   try {
     const response = await fetcher(CONTACT_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     return outcomeOf(response.status, await readJson(response));
   } catch {
@@ -101,7 +107,12 @@ export function mailtoHref(
   ]
     .filter(([, value]) => value !== '')
     .map(([label, value]) => `${label}${separator}${value}`);
-  const body = [message, lines.join('\n')].filter((part) => part !== '').join('\n\n');
+  const characters = Array.from(message);
+  const shortMessage =
+    characters.length > MAILTO_MESSAGE_CHARS
+      ? `${characters.slice(0, MAILTO_MESSAGE_CHARS).join('')}…`
+      : message;
+  const body = [shortMessage, lines.join('\n')].filter((part) => part !== '').join('\n\n');
   // encodeURIComponent, not URLSearchParams: mail clients read « + » literally.
   return `mailto:${to}?subject=${encodeURIComponent(labels.subject)}&body=${encodeURIComponent(body)}`;
 }

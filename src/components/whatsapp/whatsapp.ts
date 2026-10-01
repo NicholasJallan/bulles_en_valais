@@ -11,11 +11,15 @@ export function init(element: HTMLElement): Cleanup {
     throw new Error('whatsapp: parts missing');
   const defaultMessage = element.dataset.defaultMessage ?? '';
   let opener: HTMLElement | null = null;
+  const openers = document.querySelectorAll('[data-whatsapp-open]');
+  for (const link of openers) link.setAttribute('aria-haspopup', 'dialog');
 
   const onOpen = (event: MouseEvent) => {
     const link =
       event.target instanceof Element ? event.target.closest('[data-whatsapp-open]') : null;
     if (!(link instanceof HTMLElement)) return;
+    // Ctrl, Cmd or Shift: the visitor wants wa.me in a new tab or window, let the link work.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
     opener = link;
     dialog.showModal();
@@ -53,6 +57,7 @@ export function init(element: HTMLElement): Cleanup {
     message.removeEventListener('input', onInput);
     dialog.removeEventListener('click', onDialogClick);
     dialog.removeEventListener('close', onClose);
+    for (const link of openers) link.removeAttribute('aria-haspopup');
     if (dialog.open) dialog.close();
   };
 }

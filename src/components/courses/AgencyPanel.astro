@@ -16,14 +16,7 @@ const t = getDictionary(locale).courses.agencies[agency];
 const panelId = `agency-${agency}`;
 ---
 
-<div
-  id={panelId}
-  class="agency-panel"
-  role="tabpanel"
-  aria-labelledby={`${panelId}-tab`}
-  data-tab-panel
-  data-active={active ? '' : undefined}
->
+<div id={panelId} class="agency-panel" data-tab-panel data-active={active ? '' : undefined}>
   <div class="agency-text">
     <p class="agency-label">
       <span>{t.label}</span>

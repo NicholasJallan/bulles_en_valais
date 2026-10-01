@@ -16,6 +16,9 @@ const CONTROLLERS: ControllerRegistry = {
 
 void mountControllers(document, CONTROLLERS, (error, name) => {
   console.error(`Controller "${name}" failed to start`, error);
+  // A controller that does not start must not leave a half-enhanced page (tabs hiding their
+  // panels, a disabled submit): fall back to the page as served without JavaScript.
+  document.documentElement.classList.remove('js');
 }).then(() => {
   // Lets the end-to-end tests (and later the motion module) wait for the controllers.
   document.documentElement.dataset.controllers = 'ready';

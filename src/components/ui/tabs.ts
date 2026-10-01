@@ -10,6 +10,10 @@ export function init(element: HTMLElement): Cleanup {
   const panels = tabs.map((tab) => {
     const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
     if (panel === null) throw new Error(`tabs: no panel for tab "${tab.id}"`);
+    // Panels are plain sections without JavaScript; they become tab panels here.
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', tab.id);
+    panel.tabIndex = 0;
     return panel;
   });
 
@@ -40,6 +44,11 @@ export function init(element: HTMLElement): Cleanup {
   tablist.addEventListener('click', onClick);
   tablist.addEventListener('keydown', onKeyDown);
   return () => {
+    for (const panel of panels) {
+      panel.removeAttribute('role');
+      panel.removeAttribute('aria-labelledby');
+      panel.removeAttribute('tabindex');
+    }
     tablist.removeEventListener('click', onClick);
     tablist.removeEventListener('keydown', onKeyDown);
   };

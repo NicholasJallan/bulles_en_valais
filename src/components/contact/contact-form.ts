@@ -24,6 +24,8 @@ interface Messages {
 }
 
 const CHECKED: readonly CheckedField[] = ['name', 'email', 'phone', 'message'];
+/** MIN_ELAPSED_MS of contact.php. */
+const MIN_ELAPSED_MS = 3000;
 
 type Control = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
@@ -145,6 +147,9 @@ async function submitForm(context: FormContext): Promise<void> {
   showErrors(context, errors, true);
   if (Object.keys(errors).length > 0) return;
   setSending(context, true);
+  // contact.php silently drops a message sent less than 3 s after the page loaded (robots):
+  // a quick autofill and send waits out the rest instead of being lost.
+  await new Promise((resolve) => setTimeout(resolve, MIN_ELAPSED_MS - performance.now()));
   const website = control(form, 'website').value;
   const payload = buildPayload(fields, {
     locale: context.locale,
@@ -172,7 +177,10 @@ function validateOnLeave(context: FormContext, target: EventTarget | null): void
   if (field === undefined || input === null) return;
   const touched = input.value.trim() !== '' || input.getAttribute('aria-invalid') === 'true';
   if (!touched) return;
-  const error = validateContact(readFields(context.form))[field];
+  const errors = validateContact(readFields(context.form));
+  // Once the summary is shown, it follows the corrections (without taking the focus).
+  if (!context.summary.hidden) return showErrors(context, errors, false);
+  const error = errors[field];
   setFieldError(context.form, field, error && context.messages.errors[error]);
 }
 

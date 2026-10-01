@@ -1,8 +1,8 @@
 ---
 /**
  * Tab list of the WAI-ARIA APG (tabs.ts drives it). Shown with JavaScript only: without it the
- * panels are stacked, each with its own heading. A panel carries `data-tab-panel`, its id,
- * `role="tabpanel"`, `aria-labelledby` (the id of its tab) and `data-active` for the first one.
+ * panels are stacked, each with its own heading. A panel carries `data-tab-panel`, its id and
+ * `data-active` for the first one; tabs.ts gives it `role="tabpanel"` and its label.
  */
 interface Tab {
   id: string;

@@ -44,6 +44,7 @@ export function init(element: HTMLElement): Cleanup {
     if (target?.closest('[data-menu-close]')) return dialog.close();
     const link = target?.closest<HTMLAnchorElement>('a[data-menu-link]');
     if (!link) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey) return;
     const hash = samePageHash(link);
     if (hash === undefined) return dialog.close();
     event.preventDefault();
