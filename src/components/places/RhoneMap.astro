@@ -53,6 +53,8 @@ const height = frameHeight(FRAME);
 const sites = PLACES.map((place) => ({
   ...projectPoint(place.coords, FRAME),
   name: localize(place.name, locale),
+  // Labels near the east edge go on the left of their point.
+  anchor: projectPoint(place.coords, FRAME).x > FRAME.width * 0.7 ? 'end' : 'start',
 }));
 const titleId = 'rhone-map-title';
 ---

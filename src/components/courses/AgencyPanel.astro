@@ -16,7 +16,7 @@ const t = getDictionary(locale).courses.agencies[agency];
 const panelId = `agency-${agency}`;
 ---
 
-<article
+<div
   id={panelId}
   class="agency-panel"
   role="tabpanel"
@@ -48,7 +48,7 @@ const panelId = `agency-${agency}`;
     />
     {t.note && <p class="fine">{t.note}</p>}
   </div>
-</article>
+</div>
 
 <style>
   .agency-panel {

@@ -36,7 +36,7 @@ const credentials = CREDENTIALS.map((credential) => ({
       {/* Portrait in 4:5 from 48 rem, square on phones (art direction). */}
       <ArtPicture
         sources={[{ media: '(width >= 48rem)', src: portraitWide, widths: [480, 720, 960, 1280] }]}
-        fallback={{ src: portraitSquare, widths: [360, 540, 720, 1080] }}
+        fallback={{ src: portraitSquare, widths: [360, 540, 720, 840, 1080] }}
         sizes="(width >= 64rem) 36vw, (width >= 48rem) 70vw, 100vw"
         alt={t.portraitAlt}
         class="instructor-portrait"
