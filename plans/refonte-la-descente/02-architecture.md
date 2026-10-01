@@ -282,7 +282,7 @@ export interface Course {
 | Performance | chrome-devtools MCP + `scripts/check-budgets.mjs` | Lighthouse mobile, trace (LCP/CLS/TBT), tailles gzip | `npm run check:budgets` |
 | `dist/` | `scripts/check-dist.mjs` | Aucun script inline (JSON-LD excepté), gestionnaire `on*`, URL `javascript:` ni script ou feuille de style d'une autre origine ; aucun fichier caché (hors `.well-known/`), clé, certificat ni `settings.json` ; sous `api/` et en PHP, seulement `api/contact.php`, qui doit être présent | enchaîné par `npm run build` (un `postbuild` sauterait avec `--ignore-scripts`) |
 
-Projets Playwright : `chromium`, `firefox`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15). `webServer` : `npm run build && npm run preview -- --port 4321 --ignore-lock`, avec `reuseExistingServer: false` (le port 4321 doit être libre ; voir `00-contexte` §3 pour l'arrière-plan automatique d'Astro 7 et le Firefox de Playwright sur macOS 27).
+Projets Playwright : `chromium`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15) ; `firefox` est retiré tant que le Firefox de Playwright ne démarre pas sur macOS 27 (D21). `webServer` : `npm run build && npm run preview -- --port 4321 --ignore-lock`, avec `reuseExistingServer: false` (le port 4321 doit être libre ; voir `00-contexte` §3 pour l'arrière-plan automatique d'Astro 7 et le Firefox de Playwright sur macOS 27).
 
 ## 16. Déploiement (S12–S13)
 

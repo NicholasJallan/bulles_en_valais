@@ -52,6 +52,7 @@
 | 2026-10-01 | D18 | Serveur de dev : `vite.server.fs.deny` = défauts de Vite + `mail-config.php` et `settings.json` (il servait `/api/mail-config.php` en 200). Jamais `astro dev --host` ; sur le réseau local, seulement `astro preview --host` (sert `dist/`) | S01 (constat) |
 | 2026-10-01 | D19 | Budgets : JS initial = scripts et préchargements référencés par la page **plus leurs imports statiques** (es-module-lexer) ; JS total = tous les `.js` de `dist/` ; CSS par page (feuilles liées + `<style>`) ; gzip niveau 6, 1 Ko = 1 024 octets | S01 |
 | 2026-10-01 | D20 | `is:inline` permis sur un `<script src>` vers un fichier de `public/` (`boot.js`) : ce n'est pas du code inline. L'interdit du §9 vise le code JavaScript inline (JSON-LD excepté) | S01 |
+| 2026-10-01 | D21 | **Pas de validation Firefox tant qu'elle ne fonctionne pas** : le Firefox de Playwright ne démarre pas sur macOS 27.0.1, donc le projet `firefox` est retiré des tests E2E (à rétablir si une mise à jour de Playwright le corrige) ; la recette manuelle ne teste Firefox que s'il fonctionne | Nicholas (après S01) |
 
 ## Mutations du plan
 
@@ -69,6 +70,8 @@
 | 2026-10-01 | S01 | corriger | Playwright : `webServer` en `npm run preview -- --port 4321 --ignore-lock` et `reuseExistingServer: false` ; `02-architecture` §15 et §17, brief S01 mis à jour | sous un agent (paquet `am-i-vibing`), Astro 7 détache `astro dev` / `astro preview` en arrière-plan avec un fichier verrou : Playwright voyait « exited early », puis réutilisait le serveur orphelin, donc un build périmé |
 | 2026-10-01 | S01 | ajouter | `astro.config.mjs` : `vite.build.assetsInlineLimit: 0` et `vite.server.fs.deny` ; `scripts/check-dist.mjs` enchaîné par `npm run build` ; `es-module-lexer` en dépendance de développement ; `02-architecture` §1, §2, §3, §15 et `00-contexte` §3, §8, §9 mis à jour | D16 à D20, revue de code |
 | 2026-10-01 | S01 | constater | Le Firefox de Playwright 1.63 (Firefox 155, build 1543) ne démarre pas sur macOS 27.0.1 (« Could not find profile folder », même lancé seul et hors bac à sable) ; chromium, webkit, mobile-chrome et mobile-safari passent. Signalé dans `00-contexte` §3 et `CLAUDE.md` | environnement, pas le projet |
+| 2026-10-01 | S01 | retirer | Projet Playwright `firefox` retiré (gardé en commentaire) ; Firefox ne figure plus dans les tests E2E de `02-architecture` §15 ni de S12, et la Definition of Done (`README.md`) et la recette manuelle de S12 ne le valident que s'il fonctionne | D21 |
+| 2026-10-01 | S01 | ajouter | Logo PNG haute définition de Nicholas committé dans `src/assets/brand/LogoFull.png` ; `INPUTS-NICHOLAS` I-02 mis à jour (le SVG reste attendu pour S04) | demande de Nicholas |
 
 ## Mesures
 
@@ -136,9 +139,9 @@
   - 1ʳᵉ passe : 0 CRITICAL, 0 HIGH. Les 2 MEDIUM sont corrigés : le seuil de couverture global, que les dictionnaires auraient masqué, et l'absence de garde-fou contre un script inline. Sur 4 LOW, 3 sont corrigés ; le 4ᵉ (`LogoFull.png`) est réglé par l'indexation fichier par fichier.
   - 2ᵉ passe, ciblée : approuvée. Ses 4 LOW sont corrigés : fichiers cachés publiés, absence de `contact.php` non détectée, `postbuild` sauté par `--ignore-scripts`, ressources d'une autre origine non signalées.
 - **Budgets** (voir §Mesures) : JS initial 0,6 Ko par page, JS total 0,6 Ko, CSS 0,7 Ko (gzip).
-- **Commits** : `042dbad`, `9bcd018`, `43a951c`, `e33e888`, `421cc3d`, `db901b3`, `c8f1eac`, puis ce journal. Branche poussée sur `origin` avec l'accord de Nicholas.
+- **Commits** : `042dbad`, `9bcd018`, `43a951c`, `e33e888`, `421cc3d`, `db901b3`, `c8f1eac`, puis ce journal (`033642d`). Branche poussée sur `origin` avec l'accord de Nicholas. Ensuite, à sa demande : `fe47405` (logo dans `src/assets/brand/`) et `56d6f41` (Firefox retiré, D21), puis ce complément.
 - **Points ouverts** :
-  - Nicholas : supprimer la copie locale `api/mail-config.php`. Elle est toujours là ; le serveur de dev la refuse désormais, mais tout autre serveur lancé à la racine la servirait. Dire aussi si `images/LogoFull.png` (logo PNG de 1825×2256 px) doit rejoindre `src/assets/brand/` (S04 attend toujours le SVG, I-02).
+  - Nicholas : supprimer la copie locale `api/mail-config.php`. Elle est toujours là ; le serveur de dev la refuse désormais, mais tout autre serveur lancé à la racine la servirait. ~~Dire si `images/LogoFull.png` doit rejoindre `src/assets/brand/`~~ → fait à sa demande (`fe47405`) ; S04 attend toujours le SVG (I-02).
   - S03 : titres et descriptions méta provisoires. La parité est stricte : un `Rich` ou un `Emphasis` doit avoir la même structure en FR et en EN. À assouplir par une décision si la traduction l'exige.
   - S05 : `test:visual` et `test:a11y` n'ont encore aucun test (« No tests found »).
   - S11 : faire tourner les tests E2E sous la CSP cible (`page.route`), en complément dynamique de `check:dist`. Un éventuel îlot `application/json` devra être autorisé par une décision.
@@ -146,5 +149,5 @@
     - régler le `gzip_comp_level` de nginx : les budgets sont mesurés au niveau 6, nginx compresse au niveau 1 par défaut ;
     - `deploy.sh` doit passer par `npm run build`, donc par `check:dist` ;
     - mettre à jour le `README.md` racine, obsolète, et la version de `package.json` (0.0.1).
-  - Playwright : réessayer Firefox après une mise à jour, au plus tard en S12.
+  - Playwright : ~~réessayer Firefox après une mise à jour~~ → D21 : Firefox n'est validé que s'il fonctionne ; projet retiré (`56d6f41`), à rétablir si une mise à jour de Playwright le corrige.
 - **Retour arrière** : `git switch main && git branch -D refonte/la-descente`, puis `git push origin --delete refonte/la-descente`. `main` n'a pas été touché.

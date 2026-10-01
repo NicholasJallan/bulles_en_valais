@@ -33,12 +33,12 @@ Le site est complet sur la branche. Il faut préparer le serveur pour des **dép
    > 🔁 Point de sortie possible.
 5. **Recette automatique** :
    - `npm test`, `npm run coverage` (≥ 80 %), tests PHP (unitaires et intégration) ;
-   - `npm run test:e2e` (projets Chromium, Firefox, WebKit, Pixel 7, iPhone 15) ;
+   - `npm run test:e2e` (projets Chromium, WebKit, Pixel 7, iPhone 15 ; Firefox seulement si une mise à jour de Playwright l'a rétabli, D21) ;
    - `npm run test:visual` : générer les références aux 4 largeurs, **les revoir une par une**, puis les committer ;
    - `npm run test:a11y` (FR, EN, pages légales, bandeau ouvert) ;
    - `npx playwright test --project=csp` ;
    - sur la préproduction : Lighthouse mobile et trace (MCP `chrome-devtools`, en-tête `Authorization` via `emulate.extraHttpHeaders` pour l'option A) → consigner dans le tableau Mesures de `PROGRESS.md` ; `npm run check:budgets`.
-6. **Recette manuelle** (avec Nicholas, sur de vrais appareils : iPhone Safari, Android Chrome, Mac Safari, Firefox, Chrome) :
+6. **Recette manuelle** (avec Nicholas, sur de vrais appareils : iPhone Safari, Android Chrome, Mac Safari, Chrome, et Firefox s'il fonctionne, D21) :
    - fluidité du scroll, HUD, hero et immersion, échelle, lampe, lieux, bons cadeaux, rail, palier, contact ;
    - clavier seul de bout en bout ; lecteur d'écran (VoiceOver) sur le hero, les onglets, la FAQ et le formulaire ;
    - mouvement réduit système **et** Mode calme ;

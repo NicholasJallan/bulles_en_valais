@@ -45,7 +45,7 @@
 - **Astro 7** (sorti le 22.06.2026) : compilateur Rust par défaut (**plus aucune correction HTML automatique** : balise non fermée = erreur), **`compressHTML: 'jsx'` par défaut** (les espaces entre éléments inline disparaissent comme en React : mettre `{' '}` explicitement), Vite 8 + Rolldown, `src/fetch.ts` réservé. Fonts API et `security.csp` stables depuis Astro 6.
   - Sous un agent (Claude Code), `astro dev` et `astro preview` **passent en arrière-plan** (processus détaché, fichier verrou) : `npx astro dev stop` / `npx astro preview stop` pour les arrêter, `--ignore-lock` pour rester au premier plan (c'est ce qu'utilise Playwright).
   - Un script de moins de 4 Ko sans import serait inliné : `vite.build.assetsInlineLimit: 0` l'empêche (D17).
-- **Playwright 1.63** : son Firefox (155, build 1543) ne démarre pas sur macOS 27.0.1 (« Could not find profile folder »). En attendant une mise à jour, les tests E2E tournent sur chromium, webkit, mobile-chrome et mobile-safari, et Firefox se teste à la main.
+- **Playwright 1.63** : son Firefox (155, build 1543) ne démarre pas sur macOS 27.0.1 (« Could not find profile folder »). Les tests E2E tournent donc sur chromium, webkit, mobile-chrome et mobile-safari ; Firefox n'est validé que s'il fonctionne (D21).
 
 ## 4. État des lieux du site actuel (audit du 30.09.2026)
 

@@ -118,7 +118,7 @@ Si une étape doit changer : consigner dans `PROGRESS.md` §Mutations (date, ses
 - Labo mobile (CPU ×4, Fast 4G, cache vide) : LCP ≤ 2,0 s, CLS ≤ 0,05, TBT ≤ 200 ms ; INP ≤ 200 ms sur onglets, FAQ, formulaire.
 - JS ≤ 150 Ko gzip au total (≤ 90 Ko au chargement initial), CSS ≤ 30 Ko gzip, images initiales ≤ 1 Mo.
 - axe : 0 violation sérieuse/critique (FR et EN). Navigation clavier complète. `prefers-reduced-motion` respecté partout.
-- Chrome, Firefox, Safari (macOS + iOS) et Chrome Android validés à la main.
+- Chrome, Safari (macOS + iOS) et Chrome Android validés à la main ; Firefox seulement s'il fonctionne (D21).
 - Formulaire durci et limité en débit ; CSP sans `unsafe-eval` ni script inline ; en-têtes de sécurité conservés.
 - `robots.txt`, `sitemap`, `hreflang`, JSON-LD valides ; plus aucune « soft 404 ».
 - Bandeau de consentement fonctionnel, conversions Google Ads et GA4 reçues après consentement.
