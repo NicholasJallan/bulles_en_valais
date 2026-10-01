@@ -1,0 +1,113 @@
+---
+import { TONE_INFO } from './palette-data.ts';
+import { WATER_COLUMN, toneBackground } from './water-column.ts';
+
+const NO_BREAK_SPACE = String.fromCharCode(0xa0);
+const depthLabel = (depth: number): string => `${String(depth).padStart(2, '0')}${NO_BREAK_SPACE}m`;
+---
+
+<section id="colonne" class="column" aria-labelledby="sg-column-title">
+  <div class="column-intro sg-section" data-tone="surface">
+    <div class="sg-wrap">
+      <header class="sg-heading">
+        <h2 id="sg-column-title">
+          La colonne <em>d’eau</em>
+        </h2>
+        <p class="sg-note">
+          Faites défiler pour ressentir la descente jusqu’à 40 m, puis la remontée. Entre deux tons,
+          une thermocline (E4) fait la transition ; le dégradé ne passe jamais sous du texte
+          courant. Températures : proposition I-05, à valider.
+        </p>
+      </header>
+    </div>
+  </div>
+  <ol class="bands">
+    {WATER_COLUMN.map((band, index) => {
+      const previous = WATER_COLUMN[index - 1];
+      const changes = previous !== undefined && previous.tone !== band.tone;
+      return (
+        <li class="band-item">
+          {changes && (
+            <div
+              class="thermocline"
+              aria-hidden="true"
+              style={`--from: ${toneBackground(previous.tone)}; --to: ${toneBackground(band.tone)}`}
+            />
+          )}
+          <div class="band" data-tone={band.tone}>
+            <div class="sg-wrap band-inner">
+              <p class="band-depth">{depthLabel(band.depth)}</p>
+              <div class="band-text">
+                <p class="band-meta">
+                  {TONE_INFO[band.tone].name} · {band.temperature}&nbsp;°C
+                </p>
+                <p class="band-note">{band.note}</p>
+              </div>
+            </div>
+          </div>
+        </li>
+      );
+    })}
+  </ol>
+</section>
+
+<style>
+  .bands {
+    padding: 0;
+    list-style: none;
+  }
+
+  .band {
+    display: grid;
+    align-items: end;
+    min-block-size: 46svh;
+    padding-block: var(--space-xl);
+  }
+
+  .band-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-xl);
+  }
+
+  .band-depth {
+    font-family: var(--font-hud);
+    font-size: clamp(4rem, 2rem + 12vw, 12rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 300;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--fg);
+  }
+
+  .band-text {
+    display: grid;
+    gap: var(--space-3xs);
+    max-inline-size: 28ch;
+    padding-block-end: 0.6em;
+  }
+
+  .band-meta {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --step-3 never goes under 24 px: large text, where --accent-deco reaches 3:1. */
+  .band-note {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-style: italic;
+    font-weight: var(--display-em-weight);
+    line-height: 1.2;
+    color: var(--accent-deco);
+  }
+
+  /* E4 preview: the water changes colour across 30 vh, without any text on it. */
+  .thermocline {
+    block-size: 30svh;
+    background-image: linear-gradient(to bottom, var(--from), var(--to));
+  }
+</style>

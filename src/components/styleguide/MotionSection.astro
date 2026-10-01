@@ -1,0 +1,200 @@
+---
+import { Picture } from 'astro:assets';
+import diver from '@/assets/images/bde.jpg';
+import Button from '@/components/ui/Button.astro';
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import { MANIFESTO } from './samples.ts';
+import Switch from './Switch.astro';
+
+const TEMPI = [
+  { value: '0.75', label: 'Plus lent', detail: '× 0,75' },
+  { value: '1', label: 'Juste', detail: '× 1' },
+  { value: '1.25', label: 'Plus vif', detail: '× 1,25' },
+] as const;
+---
+
+<section
+  id="mouvement"
+  class="motion sg-section"
+  data-tone="abyss"
+  data-controller="styleguide-motion"
+  aria-labelledby="sg-motion-title"
+>
+  <div class="sg-wrap">
+    <header class="sg-heading">
+      <h2 id="sg-motion-title">
+        Le mouvement, <em>flottabilité neutre</em>
+      </h2>
+      <p class="sg-note">
+        Les éléments arrivent et se posent, sans rebond. Trois démos rejouables ; le tempo ralentit
+        ou accélère toutes les courbes pour juger la sensation. Avec « réduire les animations » ou
+        le Mode calme, rien ne bouge et tout reste lisible.
+      </p>
+      <Switch name="tempo" legend="Tempo" options={TEMPI} value="1" />
+      <p class="sg-note motion-off">
+        Mouvement réduit : démos désactivées, contenu affiché tel quel.
+      </p>
+    </header>
+
+    <div class="demos">
+      <article class="demo demo-title" data-demo="title">
+        <h3 class="demo-name">Titre en flottabilité neutre (E5)</h3>
+        <p class="sg-note">
+          1,1 s, courbe « buoyant », 80 ms entre deux lignes ; l’italique arrive un peu après.
+        </p>
+        {/* A heading, as on the site: SplitText names it with aria-label, not allowed on a <p>. */}
+        <h4 class="display demo-heading" data-demo-target>
+          <EmphasisText value={MANIFESTO} />
+        </h4>
+        <Button variant="secondary" class="demo-replay" data-demo-replay="title">
+          Rejouer
+        </Button>
+      </article>
+
+      <article class="demo demo-reveal" data-demo="reveal">
+        <h3 class="demo-name">Révélation « ligne d’eau » (E6)</h3>
+        <p class="sg-note">Une ligne d’eau de 24 points monte ; l’image passe de 108 % à 100 %.</p>
+        <figure class="reveal" data-demo-target>
+          <Picture
+            src={diver}
+            formats={['avif', 'webp']}
+            widths={[480, 800, 1200]}
+            sizes="(min-width: 64rem) 40vw, 100vw"
+            alt="Un plongeur au milieu de requins-marteaux, dans le bleu profond."
+          />
+        </figure>
+        <Button variant="secondary" class="demo-replay" data-demo-replay="reveal">
+          Rejouer
+        </Button>
+      </article>
+
+      <article class="demo demo-bubbles" data-demo="bubbles">
+        <h3 class="demo-name">Gerbe de bulles, prototype (E7)</h3>
+        <p class="sg-note">
+          Loi de Boyle : lâchée à 40 m, une bulle grossit de 71 % en arrivant en surface ; sa
+          vitesse suit la racine de son rayon. Survolez le bouton, puis cliquez.
+        </p>
+        <div class="stage" data-demo-target>
+          <canvas class="stage-canvas" aria-hidden="true"></canvas>
+          <span class="stage-depth stage-depth-top">0 m</span>
+          <span class="stage-depth stage-depth-bottom">40 m</span>
+          <Button class="stage-button" data-demo-burst="">
+            Lâcher des bulles
+          </Button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .motion-off {
+    display: none;
+  }
+
+  .motion[data-motion='off'] .motion-off {
+    display: block;
+  }
+
+  .motion:not([data-motion='on']) :global(.demo-replay) {
+    visibility: hidden;
+  }
+
+  .demos {
+    display: grid;
+    gap: var(--space-2xl) var(--grid-gap);
+  }
+
+  .demo {
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+    justify-items: start;
+  }
+
+  .demo-name {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+    letter-spacing: 0;
+  }
+
+  .demo-heading {
+    margin-block: var(--space-m);
+    font-size: var(--step-5);
+    line-height: 1.02;
+  }
+
+  /* SplitText clips each line at its line box (overflow: clip), shorter than the glyphs of
+     Fraunces (ascent ≈ 0.98 em, descent ≈ 0.25 em): the padding gives descenders and accents
+     room, the negative margin keeps the layout. S06 reuses it for the titles. */
+  .demo-heading :global(.demo-line-mask) {
+    padding-block: 0.2em;
+    margin-block: -0.2em;
+  }
+
+  .reveal {
+    inline-size: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-soft);
+    background-color: var(--c-leman);
+  }
+
+  .reveal :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    place-items: end center;
+    inline-size: 100%;
+    min-block-size: 24rem;
+    padding: var(--space-m);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+    background-image: linear-gradient(to top, var(--c-abyss), var(--c-deep) 70%, var(--c-leman));
+  }
+
+  .stage-canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+  }
+
+  .stage-depth {
+    position: absolute;
+    inset-inline-start: var(--space-s);
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stage-depth-top {
+    inset-block-start: var(--space-s);
+  }
+
+  .stage-depth-bottom {
+    inset-block-end: var(--space-s);
+  }
+
+  .stage :global(.stage-button) {
+    position: relative;
+  }
+
+  @media (width >= 64rem) {
+    .demos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .demo-title {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -72,6 +72,15 @@
 | 2026-10-01 | S01 | constater | Le Firefox de Playwright 1.63 (Firefox 155, build 1543) ne démarre pas sur macOS 27.0.1 (« Could not find profile folder », même lancé seul et hors bac à sable) ; chromium, webkit, mobile-chrome et mobile-safari passent. Signalé dans `00-contexte` §3 et `CLAUDE.md` | environnement, pas le projet |
 | 2026-10-01 | S01 | retirer | Projet Playwright `firefox` retiré (gardé en commentaire) ; Firefox ne figure plus dans les tests E2E de `02-architecture` §15 ni de S12, et la Definition of Done (`README.md`) et la recette manuelle de S12 ne le valident que s'il fonctionne | D21 |
 | 2026-10-01 | S01 | ajouter | Logo PNG haute définition de Nicholas committé dans `src/assets/brand/LogoFull.png` ; `INPUTS-NICHOLAS` I-02 mis à jour (le SVG reste attendu pour S04) | demande de Nicholas |
+| 2026-10-01 | S02 | corriger | Tâche 7 : captures faites par un script Playwright autonome (chromium, preview sur le port 4322) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
+| 2026-10-01 | S02 | ajouter | Textes du styleguide hors de `src/i18n/` (seul `hero.title` vient du dictionnaire) : contenus de démonstration repris de `legacy/components/i18n.jsx` dans `samples.ts`, textes de documentation dans `palette-data.ts` (tons, groupes, rôles), `water-column.ts` (notes des paliers) et dans les tableaux et le balisage des `.astro` de `src/components/styleguide/` et de `src/pages/styleguide.astro`. Exception à « textes visibles dans `src/i18n/` » : page noindex, en français seulement, supprimée en S13 ; S03 réécrivait les dictionnaires en parallèle | sessions S02 ∥ S03 ; précisé après la revue de code |
+| 2026-10-01 | S02 | modifier | Variables CSS des polices **par famille** (`--font-fraunces`, `--font-switzer`, `--font-instrument-serif`, `--font-zodiak`, `--font-general-sans`, `--font-jetbrains-mono`, `--font-geist-mono`) et non par appariement (`--font-a-display`…) : Switzer sert à A et à B. Les rôles `--font-display`, `--font-sans` et `--font-hud` de `tokens.css` pointent vers elles ; renommage final à la tâche 10 | doublon de téléchargement évité |
+| 2026-10-01 | S02 | modifier | Fraunces : axe optique (72), `SOFT` et `WONK` figés par style (romain 50/0, italique 100/1), graisse variable 100–900 : **37 + 43 Ko** au lieu de 118 + 146 Ko avec les cinq axes. L'animation ponctuelle de `SOFT` (DA §5) n'est plus possible ; celle de `wght` reste | budget polices (`00-contexte` §7) |
+| 2026-10-01 | S02 | modifier | Palette ajustée pour passer les tests (à reporter dans `01-direction-artistique.md` §4 à la tâche 10) : émeraude 42 → **37 %** (0,056 200) ; rouge-lampe dédoublé : **allumé** `oklch(68% 0.19 33)` sur les tons sombres, **de jour** `oklch(51% 0.19 31)` sur les tons clairs, **pâle** `oklch(82% 0.1 40)` pour les liens sur émeraude ; `lagoon-ink` chroma 0,08 → 0,075 (hors sRGB) ; ajouts : panneaux par ton (`*-raised`, Léman pour l'émeraude), ambre d'alerte (`alert`, `alert-deep`), lumière décorative en cinq paliers (`deco-surface` → `deco-abyss`) | contrastes : sur la palette d'origine, rouge sur lagon 2,54:1 et sur émeraude 2,44:1, `foam-soft` sur émeraude 4,43:1 |
+| 2026-10-01 | S02 | ajouter | Rôles testés `--bg-panel`, `--action-ink`, `--action-text`, `--alert` (13 couples par ton) ; rôles dérivés `--line`, `--line-faint`, `--glow`, `--focus-halo` ; tokens de mouvement `--dur-rise` (1,1 s) et `--stagger-line` (80 ms) d'E5 ; `--accent-deco` réservé aux textes de 24 px et plus (seuil 3:1) | composants, E5 |
+| 2026-10-01 | S02 | ajouter | Polices Fontshare (Switzer, Zodiak, General Sans) servies **telles que livrées** et jamais committées : l'ITF Free Font License 2.0 (17.08.2026) autorise l'auto-hébergement mais interdit le sous-ensemble, la conversion de format et la diffusion par un dépôt (le cache de la Fonts API est dans `node_modules/.astro/` et `.astro/`, ignorés par git). Seuls les monos Google (OFL) sont en sous-ensemble | licence ; à promouvoir en décision à la fusion |
+| 2026-10-01 | S02 | ajouter | `BaseLayout` : `route` facultatif (pas de canonical ni de hreflang hors des routes) mais alors `noindex` obligatoire (union de types), slot `head` ; `app.ts` enregistre `styleguide-switch` et `styleguide-motion`, à retirer en S13 avec le styleguide | styleguide ; union après la revue de code |
+| 2026-10-01 | S02 | corriger | Brief S02, tâche 9 : l'URL LAN de la gate passe par `npm run build && npm run preview -- --host` (avec l'accord de Nicholas) au lieu de `npm run dev -- --host` | D18 (le serveur de dev sert tous les fichiers du projet) ; revue de code |
 
 ## Mesures
 
@@ -79,6 +88,7 @@
 |---|---|---|---|---|---|---|---|---|
 | 2026-09-30 | **Site actuel** (prod, mobile, CPU ×4, Fast 4G, cache chaud) | 1,8 s (render delay) | 0,00 | n.m. | ~1 Mo+ (React + Babel via unpkg, non mesurable en cross-origin) | inline | ≈ 5 Mo d'images décodées | —/91/73/83 |
 | 2026-10-01 | S01 : squelette sans design (`check:budgets` sur `dist/`) | n.m. | n.m. | n.m. | 0,6 / 0,6 Ko | 0,7 Ko | n.m. | n.m. |
+| 2026-10-01 | S02 : tokens, polices, styleguide (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko (GSAP des démos, styleguide seulement) | 3,2 Ko (accueil) · 9,3 Ko (styleguide) | polices préchargées : 122 Ko, 3 fichiers (paire A) | n.m. |
 
 ## Journal
 
@@ -151,3 +161,94 @@
     - mettre à jour le `README.md` racine, obsolète, et la version de `package.json` (0.0.1).
   - Playwright : ~~réessayer Firefox après une mise à jour~~ → D21 : Firefox n'est validé que s'il fonctionne ; projet retiré (`56d6f41`), à rétablir si une mise à jour de Playwright le corrige.
 - **Retour arrière** : `git switch main && git branch -D refonte/la-descente`, puis `git push origin --delete refonte/la-descente`. `main` n'a pas été touché.
+
+### S02 — 2026-10-01 (design system & styleguide : tâches 1 à 8 terminées, Gate 1 en attente)
+- **Contexte** : exécutée en parallèle de S03, dans un worktree git dédié (branche `worktree-agent-a89ded45a165ffabb`, créée par l'outil depuis `main` puis recalée sur `6277579`), à fusionner dans `refonte/la-descente`. Preview sur le port 4322 ; `test:e2e` non lancé (port 4321 réservé à S03, smoke prévu après la fusion).
+- **Fait** :
+  - **Polices (tâche 1)** : Fonts API avec les candidates A (Fraunces + Switzer), B (Instrument Serif + Switzer), C (Zodiak + General Sans) et deux monos du HUD en sous-ensemble (JetBrains Mono, Geist Mono : chiffres, unités, capitales, `° · : —`). `BaseLayout` charge la paire A avec trois préchargements ; le styleguide ajoute les autres, chargées seulement quand un sélecteur les utilise.
+  - **Contraste (tâche 2, TDD)** : `src/lib/color/contrast.ts` (OKLCH → OKLab → sRGB linéaire → sRGB, écrêtage, contrôle du gamut, luminance et ratio WCAG, hexadécimal) ; `palette.ts` (couleurs brutes, rôles des cinq tons, 13 couples vérifiés par ton) ; `src/lib/css/custom-properties.ts` lit `tokens.css` pour les tests de concordance.
+  - **Tokens (tâche 3)** : couleurs et rôles par ton, espacements et échelle typographique fluides (320 → 1440 px), rayons 2 / 14 / 999 px, ombres sous-marines (liseré de lumière sur les tons sombres, où les longues ombres faisaient du banding), lueurs de la lampe, `z-index`, grille de 12 colonnes, mouvement (miroir `src/lib/motion/tokens.ts`, courbes `CustomEase` dans `eases.ts`, polygone de la ligne d'eau E6 dans `waterline.ts`).
+  - **Typographie (tâche 4)** : titres en `text-wrap: balance`, paragraphes en `pretty`, italique « liquide » colorée selon la profondeur (h1, h2 et `.display`), `tabular-nums`, sur-titre à marqueur de profondeur (le tiret est une graduation).
+  - **Composants (tâche 5)** : `Button` (lampe, secondaire, fantôme, lien ; survol, focus en halo, appui, désactivé), `Eyebrow`, `EmphasisText`, `SectionHeader`, `Field` (champ, liste, zone de texte ; aide et erreur reliées), `Icon` (icônes dessinées pour le site). Cibles de 44 px.
+  - **Styleguide (tâche 6)** : `/styleguide/` (noindex, hors sitemap) avec le sélecteur d'appariement (`data-pairing`), la palette en « carottes » d'eau et les ratios mesurés de chaque ton, la colonne d'eau 0 → 40 → 0 m avec thermoclines, les composants dans tous leurs états sur trois tons, la maquette du HUD (plongée, palier, remontée trop rapide, pastille mobile) avec choix de la police des chiffres, et trois démos GSAP chargées seulement sous `motion-ok` : titre en flottabilité neutre (E5), révélation « ligne d'eau » (E6), gerbe de bulles selon la loi de Boyle (E7, prototype), avec un réglage de tempo (× 0,75 / 1 / 1,25).
+  - **Captures (tâche 7)** : `gates/gate-1/` : haut et milieu de page à 320, 768, 1024 et 1440 px (paire A), plus les paires B et C, la palette, le HUD avec chacune des trois polices de chiffres, le mouvement, une gerbe de bulles et, après la revue, les états des composants en surface et à l'abysse ; 20 JPEG de 12 à 119 Ko.
+  - **Auto-critique (tâche 8)** : grille `design:design-critique` et checklist `design-quality.md` (9 qualités requises sur 10, aucun motif interdit). Corrigés :
+    - barre sur deux lignes et grisâtre sur les tons sombres ;
+    - encart de la gate mal placé (une règle générique devenait plus spécifique avec le scoping d'Astro) ;
+    - nuanciers en grille de cartes, remplacés par des bandes continues ;
+    - rouge allumé trop saumon ;
+    - ocre du lagon boueux ;
+    - banding des ombres sur les tons sombres ;
+    - bouton désactivé rose ;
+    - mots courts isolés en fin de titre ;
+    - coupure entre un nombre et son unité ;
+    - révélation E6 qui ne jouait jamais (l'IntersectionObserver ne voit pas un élément masqué par son propre `clip-path`).
+- **Vérifications** :
+  - `npm run build` (+ `check:dist`, 3 pages) et `astro check` : 0 erreur, 0 avertissement.
+  - Tests : 215 (contraste, gamut des 27 couleurs, 65 couples de rôles et 10 couples sur le voile de survol, concordance CSS ↔ TS des couleurs, du voile et du mouvement, rôles déclarés dans les seuls blocs de ton, courbes, ligne d'eau). Couverture de `src/lib` : 99,3 % des instructions, 95,7 % des branches.
+  - Tests de mutation : un `--action` ajouté au bloc dérivé de `tokens.css`, ou un `--fg-soft` dans `global.css`, fait échouer le garde-fou des rôles ; une page sans `route` ni `noindex` fait échouer `astro check`.
+  - `check:budgets` et `format:check` verts.
+  - axe (WCAG 2.2 AA) : 0 violation à 1440 et à 375 px, pour les trois paires.
+  - Mouvement réduit et Mode calme : démos coupées, message affiché, contenu visible.
+  - 0 erreur console sur `/`, `/en/` et `/styleguide/`.
+- **Licences** (vérifiées le 01.10.2026) :
+  - Fraunces, Instrument Serif, JetBrains Mono et Geist Mono : **SIL OFL 1.1** (fichiers `ofl/<famille>/OFL.txt` du dépôt google/fonts) ;
+  - Switzer, Zodiak et General Sans : **ITF Free Font License 2.0 du 17.08.2026** (`License/FFL.txt` de l'archive officielle `api.fontshare.com/v2/fonts/download/switzer` ; `license_type: itf_ffl` dans l'API Fontshare pour les trois). Usage commercial et auto-hébergement autorisés ; sous-ensemble, conversion de format et diffusion par un dépôt ou une plateforme interdits (voir §Mutations).
+- **Poids des polices** (woff2, latin) :
+
+  | Famille | Romain | Italique |
+  |---|---|---|
+  | Fraunces (axes figés) | 36,9 Ko | 43,3 Ko |
+  | Switzer | 42,2 Ko | 32,6 Ko |
+  | Instrument Serif | 14,7 Ko | 15,3 Ko |
+  | Zodiak | 36,5 Ko | 43,6 Ko |
+  | General Sans | 37,2 Ko | 39,8 Ko |
+  | JetBrains Mono (sous-ensemble, U+00A0 compris) | 11,0 Ko | — |
+  | Geist Mono (sous-ensemble, U+00A0 compris) | 9,1 Ko | — |
+
+  Préchargement (3 fichiers) : 122 Ko pour A, 72 Ko pour B, 117 Ko pour C. Budget : 150 Ko.
+- **Constats** :
+  - Chez Google, réduire la plage de `wght` ne réduit pas le fichier ; figer un axe, si.
+  - Astro fusionne deux familles qui partagent la variable, le nom et le fournisseur (utilisé pour Fraunces).
+  - L'outil d'écriture décode la séquence d'échappement de l'espace insécable (U+00A0) : utiliser `String.fromCharCode(0xa0)`.
+  - Prettier remettait des retours à la ligne dans le `<textarea>` (corrigé par `set:text`).
+  - Dans le shell, un argument qui commence par `#` est un commentaire.
+- **Recommandations pour la Gate 1** (à présenter à Nicholas) :
+  1. appariement **A** (Fraunces + Switzer) : seul à porter le concept (italique douce et « liquide », chiffres tabulaires nets), 122 Ko préchargés ;
+  2. palette : garder la palette ajustée ; point de vigilance, en surface la combinaison crème + sérif + accent chaud rappelle le look « éditorial » générique (atténué par la photo du hero, le vrai rouge signal et la descente rapide dans l'eau) ;
+  3. mouvement : **juste** (× 1), à confirmer sur téléphone ;
+  4. HUD : **grotesque tabulaire** (Switzer), sans troisième police et plus compacte (en mono, l'alarme « PALIER » passe sur deux lignes).
+- **Points ouverts** :
+  - Gate 1 (tâche 9) puis tâche 10 :
+    - ne garder que les polices choisies et les renommer en `--font-display`, `--font-sans` (et `--font-hud` si un mono est retenu) ;
+    - reporter les ajustements de palette et de mouvement dans `01-direction-artistique.md` §3 à §5, avec une mutation.
+  - URL LAN de la gate : `npm run preview -- --host` sur la branche fusionnée, avec l'accord de Nicholas (jamais `astro dev --host`, D18).
+  - Après la fusion : smoke E2E (`npm run test:e2e`).
+  - S05 :
+    - Switzer italique (33 Ko) n'est téléchargée que si un `em` en texte courant l'utilise ;
+    - `Eyebrow` met lui-même la profondeur sur deux chiffres : à rapprocher de `src/lib/format.ts` (S03).
+  - S06 :
+    - reprendre `waterline.ts` et les courbes `buoyant`… pour `ImageReveal` et `SplitHeading` ;
+    - reprendre aussi le masque élargi des lignes (`padding-block` et marge négative de 0,2 em) et l'indicateur `playing` de l'animation rendue par `onSplit` (redécoupage pendant l'animation) ; avec `--leading-tight` (0,96), vérifier les accents des capitales du h1.
+  - S08 : remplacer le prototype de bulles par le moteur testé.
+  - S13 : supprimer `src/pages/styleguide.astro`, `src/components/styleguide/` et les deux entrées `styleguide-*` d'`app.ts`.
+- **Revue de code** (`code-reviewer`, Opus, sur le diff de la branche) : « approuvé avec réserves », 2 HIGH, 3 MEDIUM et 7 LOW, tous corrigés avant la Gate 1 :
+  1. HIGH, contraste non testé : le bouton fantôme survolé passait `--action-text` sur un voile (4,15:1 sur le lagon). Il garde `--fg` sur le voile. Le voile (`--veil-hover`) est déclaré dans `palette.ts` et le texte posé dessus est testé sur les cinq tons. L'alerte est testée comme texte (4,5:1), puisqu'elle écrit les alarmes du HUD.
+  2. HIGH, E5 : les masques de lignes de SplitText coupaient les jambages de Fraunces. Masques élargis de 0,2 em, départ à 135 %.
+  3. MEDIUM, E5 : l'animation se figeait à mi-course quand SplitText redécoupait pendant qu'elle jouait. Les démos tournent désormais dans un `gsap.context()` unique.
+  4. MEDIUM, cascade : un test parcourt `src/**/*.{css,astro}` et n'admet les rôles que dans les cinq blocs de ton de `tokens.css`.
+  5. MEDIUM : `BaseLayout` type `route` et `noindex` en union : une page hors des routes doit être `noindex`.
+  6. LOW : la lueur des boutons passe sur un `::after` dont seule l'opacité s'anime ; plus aucune transition de couleur, de bordure ou d'ombre.
+  7. LOW : survols sous `@media (hover: hover)`, jamais sur un bouton désactivé.
+  8. LOW : le crochet d'état du styleguide devient `data-sg-state`.
+  9. LOW : les ombres et la lueur des tons clairs, ainsi que `color-scheme: light`, s'appliquent aussi aux tons clairs imbriqués.
+  10. LOW : plus de valeurs en dur dans `Button` (`--veil-hover`, `--glow-soft`, `--glow-text` ; reflet radial supprimé).
+  11. LOW : U+00A0 ajouté au sous-ensemble des monos.
+  12. LOW, docs : mutation « textes visibles » précisée, brief S02 corrigé (preview, pas dev, pour l'URL LAN), commentaire de `motion.css`.
+
+  Captures refaites, dont `1440-mouvement.jpg` ; ajout de `1440-etats-surface.jpg` et `1440-etats-abysse.jpg`.
+- **Commits** :
+  - tâches 1 à 8 : `0b72d99`, `d189d96`, `761d152`, `d948814`, `aad6e53`, `b1c770d`, `60bd134` ;
+  - revue : `78c0dd3`, `f15e5a4`, `b97d9ca`, `35a779f`, `1be0cdc` ;
+  - puis les captures refaites et ce complément.
+- **Retour arrière** : `git revert` de ces commits (tokens, composants et styleguide sont isolés) ; ou ne pas fusionner la branche du worktree.

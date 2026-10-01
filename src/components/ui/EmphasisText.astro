@@ -1,0 +1,13 @@
+---
+import type { Emphasis } from '@/i18n/types.ts';
+
+/** Inline content of a title with an emphasis: `before <em>em</em> after`. */
+interface Props {
+  value: Emphasis;
+}
+
+const { value } = Astro.props;
+---
+
+{value.before} <em>{value.em}</em>
+{value.after !== undefined && ` ${value.after}`}

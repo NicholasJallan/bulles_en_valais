@@ -1,0 +1,42 @@
+---
+// Styleguide of « La Descente » for Gate 1 (S02): noindex, out of the sitemap, removed in S13.
+import { Font } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentsSection from '@/components/styleguide/ComponentsSection.astro';
+import HeroSpecimen from '@/components/styleguide/HeroSpecimen.astro';
+import HudSection from '@/components/styleguide/HudSection.astro';
+import MotionSection from '@/components/styleguide/MotionSection.astro';
+import PaletteSection from '@/components/styleguide/PaletteSection.astro';
+import SgBar from '@/components/styleguide/SgBar.astro';
+import SgFooter from '@/components/styleguide/SgFooter.astro';
+import TypeSpecimen from '@/components/styleguide/TypeSpecimen.astro';
+import WaterColumn from '@/components/styleguide/WaterColumn.astro';
+import '@/components/styleguide/styleguide.css';
+---
+
+<BaseLayout
+  locale="fr"
+  title="Styleguide · La Descente"
+  description="Système de design de la refonte « La Descente » : palette, typographie, composants et mouvement."
+  noindex
+>
+  {/* Candidates of the other pairings and HUD monos: loaded only when the switches use them. */}
+  <Fragment slot="head">
+    <Font cssVariable="--font-instrument-serif" />
+    <Font cssVariable="--font-zodiak" />
+    <Font cssVariable="--font-general-sans" />
+    <Font cssVariable="--font-jetbrains-mono" />
+    <Font cssVariable="--font-geist-mono" />
+  </Fragment>
+  <SgBar />
+  <main>
+    <HeroSpecimen />
+    <TypeSpecimen />
+    <PaletteSection />
+    <WaterColumn />
+    <ComponentsSection />
+    <HudSection />
+    <MotionSection />
+  </main>
+  <SgFooter />
+</BaseLayout>

@@ -1,0 +1,261 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Field from '@/components/ui/Field.astro';
+import type { Tone } from '@/lib/color/palette.ts';
+import { CARDS, FORM } from './samples.ts';
+import { TONE_INFO } from './palette-data.ts';
+
+interface Props {
+  tone: Tone;
+  /** Follows a header of the same tone: no full section gap above. */
+  compact?: boolean;
+}
+
+const { tone, compact = false } = Astro.props;
+
+const VARIANTS = [
+  { variant: 'primary', name: 'Principal « lampe »', label: 'Me contacter' },
+  { variant: 'secondary', name: 'Secondaire', label: 'Les cursus' },
+  { variant: 'ghost', name: 'Fantôme', label: 'Fermer' },
+  { variant: 'link', name: 'Lien', label: 'Voir les lieux' },
+] as const;
+
+const STATES = [
+  { state: undefined, name: 'repos' },
+  { state: 'hover', name: 'survol' },
+  { state: 'focus', name: 'focus' },
+  { state: 'active', name: 'appui' },
+  { state: 'disabled', name: 'désactivé' },
+] as const;
+
+const EYEBROWS = [
+  { depth: 5, label: 'L’instructeur' },
+  { depth: 12, label: 'Cursus' },
+  { depth: 40, label: 'Spécialités' },
+  { depth: 5, label: 'Palier' },
+] as const;
+---
+
+<div class:list={['set sg-section', { 'set-compact': compact }]} data-tone={tone}>
+  <div class="sg-wrap">
+    <h3 class="set-title">
+      {TONE_INFO[tone].name} <span class="set-depth">{TONE_INFO[tone].depth}</span>
+    </h3>
+
+    <div class="buttons">
+      {VARIANTS.map((row) => (
+        <div class="buttons-row">
+          <p class="sg-note buttons-name">{row.name}</p>
+          <ul class="buttons-states">
+            {STATES.map(({ state, name }) => (
+              <li>
+                <Button
+                  variant={row.variant}
+                  disabled={state === 'disabled'}
+                  data-sg-state={state === 'disabled' ? undefined : state}
+                >
+                  {row.label}
+                </Button>
+                <span class="sg-note">{name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="fields" role="group" aria-label={`Champs de formulaire (${TONE_INFO[tone].name})`}>
+      <Field
+        id={`${tone}-name`}
+        name="name"
+        label="Nom"
+        placeholder="Votre nom"
+        autocomplete="name"
+      />
+      <Field
+        id={`${tone}-email`}
+        name="email"
+        type="email"
+        label="E-mail"
+        value="vous@exemple.ch"
+        state="focus"
+      />
+      <Field
+        id={`${tone}-email-error`}
+        name="email-error"
+        type="email"
+        label="E-mail (erreur)"
+        value="nicholas.bullesenvalais.ch"
+        error="Il manque le « @ » de l’adresse e-mail."
+      />
+      <Field
+        id={`${tone}-interest`}
+        name="interest"
+        control="select"
+        label="Je suis intéressé·e par"
+        options={FORM.interests}
+        value="sdi-owd"
+      />
+      <Field
+        id={`${tone}-phone`}
+        name="phone"
+        type="tel"
+        label="Téléphone (désactivé)"
+        placeholder="+41 …"
+        disabled
+      />
+      <Field
+        id={`${tone}-message`}
+        name="message"
+        control="textarea"
+        label="Votre message"
+        hint="Niveau actuel, disponibilités, questions."
+        rows={3}
+      />
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <p class="card-kicker tabular">{CARDS.course.sub}</p>
+        <h4 class="card-title">{CARDS.course.name}</h4>
+        <p class="card-text">{CARDS.course.desc}</p>
+        <p class="card-price tabular">{CARDS.course.price}</p>
+      </article>
+      <article class="card card-place">
+        <p class="card-kicker tabular">{CARDS.place.coords}</p>
+        <h4 class="card-title">{CARDS.place.name}</h4>
+        <p class="card-text">{CARDS.place.desc}</p>
+      </article>
+      <figure class="card card-quote">
+        <blockquote>
+          <p>{CARDS.quote.text}</p>
+        </blockquote>
+        <figcaption class="sg-note">
+          {CARDS.quote.author} · {CARDS.quote.course}
+        </figcaption>
+      </figure>
+    </div>
+
+    <ul class="eyebrows">
+      {EYEBROWS.map((item) => (
+        <li>
+          <Eyebrow depth={item.depth} label={item.label} as="span" />
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .set-compact {
+    padding-block-start: var(--space-xl);
+  }
+
+  .set-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs);
+    margin-block-end: var(--space-l);
+    font-size: var(--step-3);
+  }
+
+  .set-depth {
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    letter-spacing: 0;
+    color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .buttons {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .buttons-states {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+
+  .buttons-states li {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3xs);
+  }
+
+  .buttons-name {
+    margin-block-end: var(--space-2xs);
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-m) var(--grid-gap);
+    margin-block: var(--space-2xl);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--grid-gap);
+    align-items: start;
+  }
+
+  .card {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-drift);
+  }
+
+  /* Layering: the place card sits lower, like a deeper station. */
+  .card-place {
+    margin-block-start: var(--space-xl);
+  }
+
+  .card-kicker {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    line-height: 1.1;
+  }
+
+  .card-text {
+    font-size: var(--step--1);
+  }
+
+  .card-price {
+    margin-block-start: var(--space-2xs);
+    font-weight: var(--text-strong);
+  }
+
+  .card-quote blockquote p {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-style: italic;
+    font-weight: var(--display-em-weight);
+    line-height: 1.25;
+  }
+
+  .eyebrows {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-xl);
+    margin-block-start: var(--space-2xl);
+    padding: 0;
+    list-style: none;
+  }
+</style>

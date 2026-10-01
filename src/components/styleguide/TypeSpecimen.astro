@@ -1,0 +1,232 @@
+---
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { PRICES, SECTION } from './samples.ts';
+
+/** Fluid steps of tokens.css with their size at 320 and 1440 px. */
+const SCALE = [
+  { token: '--step-hero', range: '44 → 136 px', role: 'Titre du hero' },
+  { token: '--step-5', range: '38 → 68 px', role: 'Citations, manifeste' },
+  { token: '--step-4', range: '32 → 51 px', role: 'Titres de section' },
+  { token: '--step-2', range: '22 → 29 px', role: 'Sous-titres' },
+  { token: '--step-1', range: '19 → 22 px', role: 'Chapeaux' },
+  { token: '--step-0', range: '16 → 18 px', role: 'Texte courant' },
+  { token: '--step--1', range: '14 → 15 px', role: 'Notes, étiquettes' },
+] as const;
+---
+
+<section id="typographie" class="sg-section type" data-tone="lagoon" aria-labelledby="sg-cursus">
+  <div class="sg-wrap">
+    <p class="sg-note type-label">
+      <strong>Typographie sur le vrai contenu.</strong> Ton lagon, comme la section Cursus. Changez
+      l’appariement en haut de page : titre, chapeau, paragraphe, tarifs et chiffres suivent.
+      Appariement affiché :{' '}
+      <span class="sg-when" data-pairing="a">
+        A, Fraunces et Switzer.
+      </span>
+      <span class="sg-when" data-pairing="b">
+        B, Instrument Serif et Switzer.
+      </span>
+      <span class="sg-when" data-pairing="c">
+        C, Zodiak et General Sans.
+      </span>
+    </p>
+    <div class="sg-grid type-grid">
+      <div class="type-copy">
+        <SectionHeader
+          id="sg-cursus"
+          depth={SECTION.depth}
+          eyebrow={SECTION.eyebrow}
+          title={SECTION.title}
+          lead={SECTION.lead}
+        />
+        <p class="type-body">{SECTION.body}</p>
+      </div>
+      <aside class="prices" aria-labelledby="sg-prices-title">
+        <h3 id="sg-prices-title" class="prices-title">
+          {PRICES.title}
+        </h3>
+        <dl class="prices-list">
+          {PRICES.rows.map((row) => (
+            <div class="prices-row">
+              <dt>
+                <span class="prices-name">{row.name}</span>
+                <span class="prices-meta">{row.meta}</span>
+              </dt>
+              <dd class="prices-amount">{row.price}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="sg-note">{PRICES.note}</p>
+      </aside>
+    </div>
+
+    <div class="digits" role="group" aria-label="Chiffres du HUD (maquette)">
+      <p class="digits-item">
+        <span class="digits-value">12,4</span>
+        <span class="digits-unit">m</span>
+      </p>
+      <p class="digits-item">
+        <span class="digits-value">14</span>
+        <span class="digits-unit">°C</span>
+      </p>
+      <p class="digits-item">
+        <span class="digits-value">03:27</span>
+        <span class="digits-unit">durée</span>
+      </p>
+    </div>
+
+    <ol class="scale" aria-label="Échelle typographique">
+      {SCALE.map((step) => (
+        <li class="scale-row">
+          <span class="scale-token">{step.token}</span>
+          <span class="scale-range">{step.range}</span>
+          <span class="scale-sample" style={`font-size: var(${step.token})`}>
+            {step.role}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .type-label {
+    max-inline-size: 60ch;
+    margin-block-end: var(--space-xl);
+  }
+
+  .type-grid {
+    row-gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .type-body {
+    margin-block-start: var(--space-m);
+  }
+
+  .prices {
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-float);
+  }
+
+  .prices-title {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+    letter-spacing: 0;
+    margin-block-end: var(--space-xs);
+  }
+
+  .prices-list {
+    display: grid;
+  }
+
+  .prices-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-xs);
+    border-block-end: 1px solid var(--line);
+  }
+
+  .prices-name {
+    display: block;
+    font-weight: 500;
+  }
+
+  .prices-meta {
+    display: block;
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .prices-amount {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--text-strong);
+  }
+
+  .prices .sg-note {
+    margin-block-start: var(--space-s);
+  }
+
+  .digits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-2xl);
+    margin-block: var(--space-2xl) var(--space-xl);
+    padding-block: var(--space-m);
+    border-block: 1px solid var(--line);
+  }
+
+  .digits-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35em;
+  }
+
+  .digits-value {
+    font-family: var(--font-hud);
+    font-size: var(--step-5);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .digits-unit {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .scale {
+    display: grid;
+    padding: 0;
+    list-style: none;
+  }
+
+  .scale-row {
+    display: grid;
+    grid-template-columns: 8.5rem 7rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-s);
+    padding-block: var(--space-2xs);
+    border-block-end: 1px solid var(--line-faint);
+  }
+
+  .scale-token,
+  .scale-range {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scale-sample {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  @media (width >= 48rem) {
+    .type-copy {
+      grid-column: 1 / span 7;
+    }
+
+    .prices {
+      grid-column: 9 / span 4;
+      margin-block-start: var(--space-3xl);
+    }
+  }
+
+  @media (width < 40rem) {
+    .scale-row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

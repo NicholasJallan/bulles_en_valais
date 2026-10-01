@@ -1,0 +1,70 @@
+---
+import Switch from './Switch.astro';
+
+const PAIRINGS = [
+  { value: 'a', label: 'A', detail: 'Fraunces + Switzer' },
+  { value: 'b', label: 'B', detail: 'Instrument Serif + Switzer' },
+  { value: 'c', label: 'C', detail: 'Zodiak + General Sans' },
+] as const;
+---
+
+<header class="bar" data-tone="surface">
+  <div class="sg-wrap bar-inner">
+    <h1 class="bar-title">
+      La Descente <span class="bar-sub">système de design</span>
+    </h1>
+    <Switch name="pairing" legend="Appariement" options={PAIRINGS} value="a" class="bar-switch" />
+  </div>
+</header>
+
+<style>
+  .bar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-nav);
+    border-block-end: 1px solid var(--line-faint);
+    box-shadow: var(--shadow-float);
+  }
+
+  .bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-3xs);
+  }
+
+  .bar-title {
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    line-height: 1.1;
+  }
+
+  .bar-sub {
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    letter-spacing: 0;
+    color: var(--fg-soft);
+  }
+
+  @media (width < 64rem) {
+    .bar :global(.switch-detail) {
+      display: none;
+    }
+  }
+
+  @media (width < 48rem) {
+    .bar-sub,
+    .bar :global(.switch-legend) {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+</style>

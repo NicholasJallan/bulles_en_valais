@@ -1,0 +1,86 @@
+/* Styleguide only (noindex, removed in S13). Layout helpers and the Gate 1 switches. */
+
+/* Pairings compared at Gate 1: A is the default of tokens.css. */
+html[data-pairing='b'] {
+  --font-display: var(--font-instrument-serif, Georgia, serif);
+  --display-weight: 400;
+  --display-em-weight: 400;
+  --display-tracking: -0.01em;
+}
+
+html[data-pairing='c'] {
+  --font-display: var(--font-zodiak, Georgia, serif);
+  --font-sans: var(--font-general-sans, system-ui, sans-serif);
+  --display-weight: 380;
+  --display-em-weight: 340;
+  --display-tracking: -0.025em;
+}
+
+html[data-hud='jetbrains'] {
+  --font-hud: var(--font-jetbrains-mono, monospace);
+}
+
+html[data-hud='geist'] {
+  --font-hud: var(--font-geist-mono, monospace);
+}
+
+html {
+  scroll-padding-block-start: 5.5rem;
+}
+
+.sg-wrap {
+  inline-size: 100%;
+  max-inline-size: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.sg-section {
+  padding-block: var(--space-section);
+}
+
+.sg-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+
+/* Documentation voice: small, quiet, never competing with the specimens. */
+.sg-note {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--fg-soft);
+}
+
+.sg-note strong {
+  color: var(--fg);
+  font-weight: var(--text-strong);
+}
+
+.sg-heading {
+  display: grid;
+  gap: var(--space-xs);
+  margin-block-end: var(--space-xl);
+}
+
+.sg-heading h2 {
+  font-size: var(--step-4);
+}
+
+/* Shown only for the active pairing or HUD font. */
+.sg-when {
+  display: none;
+}
+
+html:not([data-pairing]) .sg-when[data-pairing='a'],
+html[data-pairing='a'] .sg-when[data-pairing='a'],
+html[data-pairing='b'] .sg-when[data-pairing='b'],
+html[data-pairing='c'] .sg-when[data-pairing='c'] {
+  display: inline;
+}
+
+@media (width < 48rem) {
+  .sg-grid > * {
+    grid-column: 1 / -1;
+  }
+}

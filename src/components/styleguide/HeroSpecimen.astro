@@ -1,0 +1,154 @@
+---
+import { getDictionary } from '@/i18n/index.ts';
+import Button from '@/components/ui/Button.astro';
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import { HERO } from './samples.ts';
+
+const { title } = getDictionary('fr').hero;
+
+const QUESTIONS = [
+  'Appariement typographique : A, B ou C (sélecteur en haut de page).',
+  'Palette et tons : faut-il ajuster une couleur, un ton ?',
+  'Sensation du mouvement : plus lent, plus rapide, ou juste ?',
+  'Chiffres du HUD : grotesque tabulaire ou police mono ?',
+] as const;
+
+const CONTENTS = [
+  { href: '#typographie', label: 'Typographie' },
+  { href: '#palette', label: 'Palette' },
+  { href: '#colonne', label: 'Colonne d’eau' },
+  { href: '#composants', label: 'Composants' },
+  { href: '#hud', label: 'HUD' },
+  { href: '#mouvement', label: 'Mouvement' },
+] as const;
+---
+
+<section class="hero" data-tone="surface" aria-labelledby="sg-hero-label">
+  <div class="sg-wrap hero-grid">
+    <h2 id="sg-hero-label" class="visually-hidden">
+      Surface : le titre du hero
+    </h2>
+    <Eyebrow depth={0} label={HERO.eyebrow} class="hero-eyebrow" />
+    <p class="display display-hero hero-title">
+      <EmphasisText value={title} />
+    </p>
+    <div class="hero-copy">
+      <p class="lead">{HERO.lead}</p>
+      <div class="hero-actions">
+        <Button>{HERO.primary}</Button>
+        <Button variant="secondary" href="#typographie" icon="arrow-down">
+          {HERO.secondary}
+        </Button>
+      </div>
+    </div>
+    <aside class="hero-gate" aria-labelledby="sg-gate-title">
+      <h3 id="sg-gate-title" class="hero-gate-title">
+        À juger à la Gate 1
+      </h3>
+      <ol class="hero-gate-list">
+        {QUESTIONS.map((question) => (
+          <li>{question}</li>
+        ))}
+      </ol>
+      <nav class="hero-contents" aria-label="Sommaire du styleguide">
+        <ul>
+          {CONTENTS.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-2xl) var(--space-section);
+    overflow: clip;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    gap: var(--space-l) var(--grid-gap);
+    align-items: start;
+  }
+
+  .hero-eyebrow,
+  .hero-title,
+  .hero-copy,
+  .hero-gate {
+    grid-column: 1 / -1;
+  }
+
+  .hero-title {
+    margin-block-start: var(--space-xs);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-m);
+  }
+
+  .hero-gate {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-drift);
+  }
+
+  .hero-gate-title {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+    letter-spacing: 0;
+  }
+
+  .hero-gate-list {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-inline-start: 1.25em;
+    font-size: var(--step--1);
+  }
+
+  .hero-gate-list li::marker {
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-soft);
+  }
+
+  .hero-contents ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+    padding: var(--space-2xs) 0 0;
+    border-block-start: 1px solid var(--line-faint);
+    list-style: none;
+  }
+
+  .hero-contents a {
+    display: inline-block;
+    padding-block: 0.55em;
+    font-size: var(--step--1);
+  }
+
+  @media (width >= 64rem) {
+    .hero-title {
+      grid-column: 1 / span 11;
+    }
+
+    .hero-copy {
+      grid-column: 1 / span 6;
+    }
+
+    .hero-gate {
+      grid-column: 8 / span 5;
+    }
+  }
+</style>

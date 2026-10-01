@@ -17,10 +17,11 @@ html {
 
 body {
   min-height: 100svh;
-  background-color: var(--color-surface);
-  color: var(--color-ink);
+  background-color: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--step-0);
+  font-weight: var(--text-weight);
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
 }
@@ -49,4 +50,47 @@ h4,
 h5,
 h6 {
   overflow-wrap: break-word;
+}
+
+/* Tones: the section paints its own water. */
+[data-tone] {
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+[data-tone='emerald'],
+[data-tone='deep'],
+[data-tone='abyss'] {
+  color-scheme: dark;
+}
+
+/* A light tone nested in dark water gets its light controls back. */
+[data-tone='surface'],
+[data-tone='lagoon'] {
+  color-scheme: light;
+}
+
+::selection {
+  background-color: color-mix(in oklch, var(--action) 28%, var(--bg));
+  color: var(--fg);
+}
+
+/* Links in running text: the lamp colour, always underlined. */
+a {
+  color: var(--action-text);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* The keyboard focus is a halo of light, on every tone. */
+:focus-visible {
+  outline: var(--focus-width) solid var(--action);
+  outline-offset: var(--focus-offset);
 }
