@@ -1,17 +1,203 @@
-/* Provisional tokens (values of the current site): the design system replaces them in S02. */
+/*
+ * Design tokens of « La Descente » (plans/refonte-la-descente/01-direction-artistique.md).
+ * Colours mirror src/lib/color/palette.ts and motion mirrors src/lib/motion/tokens.ts:
+ * palette.test.ts and tokens.test.ts check that they match, and every contrast of every tone.
+ */
+
 :root {
-  --color-surface: #fafaf7;
-  --color-ink: #0f1e28;
-  --color-accent: #0f3a4f;
+  /* Raw colours: components use the tone roles below, never these directly. */
+  --c-surface: oklch(97.5% 0.008 85);
+  --c-surface-2: oklch(94% 0.014 85);
+  --c-surface-raised: oklch(99.3% 0.004 85);
+  --c-lagoon: oklch(90% 0.035 195);
+  --c-lagoon-raised: oklch(94.5% 0.024 195);
+  --c-lagoon-ink: oklch(45% 0.075 200);
+  --c-emerald: oklch(37% 0.056 200);
+  --c-leman: oklch(32% 0.055 230);
+  --c-deep: oklch(22% 0.045 240);
+  --c-deep-raised: oklch(27% 0.048 238);
+  --c-abyss: oklch(14% 0.03 245);
+  --c-abyss-raised: oklch(19% 0.035 243);
+  --c-ink: oklch(21% 0.03 240);
+  --c-ink-soft: oklch(38% 0.025 235);
+  --c-foam: oklch(96% 0.01 90);
+  --c-foam-soft: oklch(80% 0.02 220);
+  --c-torch: oklch(70% 0.17 36);
+  --c-torch-deep: oklch(51% 0.19 31);
+  --c-torch-pale: oklch(82% 0.1 40);
+  --c-torch-glow: oklch(76% 0.15 50);
+  --c-alert: oklch(82% 0.15 85);
+  --c-alert-deep: oklch(50% 0.1 70);
+  --c-deco-surface: oklch(58% 0.13 58);
+  --c-deco-lagoon: oklch(50% 0.085 80);
+  --c-deco-emerald: oklch(74% 0.06 115);
+  --c-deco-deep: oklch(70% 0.03 190);
+  --c-deco-abyss: oklch(62% 0.015 235);
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: Georgia, 'Times New Roman', serif;
+  /* Type. The Fonts API defines --font-fraunces, --font-switzer… (astro.config.mjs). */
+  --font-display: var(--font-fraunces, Georgia, serif);
+  --font-sans: var(--font-switzer, system-ui, sans-serif);
+  --font-hud: var(--font-sans);
+  --display-weight: 360;
+  --display-tracking: -0.02em;
+  --display-em-weight: 320;
+  --text-weight: 400;
+  --text-strong: 560;
 
-  --text-base: 1rem;
-  --text-hero: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
-  --leading-body: 1.6;
-  --leading-tight: 1.05;
+  --step--2: clamp(0.75rem, 0.7321rem + 0.0893vw, 0.8125rem);
+  --step--1: clamp(0.875rem, 0.8571rem + 0.0893vw, 0.9375rem);
+  --step-0: clamp(1rem, 0.9643rem + 0.1786vw, 1.125rem);
+  --step-1: clamp(1.1875rem, 1.125rem + 0.3125vw, 1.4063rem);
+  --step-2: clamp(1.4rem, 1.2857rem + 0.5714vw, 1.8rem);
+  --step-3: clamp(1.65rem, 1.4357rem + 1.0714vw, 2.4rem);
+  --step-4: clamp(2rem, 1.6571rem + 1.7143vw, 3.2rem);
+  --step-5: clamp(2.4rem, 1.8714rem + 2.6429vw, 4.25rem);
+  --step-hero: clamp(2.75rem, 1.1071rem + 8.2143vw, 8.5rem);
 
-  --space-gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
-  --measure: 65ch;
+  --leading-tight: 0.96;
+  --leading-snug: 1.1;
+  --leading-lead: 1.45;
+  --leading-body: 1.62;
+  --tracking-label: 0.01em;
+  --measure: 64ch;
+
+  /* Space: fluid from 320 to 1440 px. Sections breathe more than their content. */
+  --space-3xs: clamp(0.25rem, 0.2321rem + 0.0893vw, 0.3125rem);
+  --space-2xs: clamp(0.5rem, 0.4821rem + 0.0893vw, 0.5625rem);
+  --space-xs: clamp(0.75rem, 0.7143rem + 0.1786vw, 0.875rem);
+  --space-s: clamp(1rem, 0.9643rem + 0.1786vw, 1.125rem);
+  --space-m: clamp(1.5rem, 1.4464rem + 0.2679vw, 1.6875rem);
+  --space-l: clamp(2rem, 1.9286rem + 0.3571vw, 2.25rem);
+  --space-xl: clamp(3rem, 2.8929rem + 0.5357vw, 3.375rem);
+  --space-2xl: clamp(4rem, 3.8571rem + 0.7143vw, 4.5rem);
+  --space-3xl: clamp(6rem, 5.7857rem + 1.0714vw, 6.75rem);
+  --space-section: clamp(4.5rem, 3.2143rem + 6.4286vw, 9rem);
+  --space-breath: clamp(6rem, 3.7143rem + 11.4286vw, 14rem);
+
+  /* Layout: 12 columns, at least 16 px of margin on a phone. */
+  --page-max: 90rem;
+  --gutter: clamp(1rem, 0.4286rem + 2.8571vw, 3rem);
+  --grid-columns: 12;
+  --grid-gap: clamp(1rem, 0.7143rem + 1.4286vw, 2rem);
+  --tap-min: 2.75rem;
+
+  /* Radii: sharp for controls, soft for cards and images, round for bubbles and pills. */
+  --radius-sharp: 2px;
+  --radius-soft: 14px;
+  --radius-round: 999px;
+
+  /* Underwater shadows: large, diffuse, tinted by deep water. */
+  --shadow-float:
+    0 1px 2px oklch(22% 0.045 240 / 0.08), 0 12px 28px -14px oklch(22% 0.06 235 / 0.32);
+  --shadow-drift:
+    0 2px 6px oklch(22% 0.045 240 / 0.06), 0 28px 56px -28px oklch(22% 0.07 230 / 0.42);
+  --shadow-depth:
+    0 4px 12px oklch(18% 0.05 240 / 0.08), 0 48px 96px -40px oklch(18% 0.08 232 / 0.55);
+
+  /* Light: whatever can be clicked lights up, the keyboard focus is a halo. */
+  --glow-lit:
+    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 55%, transparent),
+    0 0 28px 2px color-mix(in oklch, var(--c-torch-glow) 38%, transparent),
+    0 0 72px 8px color-mix(in oklch, var(--c-torch) 20%, transparent);
+  --focus-width: 2px;
+  --focus-offset: 3px;
+
+  /* Stacking order. */
+  --z-below: -1;
+  --z-raised: 1;
+  --z-sticky: 100;
+  --z-hud: 200;
+  --z-bubbles: 250;
+  --z-nav: 300;
+  --z-menu: 400;
+  --z-dialog: 500;
+  --z-consent: 600;
+  --z-skip: 700;
+
+  /* Motion: neutral buoyancy, things arrive and settle (src/lib/motion/tokens.ts). */
+  --dur-instant: 120ms;
+  --dur-fast: 240ms;
+  --dur-base: 480ms;
+  --dur-slow: 900ms;
+  --dur-rise: 1100ms;
+  --dur-drift: 1400ms;
+  --dur-tide: 2400ms;
+  --stagger-line: 80ms;
+  --ease-buoyant: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-surface: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-drift: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-sink: cubic-bezier(0.55, 0, 0.75, 0.2);
+}
+
+/* Tones: each section sets its background and text colours with data-tone. */
+:root,
+[data-tone='surface'] {
+  --bg: var(--c-surface);
+  --bg-panel: var(--c-surface-raised);
+  --fg: var(--c-ink);
+  --fg-soft: var(--c-ink-soft);
+  --accent-deco: var(--c-deco-surface);
+  --action: var(--c-torch-deep);
+  --action-ink: var(--c-foam);
+  --action-text: var(--c-torch-deep);
+  --alert: var(--c-alert-deep);
+}
+
+[data-tone='lagoon'] {
+  --bg: var(--c-lagoon);
+  --bg-panel: var(--c-lagoon-raised);
+  --fg: var(--c-ink);
+  --fg-soft: var(--c-ink-soft);
+  --accent-deco: var(--c-deco-lagoon);
+  --action: var(--c-torch-deep);
+  --action-ink: var(--c-foam);
+  --action-text: var(--c-torch-deep);
+  --alert: var(--c-alert-deep);
+}
+
+[data-tone='emerald'] {
+  --bg: var(--c-emerald);
+  --bg-panel: var(--c-leman);
+  --fg: var(--c-foam);
+  --fg-soft: var(--c-foam-soft);
+  --accent-deco: var(--c-deco-emerald);
+  --action: var(--c-torch);
+  --action-ink: var(--c-ink);
+  --action-text: var(--c-torch-pale);
+  --alert: var(--c-alert);
+}
+
+[data-tone='deep'] {
+  --bg: var(--c-deep);
+  --bg-panel: var(--c-deep-raised);
+  --fg: var(--c-foam);
+  --fg-soft: var(--c-foam-soft);
+  --accent-deco: var(--c-deco-deep);
+  --action: var(--c-torch);
+  --action-ink: var(--c-ink);
+  --action-text: var(--c-torch);
+  --alert: var(--c-alert);
+}
+
+[data-tone='abyss'] {
+  --bg: var(--c-abyss);
+  --bg-panel: var(--c-abyss-raised);
+  --fg: var(--c-foam);
+  --fg-soft: var(--c-foam-soft);
+  --accent-deco: var(--c-deco-abyss);
+  --action: var(--c-torch);
+  --action-ink: var(--c-ink);
+  --action-text: var(--c-torch);
+  --alert: var(--c-alert);
+}
+
+/* Derived from the roles of the nearest tone (decorative only: no contrast requirement). */
+:root,
+[data-tone] {
+  --line: color-mix(in oklch, var(--fg) 16%, var(--bg));
+  --line-faint: color-mix(in oklch, var(--fg) 8%, var(--bg));
+  --glow: color-mix(in oklch, var(--c-torch-glow) 45%, transparent);
+  --focus-halo:
+    0 0 0 7px color-mix(in oklch, var(--action) 20%, transparent),
+    0 0 26px 4px color-mix(in oklch, var(--c-torch-glow) 32%, transparent);
 }
