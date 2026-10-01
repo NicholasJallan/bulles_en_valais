@@ -84,16 +84,6 @@ export const legalEn: Dictionary['legal'] = {
         ],
       },
       {
-        heading: 'Transfers outside Switzerland',
-        paragraphs: [
-          [
-            {
-              text: 'Google and Meta may process data in the United States. These transfers are covered by the Swiss-U.S. Data Privacy Framework (and, for the European Union, the EU-U.S. Data Privacy Framework) or by standard contractual clauses.',
-            },
-          ],
-        ],
-      },
-      {
         heading: 'Retention',
         paragraphs: [[{ text: 'Data is kept for as long as its purpose requires, then deleted:' }]],
         list: [
@@ -114,7 +104,7 @@ export const legalEn: Dictionary['legal'] = {
                 href: 'mailto:nicholas@bullesenvalais.ch',
               },
             },
-            { text: ': I reply within 30 days.' },
+            { text: '.' },
           ],
           [
             {

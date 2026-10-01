@@ -90,16 +90,6 @@ export const legalFr: Dictionary['legal'] = {
         ],
       },
       {
-        heading: 'Transferts hors de Suisse',
-        paragraphs: [
-          [
-            {
-              text: "Google et Meta peuvent traiter des données aux États-Unis. Ces transferts sont encadrés par le Swiss-U.S. Data Privacy Framework (et, pour l'Union européenne, par l'EU-U.S. Data Privacy Framework) ou par des clauses contractuelles types.",
-            },
-          ],
-        ],
-      },
-      {
         heading: 'Durées de conservation',
         paragraphs: [
           [
@@ -126,7 +116,7 @@ export const legalFr: Dictionary['legal'] = {
                 href: 'mailto:nicholas@bullesenvalais.ch',
               },
             },
-            { text: ' : je réponds dans un délai de 30 jours.' },
+            { text: '.' },
           ],
           [
             {
