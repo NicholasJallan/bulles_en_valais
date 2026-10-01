@@ -25,7 +25,7 @@ export const COLORS = {
   'ink-soft': oklch(38, 0.025, 235),
   foam: oklch(96, 0.01, 90), // text on dark tones
   'foam-soft': oklch(80, 0.02, 220),
-  torch: oklch(70, 0.17, 36), // the lamp, lit: actions on dark tones
+  torch: oklch(68, 0.19, 33), // the lamp, lit: actions on dark tones
   'torch-deep': oklch(51, 0.19, 31), // the lamp in daylight: actions on light tones
   'torch-pale': oklch(82, 0.1, 40), // links on emerald
   'torch-glow': oklch(76, 0.15, 50), // halo of the actions
@@ -33,7 +33,7 @@ export const COLORS = {
   'alert-deep': oklch(50, 0.1, 70), // the same warning on light tones
   // Decorative warmth fades with depth like daylight: red goes first, then orange, then yellow.
   'deco-surface': oklch(58, 0.13, 58),
-  'deco-lagoon': oklch(50, 0.085, 80),
+  'deco-lagoon': oklch(54, 0.1, 86),
   'deco-emerald': oklch(74, 0.06, 115),
   'deco-deep': oklch(70, 0.03, 190),
   'deco-abyss': oklch(62, 0.015, 235),

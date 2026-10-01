@@ -146,10 +146,12 @@ const classes = ['button', `button-${variant}`, className];
     transform: translateY(1px);
   }
 
+  /* Disabled: the lamp is off (no glow, no colour), not just paler. */
   .button:is(:disabled, [aria-disabled='true']) {
     --button-shadow: 0 0 0 0 transparent;
     background-image: none;
-    opacity: 0.42;
+    opacity: 0.5;
+    filter: grayscale(1);
     cursor: not-allowed;
   }
 </style>

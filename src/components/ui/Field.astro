@@ -69,9 +69,8 @@ const shared = {
     </p>
   )}
   {control === 'textarea' ? (
-    <textarea {...shared} rows={rows} placeholder={placeholder}>
-        {value}
-      </textarea>
+    /* set:text: the content of a textarea is its value, formatting whitespace included. */
+    <textarea {...shared} rows={rows} placeholder={placeholder} set:text={value ?? ''} />
   ) : control === 'select' ? (
     <div class="field-select">
       <select {...shared} autocomplete={autocomplete}>

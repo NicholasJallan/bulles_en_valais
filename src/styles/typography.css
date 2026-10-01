@@ -28,10 +28,14 @@ h3 {
 }
 
 /* The italic part of a title: liquid, and coloured by the light of its depth (warm at the
-   surface, grey in the abyss). Only actions keep the red at every depth. */
+   surface, grey in the abyss). Only actions keep the red at every depth. --accent-deco is
+   checked at 3:1, the large-text minimum: keep it on text of 24 px and more. */
 :is(h1, h2, h3, .display) em {
   font-style: italic;
   font-weight: var(--display-em-weight);
+}
+
+:is(h1, h2, .display) em {
   color: var(--accent-deco);
 }
 

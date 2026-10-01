@@ -39,6 +39,10 @@ describe('waterlinePoints', () => {
     expect(Math.abs(level(moved) - level(still)) / still.length).toBeLessThan(2);
   });
 
+  it('puts a single point at the left edge', () => {
+    expect(waterlinePoints(1, { points: 1, amplitude: 0 })).toEqual([[0, 0]]);
+  });
+
   it('accepts another number of points and amplitude', () => {
     const points = waterlinePoints(0.5, { points: 8, amplitude: 0 });
     expect(points).toHaveLength(8);

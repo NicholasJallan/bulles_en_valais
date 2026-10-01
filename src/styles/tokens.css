@@ -22,14 +22,14 @@
   --c-ink-soft: oklch(38% 0.025 235);
   --c-foam: oklch(96% 0.01 90);
   --c-foam-soft: oklch(80% 0.02 220);
-  --c-torch: oklch(70% 0.17 36);
+  --c-torch: oklch(68% 0.19 33);
   --c-torch-deep: oklch(51% 0.19 31);
   --c-torch-pale: oklch(82% 0.1 40);
   --c-torch-glow: oklch(76% 0.15 50);
   --c-alert: oklch(82% 0.15 85);
   --c-alert-deep: oklch(50% 0.1 70);
   --c-deco-surface: oklch(58% 0.13 58);
-  --c-deco-lagoon: oklch(50% 0.085 80);
+  --c-deco-lagoon: oklch(54% 0.1 86);
   --c-deco-emerald: oklch(74% 0.06 115);
   --c-deco-deep: oklch(70% 0.03 190);
   --c-deco-abyss: oklch(62% 0.015 235);
@@ -94,11 +94,11 @@
   --shadow-depth:
     0 4px 12px oklch(18% 0.05 240 / 0.08), 0 48px 96px -40px oklch(18% 0.08 232 / 0.55);
 
-  /* Light: whatever can be clicked lights up, the keyboard focus is a halo. */
+  /* Light: whatever can be clicked lights up, the keyboard focus is a halo. In daylight the lamp
+     only pools a warm light beneath; in dark water it glows (see the dark tones below). */
   --glow-lit:
-    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 55%, transparent),
-    0 0 28px 2px color-mix(in oklch, var(--c-torch-glow) 38%, transparent),
-    0 0 72px 8px color-mix(in oklch, var(--c-torch) 20%, transparent);
+    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 50%, transparent),
+    0 10px 22px -8px color-mix(in oklch, var(--c-torch) 55%, transparent);
   --focus-width: 2px;
   --focus-offset: 3px;
 
@@ -200,4 +200,23 @@
   --focus-halo:
     0 0 0 7px color-mix(in oklch, var(--action) 20%, transparent),
     0 0 26px 4px color-mix(in oklch, var(--c-torch-glow) 32%, transparent);
+}
+
+/* In dark water a long shadow only bands: depth comes from a rim of light on top instead. */
+[data-tone='emerald'],
+[data-tone='deep'],
+[data-tone='abyss'] {
+  --shadow-float:
+    inset 0 1px 0 color-mix(in oklch, var(--fg) 7%, transparent),
+    0 10px 20px -14px oklch(8% 0.03 245 / 0.7);
+  --shadow-drift:
+    inset 0 1px 0 color-mix(in oklch, var(--fg) 9%, transparent),
+    0 18px 32px -22px oklch(8% 0.03 245 / 0.75);
+  --shadow-depth:
+    inset 0 1px 0 color-mix(in oklch, var(--fg) 10%, transparent),
+    0 24px 40px -26px oklch(6% 0.03 245 / 0.8);
+  --glow-lit:
+    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 55%, transparent),
+    0 0 28px 2px color-mix(in oklch, var(--c-torch-glow) 38%, transparent),
+    0 0 72px 8px color-mix(in oklch, var(--c-torch) 20%, transparent);
 }
