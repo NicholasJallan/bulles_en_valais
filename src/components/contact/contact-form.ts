@@ -69,11 +69,130 @@ function setFieldError(form: HTMLFormElement, field: CheckedField, text: string 
   else input.removeAttribute('aria-describedby');
 }
 
-export function init(element: HTMLElement): Cleanup {
+interface FormContext {
+  readonly element: HTMLElement;
+  readonly form: HTMLFormElement;
+  readonly messages: Messages;
+  readonly locale: Locale;
+  readonly summary: HTMLElement;
+  readonly summaryList: HTMLUListElement;
+  readonly submit: HTMLButtonElement;
+  readonly status: HTMLElement;
+  readonly success: HTMLElement;
+  readonly failure: HTMLElement;
+}
+
+function summaryItem(context: FormContext, field: CheckedField): HTMLLIElement {
+  const item = document.createElement('li');
+  const link = document.createElement('a');
+  link.href = `#${control(context.form, field).id}`;
+  link.textContent = context.messages.fieldNames[field];
+  item.append(link);
+  return item;
+}
+
+/** Errors next to each field, and their summary above the form (focused on submit). */
+function showErrors(context: FormContext, errors: ContactErrors, focusSummary: boolean): void {
+  for (const field of CHECKED) {
+    const error = errors[field];
+    setFieldError(context.form, field, error && context.messages.errors[error]);
+  }
+  const invalid = CHECKED.filter((field) => errors[field] !== undefined);
+  context.summaryList.replaceChildren(...invalid.map((field) => summaryItem(context, field)));
+  context.summary.hidden = invalid.length === 0;
+  if (focusSummary && invalid.length > 0) context.summary.focus();
+}
+
+/** Fields the server refused: it does not say why, so each one is named in the summary. */
+function showRefused(context: FormContext, fields: readonly CheckedField[]): void {
+  const { messages } = context;
+  showErrors(context, Object.fromEntries(fields.map((field) => [field, 'required'])), true);
+  for (const field of fields) {
+    setFieldError(context.form, field, `${messages.errorSummary} ${messages.fieldNames[field]}`);
+  }
+}
+
+/** The other ways to reach Nicholas, prepared with the message: links, never opened for him. */
+function showFailure(context: FormContext, fields: ContactFields, focus: boolean): void {
+  const { messages, failure } = context;
+  const interest = control(context.form, 'interest') as HTMLSelectElement;
+  const interestLabel = interest.selectedOptions[0]?.textContent?.trim() ?? fields.interest;
+  const email = context.element.dataset.email ?? '';
+  part<HTMLAnchorElement>(failure, '[data-mailto]').href = mailtoHref(
+    email,
+    fields,
+    messages.mail,
+    interestLabel,
+    context.locale,
+  );
+  part<HTMLAnchorElement>(failure, '[data-whatsapp-fallback]').href = whatsappUrl(
+    fields.message.trim() || messages.whatsappDefault,
+  );
+  failure.hidden = false;
+  if (focus) failure.focus();
+}
+
+function setSending(context: FormContext, sending: boolean): void {
+  context.submit.disabled = sending;
+  context.status.textContent = sending ? context.messages.sending : '';
+}
+
+async function submitForm(context: FormContext): Promise<void> {
+  const { form } = context;
+  const fields = readFields(form);
+  const errors = validateContact(fields);
+  context.failure.hidden = true;
+  showErrors(context, errors, true);
+  if (Object.keys(errors).length > 0) return;
+  setSending(context, true);
+  const website = control(form, 'website').value;
+  const payload = buildPayload(fields, {
+    locale: context.locale,
+    elapsed: performance.now(),
+    website,
+  });
+  const outcome = await sendContact(payload);
+  setSending(context, false);
+  if (outcome.kind === 'success') {
+    form.hidden = true;
+    context.success.hidden = false;
+    context.success.focus();
+  } else if (outcome.kind === 'invalid') {
+    showRefused(context, outcome.fields);
+    showFailure(context, fields, false);
+  } else {
+    showFailure(context, fields, true);
+  }
+}
+
+/** Checks a field when leaving it, once something was typed in it or it was marked invalid. */
+function validateOnLeave(context: FormContext, target: EventTarget | null): void {
+  const input = target as Control | null;
+  const field = CHECKED.find((name) => name === input?.name);
+  if (field === undefined || input === null) return;
+  const touched = input.value.trim() !== '' || input.getAttribute('aria-invalid') === 'true';
+  if (!touched) return;
+  const error = validateContact(readFields(context.form))[field];
+  setFieldError(context.form, field, error && context.messages.errors[error]);
+}
+
+/** Links such as « Offer a gift voucher » choose the interest before reaching the form. */
+function prefill(context: FormContext, target: EventTarget | null): void {
+  const link = target instanceof Element ? target.closest('[data-prefill-interest]') : null;
+  const value = link?.getAttribute('data-prefill-interest');
+  const select = control(context.form, 'interest') as HTMLSelectElement;
+  if (value && Array.from(select.options).some((option) => option.value === value)) {
+    select.value = value;
+  }
+}
+
+function contextOf(element: HTMLElement): FormContext {
   const form = part<HTMLFormElement>(element, '[data-form]');
-  const messages = JSON.parse(element.dataset.messages ?? '{}') as Messages;
-  const locale = (element.dataset.locale ?? 'fr') as Locale;
-  const view = {
+  return {
+    element,
+    form,
+    messages: JSON.parse(element.dataset.messages ?? '{}') as Messages,
+    locale: (element.dataset.locale ?? 'fr') as Locale,
     summary: part<HTMLElement>(form, '[data-summary]'),
     summaryList: part<HTMLUListElement>(form, '[data-summary-list]'),
     submit: part<HTMLButtonElement>(form, '[data-submit]'),
@@ -81,122 +200,70 @@ export function init(element: HTMLElement): Cleanup {
     success: part<HTMLElement>(element, '[data-success]'),
     failure: part<HTMLElement>(element, '[data-failure]'),
   };
-  const errorText = (error: FieldError) => messages.errors[error];
+}
 
-  const showErrors = (errors: ContactErrors, focusSummary: boolean) => {
-    for (const field of CHECKED) {
-      const error = errors[field];
-      setFieldError(form, field, error === undefined ? undefined : errorText(error));
-    }
-    const invalid = CHECKED.filter((field) => errors[field] !== undefined);
-    view.summaryList.replaceChildren(
-      ...invalid.map((field) => {
-        const item = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = `#${control(form, field).id}`;
-        link.textContent = messages.fieldNames[field];
-        item.append(link);
-        return item;
-      }),
-    );
-    view.summary.hidden = invalid.length === 0;
-    if (focusSummary && invalid.length > 0) view.summary.focus();
-  };
+type Listener = readonly [EventTarget, string, (event: Event) => void];
 
-  const onSummaryClick = (event: MouseEvent) => {
-    const link = event.target instanceof Element ? event.target.closest('a') : null;
-    if (link === null) return;
-    event.preventDefault();
-    document.getElementById(link.hash.slice(1))?.focus();
-  };
+export function init(element: HTMLElement): Cleanup {
+  const context = contextOf(element);
+  const { form, submit, summary, success } = context;
+  // Pressing « Send » blurs the field: showing its error then would move the button under the
+  // pointer and lose the click (the submit checks every field anyway). On touch screens the blur
+  // comes after pointerup, so the flag lasts until the next press.
+  let pressingSubmit = false;
 
-  const onFocusOut = (event: FocusEvent) => {
-    const target = event.target as Control | null;
-    const field = CHECKED.find((name) => name === target?.name);
-    if (field === undefined || target === null) return;
-    const touched = target.value.trim() !== '' || target.getAttribute('aria-invalid') === 'true';
-    if (!touched) return;
-    const error = validateContact(readFields(form))[field];
-    setFieldError(form, field, error === undefined ? undefined : errorText(error));
-  };
+  const listeners: readonly Listener[] = [
+    [
+      form,
+      'submit',
+      (event) => {
+        event.preventDefault();
+        if (!submit.disabled) void submitForm(context);
+      },
+    ],
+    [
+      form,
+      'focusout',
+      (event) => {
+        const { relatedTarget } = event as FocusEvent;
+        if (!pressingSubmit && relatedTarget !== submit) validateOnLeave(context, event.target);
+      },
+    ],
+    [
+      document,
+      'pointerdown',
+      (event) => {
+        pressingSubmit = event.target instanceof Node && submit.contains(event.target);
+      },
+    ],
+    [
+      summary,
+      'click',
+      (event) => {
+        const link = event.target instanceof Element ? event.target.closest('a') : null;
+        if (link === null) return;
+        event.preventDefault();
+        document.getElementById(link.hash.slice(1))?.focus();
+      },
+    ],
+    [
+      part(success, '[data-reset]'),
+      'click',
+      () => {
+        form.reset();
+        showErrors(context, {}, false);
+        success.hidden = true;
+        form.hidden = false;
+        control(form, 'name').focus();
+      },
+    ],
+    [document, 'click', (event) => prefill(context, event.target)],
+  ];
 
-  const setSending = (sending: boolean) => {
-    view.submit.disabled = sending;
-    view.status.textContent = sending ? messages.sending : '';
-  };
-
-  const showFailure = (fields: ContactFields, focus: boolean) => {
-    const interest = control(form, 'interest') as HTMLSelectElement;
-    const interestLabel = interest.selectedOptions[0]?.textContent?.trim() ?? fields.interest;
-    const mailto = part<HTMLAnchorElement>(view.failure, '[data-mailto]');
-    const email = element.dataset.email ?? '';
-    mailto.href = mailtoHref(email, fields, messages.mail, interestLabel, locale);
-    const whatsapp = part<HTMLAnchorElement>(view.failure, '[data-whatsapp-fallback]');
-    whatsapp.href = whatsappUrl(fields.message.trim() || messages.whatsappDefault);
-    view.failure.hidden = false;
-    if (focus) view.failure.focus();
-  };
-
-  const onSubmit = async (event: SubmitEvent) => {
-    event.preventDefault();
-    if (view.submit.disabled) return;
-    const fields = readFields(form);
-    const errors = validateContact(fields);
-    view.failure.hidden = true;
-    showErrors(errors, true);
-    if (Object.keys(errors).length > 0) return;
-    setSending(true);
-    const website = control(form, 'website').value;
-    const payload = buildPayload(fields, { locale, elapsed: performance.now(), website });
-    const outcome = await sendContact(payload);
-    setSending(false);
-    if (outcome.kind === 'success') {
-      form.hidden = true;
-      view.success.hidden = false;
-      view.success.focus();
-    } else if (outcome.kind === 'invalid') {
-      const refused = Object.fromEntries(outcome.fields.map((field) => [field, 'required']));
-      showErrors(refused as ContactErrors, true);
-      for (const field of outcome.fields) {
-        setFieldError(form, field, `${messages.errorSummary} ${messages.fieldNames[field]}`);
-      }
-      showFailure(fields, false);
-    } else {
-      showFailure(fields, true);
-    }
-  };
-
-  const onReset = () => {
-    form.reset();
-    showErrors({}, false);
-    view.success.hidden = true;
-    form.hidden = false;
-    control(form, 'name').focus();
-  };
-
-  /** Links such as « Offer a gift voucher » choose the interest before reaching the form. */
-  const onPrefill = (event: MouseEvent) => {
-    const link =
-      event.target instanceof Element ? event.target.closest('[data-prefill-interest]') : null;
-    const value = link?.getAttribute('data-prefill-interest');
-    const select = control(form, 'interest') as HTMLSelectElement;
-    if (value && Array.from(select.options).some((option) => option.value === value)) {
-      select.value = value;
-    }
-  };
-
-  const reset = part<HTMLButtonElement>(view.success, '[data-reset]');
   form.noValidate = true;
-  form.addEventListener('submit', onSubmit);
-  form.addEventListener('focusout', onFocusOut);
-  view.summary.addEventListener('click', onSummaryClick);
-  reset.addEventListener('click', onReset);
-  document.addEventListener('click', onPrefill);
+  submit.disabled = false;
+  for (const [target, type, listener] of listeners) target.addEventListener(type, listener);
   return () => {
-    form.removeEventListener('submit', onSubmit);
-    form.removeEventListener('focusout', onFocusOut);
-    view.summary.removeEventListener('click', onSummaryClick);
-    reset.removeEventListener('click', onReset);
-    document.removeEventListener('click', onPrefill);
+    for (const [target, type, listener] of listeners) target.removeEventListener(type, listener);
   };
 }

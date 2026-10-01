@@ -16,4 +16,7 @@ const CONTROLLERS: ControllerRegistry = {
 
 void mountControllers(document, CONTROLLERS, (error, name) => {
   console.error(`Controller "${name}" failed to start`, error);
+}).then(() => {
+  // Lets the end-to-end tests (and later the motion module) wait for the controllers.
+  document.documentElement.dataset.controllers = 'ready';
 });

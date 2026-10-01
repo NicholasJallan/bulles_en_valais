@@ -113,7 +113,8 @@ const messages = JSON.stringify({
 
     <p class="fine no-js-only form-no-js">{t.noScript}</p>
     <div class="form-actions js-only">
-      <Button type="submit" icon="arrow-up-right" data-submit>
+      {/* Enabled by contact-form.ts: a click before it starts must not post the form natively. */}
+      <Button type="submit" icon="arrow-up-right" disabled data-submit>
         {t.submit}
       </Button>
       <p class="form-status fine" role="status" data-status></p>
