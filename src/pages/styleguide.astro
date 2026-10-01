@@ -1,6 +1,5 @@
 ---
 // Styleguide of « La Descente » for Gate 1 (S02): noindex, out of the sitemap, removed in S13.
-import { Font } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ComponentsSection from '@/components/styleguide/ComponentsSection.astro';
 import HeroSpecimen from '@/components/styleguide/HeroSpecimen.astro';
@@ -20,14 +19,6 @@ import '@/components/styleguide/styleguide.css';
   description="Système de design de la refonte « La Descente » : palette, typographie, composants et mouvement."
   noindex
 >
-  {/* Candidates of the other pairings and HUD monos: loaded only when the switches use them. */}
-  <Fragment slot="head">
-    <Font cssVariable="--font-instrument-serif" />
-    <Font cssVariable="--font-zodiak" />
-    <Font cssVariable="--font-general-sans" />
-    <Font cssVariable="--font-jetbrains-mono" />
-    <Font cssVariable="--font-geist-mono" />
-  </Fragment>
   <SgBar />
   <main>
     <HeroSpecimen />

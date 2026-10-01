@@ -1,11 +1,5 @@
 ---
-import Switch from './Switch.astro';
-
-const PAIRINGS = [
-  { value: 'a', label: 'A', detail: 'Fraunces + Switzer' },
-  { value: 'b', label: 'B', detail: 'Instrument Serif + Switzer' },
-  { value: 'c', label: 'C', detail: 'Zodiak + General Sans' },
-] as const;
+/** Bar of the styleguide: its name and the fonts chosen at Gate 1. */
 ---
 
 <header class="bar" data-tone="surface">
@@ -13,7 +7,7 @@ const PAIRINGS = [
     <h1 class="bar-title">
       La Descente <span class="bar-sub">système de design</span>
     </h1>
-    <Switch name="pairing" legend="Appariement" options={PAIRINGS} value="a" class="bar-switch" />
+    <p class="bar-fonts">Instrument Serif + Switzer</p>
   </div>
 </header>
 
@@ -50,15 +44,14 @@ const PAIRINGS = [
     color: var(--fg-soft);
   }
 
-  @media (width < 64rem) {
-    .bar :global(.switch-detail) {
-      display: none;
-    }
+  .bar-fonts {
+    padding-block: var(--space-2xs);
+    font-size: var(--step--1);
+    color: var(--fg-soft);
   }
 
   @media (width < 48rem) {
-    .bar-sub,
-    .bar :global(.switch-legend) {
+    .bar-sub {
       position: absolute;
       inline-size: 1px;
       block-size: 1px;

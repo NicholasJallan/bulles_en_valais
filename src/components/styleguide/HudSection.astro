@@ -1,12 +1,4 @@
 ---
-import Switch from './Switch.astro';
-
-const HUD_FONTS = [
-  { value: 'grotesk', label: 'Grotesque tabulaire', detail: 'sans police de plus' },
-  { value: 'jetbrains', label: 'JetBrains Mono', detail: 'sous-ensemble' },
-  { value: 'geist', label: 'Geist Mono', detail: 'sous-ensemble' },
-] as const;
-
 const STATES = [
   {
     name: 'En plongée',
@@ -19,7 +11,7 @@ const STATES = [
   {
     name: 'Palier de sécurité',
     depth: '5,0',
-    temperature: '17',
+    temperature: '20',
     time: '02:41',
     alarm: 'PALIER 5 m · 02:41',
     dot: [134, 16],
@@ -48,9 +40,8 @@ const PROFILE = 'M4 6 L30 46 L96 46 L128 16 L140 16 L152 6';
       <p class="sg-note">
         Esprit ordinateur de plongée : grands chiffres, petites étiquettes, aucune fioriture. Sur
         ordinateur, il se tient au bord droit ; sur téléphone, c’est une pastille en bas à gauche.
-        Comparez la police des chiffres.
+        Chiffres en Switzer tabulaire (Gate 1).
       </p>
-      <Switch name="hud" legend="Chiffres" options={HUD_FONTS} value="grotesk" />
     </header>
 
     <p class="digits-row" aria-hidden="true">

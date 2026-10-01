@@ -12,10 +12,11 @@ export const COLORS = {
   surface: oklch(97.5, 0.008, 85), // foam: main light background
   'surface-2': oklch(94, 0.014, 85), // limestone: sunken areas
   'surface-raised': oklch(99.3, 0.004, 85),
-  lagoon: oklch(90, 0.035, 195),
-  'lagoon-raised': oklch(94.5, 0.024, 195),
-  'lagoon-ink': oklch(45, 0.075, 200), // Rosel turquoise: cold accents (0.08 is outside sRGB)
-  emerald: oklch(37, 0.056, 200), // glacial; darker than the first proposal (42 %) for contrast
+  // Gate 1: less « light blue » and less green than first proposed (mineral lake water).
+  lagoon: oklch(90, 0.018, 205),
+  'lagoon-raised': oklch(94.5, 0.012, 205),
+  'lagoon-ink': oklch(45, 0.06, 215), // Rosel turquoise: cold accents
+  emerald: oklch(37, 0.04, 215), // glacial; darker than the first proposal (42 %) for contrast
   leman: oklch(32, 0.055, 230), // also the panels of the emerald tone: deeper water
   deep: oklch(22, 0.045, 240),
   'deep-raised': oklch(27, 0.048, 238),
@@ -34,7 +35,7 @@ export const COLORS = {
   // Decorative warmth fades with depth like daylight: red goes first, then orange, then yellow.
   'deco-surface': oklch(58, 0.13, 58),
   'deco-lagoon': oklch(54, 0.1, 86),
-  'deco-emerald': oklch(74, 0.06, 115),
+  'deco-emerald': oklch(74, 0.035, 95),
   'deco-deep': oklch(70, 0.03, 190),
   'deco-abyss': oklch(62, 0.015, 235),
 } as const satisfies Record<string, Oklch>;

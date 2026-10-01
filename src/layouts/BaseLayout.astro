@@ -46,8 +46,11 @@ const links =
     {links.map(({ hreflang, href }) => (
       <link rel="alternate" hreflang={hreflang} href={href} />
     ))}
-    {/* Pairing A until Gate 1: three preloaded files at most (00-contexte.md §7). */}
-    <Font cssVariable="--font-fraunces" preload={[{ style: 'normal' }, { style: 'italic' }]} />
+    {/* Gate 1: Instrument Serif (roman, italic) and Switzer roman, three files at most (§7). */}
+    <Font
+      cssVariable="--font-instrument-serif"
+      preload={[{ style: 'normal' }, { style: 'italic' }]}
+    />
     <Font cssVariable="--font-switzer" preload={[{ style: 'normal' }]} />
     <slot name="head" />
     <script>

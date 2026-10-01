@@ -9,10 +9,10 @@
   --c-surface: oklch(97.5% 0.008 85);
   --c-surface-2: oklch(94% 0.014 85);
   --c-surface-raised: oklch(99.3% 0.004 85);
-  --c-lagoon: oklch(90% 0.035 195);
-  --c-lagoon-raised: oklch(94.5% 0.024 195);
-  --c-lagoon-ink: oklch(45% 0.075 200);
-  --c-emerald: oklch(37% 0.056 200);
+  --c-lagoon: oklch(90% 0.018 205);
+  --c-lagoon-raised: oklch(94.5% 0.012 205);
+  --c-lagoon-ink: oklch(45% 0.06 215);
+  --c-emerald: oklch(37% 0.04 215);
   --c-leman: oklch(32% 0.055 230);
   --c-deep: oklch(22% 0.045 240);
   --c-deep-raised: oklch(27% 0.048 238);
@@ -30,17 +30,17 @@
   --c-alert-deep: oklch(50% 0.1 70);
   --c-deco-surface: oklch(58% 0.13 58);
   --c-deco-lagoon: oklch(54% 0.1 86);
-  --c-deco-emerald: oklch(74% 0.06 115);
+  --c-deco-emerald: oklch(74% 0.035 95);
   --c-deco-deep: oklch(70% 0.03 190);
   --c-deco-abyss: oklch(62% 0.015 235);
 
-  /* Type. The Fonts API defines --font-fraunces, --font-switzer… (astro.config.mjs). */
-  --font-display: var(--font-fraunces, Georgia, serif);
+  /* Type (Gate 1: pairing B). The Fonts API defines --font-instrument-serif and --font-switzer. */
+  --font-display: var(--font-instrument-serif, Georgia, serif);
   --font-sans: var(--font-switzer, system-ui, sans-serif);
   --font-hud: var(--font-sans);
-  --display-weight: 360;
-  --display-tracking: -0.02em;
-  --display-em-weight: 320;
+  --display-weight: 400;
+  --display-tracking: -0.01em;
+  --display-em-weight: 400;
   --text-weight: 400;
   --text-strong: 560;
 
