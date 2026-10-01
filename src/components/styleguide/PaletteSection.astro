@@ -1,0 +1,251 @@
+---
+import Button from '@/components/ui/Button.astro';
+import { TONES } from '@/lib/color/palette.ts';
+import { COLOR_GROUPS, TONE_INFO, swatch, toneRatios } from './palette-data.ts';
+---
+
+<section id="palette" class="palette" aria-labelledby="sg-palette-title">
+  <div class="sg-section palette-raw" data-tone="surface">
+    <div class="sg-wrap">
+      <header class="sg-heading">
+        <h2 id="sg-palette-title">
+          Palette <em>et contrastes</em>
+        </h2>
+        <p class="sg-note">
+          Valeurs OKLCH de <code>src/lib/color/palette.ts</code>, recopiées dans{' '}
+          <code>tokens.css</code> et vérifiées par les tests : chaque couleur tient dans le sRGB, et
+          chaque couple texte/fond de chaque ton atteint 4,5:1 (texte) ou 3:1 (grands titres,
+          interface).
+        </p>
+      </header>
+      {COLOR_GROUPS.map((group) => (
+        <div class="group">
+          <h3 class="group-title">{group.title}</h3>
+          <ul class="strip">
+            {group.names.map((name) => {
+              const color = swatch(name);
+              return (
+                <li class="cell">
+                  <span class="chip" style={`background-color: var(${color.property})`} />
+                  <span class="cell-text">
+                    <span class="cell-name">{color.name}</span>
+                    <span class="cell-value">{color.oklch}</span>
+                    <span class="cell-value">{color.hex}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {TONES.map((tone) => (
+    <div class="tone sg-section" data-tone={tone}>
+      <div class="sg-wrap tone-grid">
+        <div class="tone-copy">
+          <p class="eyebrow">
+            <span class="eyebrow-depth">{TONE_INFO[tone].depth}</span>
+          </p>
+          <h3 class="tone-title display">
+            {TONE_INFO[tone].name}, <em>{TONE_INFO[tone].light}</em>
+          </h3>
+          <p>
+            Le texte courant garde son contraste à toutes les profondeurs. Les mots en italique
+            perdent leur chaleur en descendant ;{' '}
+            <a href="#palette">les liens et les boutons gardent la lampe</a>.
+          </p>
+          <p class="tone-soft">Texte doux : légendes, notes et détails des tarifs.</p>
+          <div class="tone-actions">
+            <Button>Me contacter</Button>
+            <Button variant="secondary">Les cursus</Button>
+          </div>
+        </div>
+        <table class="ratios">
+          <caption class="sg-note">
+            Contrastes mesurés, ton {TONE_INFO[tone].name.toLowerCase()}
+          </caption>
+          <tbody>
+            {toneRatios(tone).map((row) => (
+              <tr>
+                <th scope="row">{row.pair}</th>
+                <td class="ratio">{row.ratio}</td>
+                <td class="level">{row.level}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ))}
+</section>
+
+<style>
+  .group + .group {
+    margin-block-start: var(--space-xl);
+  }
+
+  .group-title {
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: 0;
+    margin-block-end: var(--space-xs);
+  }
+
+  /* A core sample of the water: the colours touch, like layers of the same lake. */
+  .strip {
+    display: grid;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cell {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--space-s);
+    font-size: var(--step--1);
+  }
+
+  .chip {
+    display: block;
+    min-block-size: 3.25rem;
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--fg) 8%, transparent);
+  }
+
+  .cell-text {
+    align-self: center;
+    padding-block: var(--space-3xs);
+  }
+
+  .cell:first-child .chip {
+    border-start-start-radius: var(--radius-soft);
+    border-start-end-radius: var(--radius-soft);
+  }
+
+  .cell:last-child .chip {
+    border-end-start-radius: var(--radius-soft);
+    border-end-end-radius: var(--radius-soft);
+  }
+
+  .cell-text {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+  }
+
+  .cell-name {
+    font-weight: var(--text-strong);
+  }
+
+  .cell-value {
+    color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tone-grid {
+    display: grid;
+    gap: var(--space-xl) var(--grid-gap);
+    align-items: start;
+  }
+
+  .tone-copy {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .tone-title {
+    font-size: var(--step-4);
+  }
+
+  .tone-soft {
+    color: var(--fg-soft);
+    font-size: var(--step--1);
+  }
+
+  .tone-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-xs);
+  }
+
+  .ratios {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    font-size: var(--step--1);
+  }
+
+  .ratios caption {
+    padding-block-end: var(--space-2xs);
+    text-align: start;
+  }
+
+  .ratios th,
+  .ratios td {
+    padding: 0.45em 0.9em;
+    border-block-end: 1px solid var(--line-faint);
+    text-align: start;
+  }
+
+  .ratios tr:last-child :is(th, td) {
+    border-block-end: 0;
+  }
+
+  .ratios th {
+    font-weight: 400;
+  }
+
+  .ratio {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+
+  .level {
+    color: var(--fg-soft);
+    font-weight: var(--text-strong);
+  }
+
+  code {
+    font-size: 0.92em;
+  }
+
+  @media (width >= 64rem) {
+    .strip {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+    }
+
+    .cell {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .chip {
+      block-size: 6rem;
+    }
+
+    .cell-text {
+      flex-direction: column;
+    }
+
+    .cell:first-child .chip {
+      border-start-end-radius: 0;
+      border-end-start-radius: var(--radius-soft);
+    }
+
+    .cell:last-child .chip {
+      border-start-end-radius: var(--radius-soft);
+      border-end-start-radius: 0;
+    }
+
+    .tone-grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+  }
+</style>

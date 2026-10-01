@@ -53,6 +53,15 @@ export function oklchToSrgb(color: Oklch): Rgb {
   return { r: encodeGamma(clip(r)), g: encodeGamma(clip(g)), b: encodeGamma(clip(b)) };
 }
 
+/** CSS hexadecimal notation of a gamma-encoded sRGB colour. */
+export function srgbToHex({ r, g, b }: Rgb): string {
+  const channel = (value: number): string =>
+    Math.round(clip(value) * 255)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${channel(r)}${channel(g)}${channel(b)}`;
+}
+
 /** WCAG relative luminance of a gamma-encoded sRGB colour. */
 export function relativeLuminance({ r, g, b }: Rgb): number {
   return 0.2126 * decodeGamma(r) + 0.7152 * decodeGamma(g) + 0.0722 * decodeGamma(b);

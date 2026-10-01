@@ -5,6 +5,7 @@ import {
   isInSrgbGamut,
   oklchToSrgb,
   relativeLuminance,
+  srgbToHex,
   type Oklch,
   type Rgb,
 } from './contrast.ts';
@@ -88,6 +89,14 @@ describe('contrastRatio', () => {
   it('gives the well-known 4.48:1 of #777 on white', () => {
     // #777777 → linear 0.1845 → L = ∛0.1845 = 0.5693
     expect(contrastRatio({ l: 0.5693, c: 0, h: 0 }, WHITE)).toBeCloseTo(4.48, 1);
+  });
+});
+
+describe('srgbToHex', () => {
+  it('writes the CSS hexadecimal notation, rounding each channel', () => {
+    expect(srgbToHex({ r: 1, g: 0, b: 0 })).toBe('#ff0000');
+    expect(srgbToHex({ r: 0.5, g: 0.5, b: 0.5 })).toBe('#808080');
+    expect(srgbToHex(oklchToSrgb(BLACK))).toBe('#000000');
   });
 });
 

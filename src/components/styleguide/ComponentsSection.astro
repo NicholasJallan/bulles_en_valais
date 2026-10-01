@@ -1,0 +1,30 @@
+---
+import ComponentSet from './ComponentSet.astro';
+---
+
+<section id="composants" aria-labelledby="sg-components-title">
+  <div class="sg-section components-intro" data-tone="surface">
+    <div class="sg-wrap">
+      <header class="sg-heading">
+        <h2 id="sg-components-title">
+          Composants, <em>trois profondeurs</em>
+        </h2>
+        <p class="sg-note">
+          Boutons, champs, cartes et sur-titres dans tous leurs états, en surface, à 20 m et à 40 m.
+          Ce qui est cliquable « s’allume » au survol ; le focus clavier est un halo. Les erreurs de
+          formulaire passent par l’ambre d’alarme : le rouge est réservé aux actions. Cibles
+          tactiles de 44 px.
+        </p>
+      </header>
+    </div>
+  </div>
+  <ComponentSet tone="surface" compact />
+  <ComponentSet tone="emerald" />
+  <ComponentSet tone="abyss" />
+</section>
+
+<style>
+  .components-intro {
+    padding-block-end: 0;
+  }
+</style>
