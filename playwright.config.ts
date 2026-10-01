@@ -24,9 +24,11 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 120_000,
   },
+  // No firefox project: the Firefox build of Playwright 1.63 does not start on macOS 27.0.1, and
+  // Firefox is validated only when it works (D21). Add it back once a Playwright update fixes it:
+  // { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: DESKTOP_VIEWPORT } },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: DESKTOP_VIEWPORT } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: DESKTOP_VIEWPORT } },
     { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: DESKTOP_VIEWPORT } },
     { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
     { name: 'mobile-safari', use: { ...devices['iPhone 15'] } },

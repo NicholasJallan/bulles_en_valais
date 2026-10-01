@@ -33,7 +33,7 @@ Invariants at the end of every session: `npm run build`, `npm run check` and `np
 
 - **Astro 7 and coding agents**: Astro detects agents (Claude Code) and then runs `astro dev` / `astro preview` in the background (detached, with a lock file). Stop them with `npx astro dev stop` / `npx astro preview stop`; `--ignore-lock` keeps them in the foreground (the Playwright `webServer` uses it).
 - **The dev server serves every file of the project** (Vite), gitignored ones included: `vite.server.fs.deny` in `astro.config.mjs` refuses `mail-config.php`, `settings.json`, `.env`… Never `npm run dev -- --host`. To show the site on the LAN, `npm run preview -- --host` (serves `dist/` only), with Nicholas's agreement.
-- **Firefox**: the Firefox build of Playwright 1.63 does not start on macOS 27.0.1 ("Could not find profile folder"). Until a Playwright update fixes it, run the other projects: `npx playwright test tests/e2e --project=chromium --project=webkit --project=mobile-chrome --project=mobile-safari`.
+- **Firefox**: the Firefox build of Playwright 1.63 does not start on macOS 27.0.1 ("Could not find profile folder"), so `playwright.config.ts` has no `firefox` project: Firefox is validated only when it works (D21 in `PROGRESS.md`). Add the project back once a Playwright update fixes it.
 
 ### Test the contact endpoint
 
