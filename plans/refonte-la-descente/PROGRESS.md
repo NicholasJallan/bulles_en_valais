@@ -9,7 +9,7 @@
 - [x] **S02** — Design system & styleguide — 01.10.2026 (Gate 1 validée)
 - [x] **S03** — Contenus & i18n typés FR/EN — 01.10.2026 (Gate 2 validée)
 - [x] **S04** — Visuels : retouches, IA, logo, favicons, OG — 01.10.2026 (Gate 3 validée)
-- [ ] **S05** — Page statique complète
+- [x] **S05** — Page statique complète — 01.10.2026
 - [ ] **S06** — Moteur de mouvement
 - [ ] **S07** — Hero « Surface » en WebGL + immersion
 - [ ] **S08** — Cursus, échelle de profondeur, interludes, bulles
@@ -108,6 +108,12 @@
 | 2026-10-01 | S04 | ajouter | `scripts/make-icons.mjs` (favicons, `favicon.ico` de secours) ; `scripts/fonts/` (Instrument Serif, OFL, pour les images OG) ; `opentype.js`, `sharp` et `svgo` en dépendances de développement ; liens des icônes et du manifeste dans `BaseLayout` | revue de code ; Pango ignore les polices fournies sur macOS |
 | 2026-10-01 | S04 | remplacer | Gate 3 jugée sur des planches envoyées dans la session (`gates/gate-3/`), sans prévisualisation sur le Pi | Nicholas à distance, contenu purement visuel |
 | 2026-10-01 | S04 | abandonner | Animation du logo (E15 « le logo expire une bulle », bulles E7 au survol du logo) ; `01-direction-artistique.md` §7, briefs S04 et S07 mis à jour | D35 |
+| 2026-10-01 | S05 | reporter | Envoi du formulaire **sans JavaScript** : `contact.php` n'accepte que du JSON, donc sans JS le formulaire affiche un avis (`contact.form.noScript`, FR/EN) et renvoie vers WhatsApp, le téléphone et l'e-mail ; l'éventuel chemin `x-www-form-urlencoded` (sans `elapsed`, donc pot de miel seul) est à trancher avec Nicholas en S10 ; brief S10 mis à jour | modifier le PHP relève de S10 (revue de sécurité) |
+| 2026-10-01 | S05 | ajouter | `src/lib/depth/ladder-scale.ts` et `src/lib/geo.ts` dès S05 (TDD) pour l'échelle et la carte statiques ; S08 et S09 les reprennent | échelle graduée et carte du Rhône statiques |
+| 2026-10-01 | S05 | modifier | Onglets communs `ui/TabList.astro` + `ui/tabs.ts` (au lieu de `courses/tabs.ts`), partagés par Cursus et Spécialités ; `ui/Section.astro` (ancre, ton, profondeurs du HUD, attributs de portée transmis) et `ui/ArtPicture.astro` (direction artistique : `<Picture>` ne sert qu'un recadrage) | composants partagés |
+| 2026-10-01 | S05 | ajouter | `app.ts` pose `html[data-controllers="ready"]` quand les contrôleurs ont démarré (tests E2E, et S06) et retire `html.js` si l'un d'eux échoue (retour à la page sans JS) ; bouton d'envoi désactivé jusqu'au démarrage de `contact-form.ts` | un clic avant le contrôleur postait le formulaire en natif ; revue de code |
+| 2026-10-01 | S05 | modifier | Bandeau de navigation posé sur le hero (`position: absolute`), non collant ; S06 décidera du comportement au défilement (ScrollTrigger) | aucun écouteur `scroll` en S05 |
+| 2026-10-01 | S05 | corriger | Lighthouse lancé par `npx lighthouse@12` avec le Chromium de Playwright (MCP `chrome-devtools` absent de la session) ; revue de code et revue d'accessibilité fusionnées en une passe modérée (Sonnet, D30), en complément d'axe et de Lighthouse | environnement, économie de tokens demandée par Nicholas |
 
 ## Mesures
 
@@ -117,6 +123,7 @@
 | 2026-10-01 | S01 : squelette sans design (`check:budgets` sur `dist/`) | n.m. | n.m. | n.m. | 0,6 / 0,6 Ko | 0,7 Ko | n.m. | n.m. |
 | 2026-10-01 | S02 : tokens, polices, styleguide (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko (GSAP des démos, styleguide seulement) | 3,2 Ko (accueil) · 9,3 Ko (styleguide) | polices préchargées : 122 Ko, 3 fichiers (paire A) | n.m. |
 | 2026-10-01 | S02 + S03 fusionnées, après la Gate 1 (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko | 3,2 Ko (accueil) · 7,5 Ko (styleguide) | polices préchargées : 72 Ko, 3 fichiers (paire B) | n.m. |
+| 2026-10-01 | S05 : page statique, Lighthouse mobile **local** (simulé, `astro preview`) | 2,2 s | 0 | 0 ms | 1,5 / 41,7 Ko | 11,2 Ko (accueil) | 249 Ko (`/`) ; hero AVIF 75 Ko (960 px), 118–168 Ko (1600–1920 px) | 99/100/100/100 (FR et EN) |
 
 ## Journal
 
@@ -382,3 +389,29 @@
   - S09 : `places/*.jpg` en 4:5 (1600×2000) ;
   - relancer `make-og.mjs` si le titre du hero change.
 - **Retour arrière** : `git revert` des commits S04 ; les anciennes images sont dans l'historique (`5ce9495`).
+
+### S05 — 2026-10-01 (page statique complète, FR/EN)
+- **Fait** :
+  - `BaseLayout` : lien d'évitement, `<main id="content">` ; `HomePage` assemble les 15 étapes du profil (`ui/Section` : `id`, `aria-labelledby`, `data-tone`, `data-depth-start/end`, `data-hud="hidden"` sur l'échelle et le comparatif) ;
+  - sections : bandeau (menu mobile en `<dialog>` modal), hero (`<Picture>` `eager` + `fetchpriority="high"`, crédits, coordonnées du Rosel), manifeste, instructeur (portrait 4:5 / 1:1, crédits en `<dl>`), Cursus (onglets APG, tarifs de `courses.ts`, lien « Me renseigner » qui pré-remplit l'intérêt), interludes A et B (citation, crédit), échelle de profondeur statique (réelle jusqu'à 40 m puis resserrée, en pointillés), comparatif (cartes sous 48 rem), Spécialités (4 onglets, index en deux colonnes), Lieux (carte SVG du Rhône, fiches décalées vers l'aval), Avant de s'immerger (`#gear`, `#insurance`), Bons cadeaux (bon en objet, offres, étapes, CTA `data-prefill-interest="gift"`), Témoignages (rail `scroll-snap`, boutons, `lang`), FAQ (`<details name="faq">`), Contact (canaux, formulaire), dialogue WhatsApp, pied de page (crédits, liens légaux, langue, Mode calme `aria-pressed`, « Gérer les cookies » inactif jusqu'à S11) ;
+  - contrôleurs essentiels : `nav`, `tabs`, `rail`, `contact-form`, `whatsapp`, `calm-mode` ; sélecteur de langue en vrais liens (`routes.ts`, pages légales ajoutées) ;
+  - `src/lib/form/validate.ts` (mêmes règles que `contact.php`, vérifiées sur les mêmes adresses avec PHP) et `submit.ts` (JSON, délai de 15 s, 200 / 400 / échec, `mailto:` préparé mais jamais ouvert) en TDD ; `lib/tabs.ts`, `lib/depth/ladder-scale.ts`, `lib/geo.ts` en TDD ;
+  - `LegalLayout`, Confidentialité et Mentions légales FR/EN, `404.astro` bilingue en `noindex` (hors du sitemap) ;
+  - tests : `tests/e2e/page`, `controllers`, `form` (requêtes simulées 200/400/500), `no-js`, `overflow` (320 px, 5 pages), `tests/a11y/axe.spec.ts` (7 pages) ;
+  - captures de référence : `gates/s05/fr-{320,768,1024,1440}.jpg`, `en-1440.jpg`.
+- **Vérifications** : `npm run build` (+ `check:dist`, 8 pages) ; `astro check` 0/0/0 ; 414 tests Vitest ; Playwright 138 réussis, 2 sautés (menu mobile sur les projets desktop) sur chromium, webkit, mobile-chrome et mobile-safari, dont axe : **0 violation sérieuse ou critique** ; aucun débordement à 320, 375, 768, 1024, 1440 et 1920 px ; `check:budgets` : JS initial 1,5 Ko, total 41,7 Ko, CSS 11,2 Ko ; Lighthouse mobile local **99 / 100 / 100 / 100** sur `/` et `/en/`.
+- **Constats** :
+  - l'erreur affichée en quittant le champ e-mail décalait le bouton « Envoyer » entre l'appui et le relâchement : le clic était perdu (vu par un test E2E). La validation à la sortie est sautée pendant l'appui sur le bouton ;
+  - un composant qui reçoit `class` d'un parent doit transmettre l'attribut `data-astro-cid-*` (`Section` le fait), sinon les styles à portée du parent ne s'appliquent pas ;
+  - une grille sans `minmax(0, 1fr)` laissait le rail des témoignages imposer sa largeur (débordement) ;
+  - Lighthouse prenait le portrait 1080 px sur un écran de 412 px à DPR 1,75 : largeur 840 ajoutée ; hero en AVIF q40 plafonné à 1920 px.
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30, accessibilité comprise) : approuvée, 0 CRITICAL, 0 HIGH. 4 MEDIUM corrigés (délai d'envoi, `mailto:` raccourci, retour à la page sans JS si un contrôleur échoue, défilement doux du rail seulement sous `motion-ok`) ; 6 LOW corrigés (résumé d'erreurs mis à jour, Ctrl/Cmd-clic, rôles des panneaux posés par `tabs.ts`, `aria-haspopup` posé par JS, attente des 3 s du garde anti-robot, focus des boutons du rail) ; 1 LOW laissé : le Mode calme recharge la page (prévu par le brief), le focus revient en haut.
+- **Défauts de `00-contexte.md` §4.3** : 2 (images AVIF/WebP, `srcset`), 5 (aucun écouteur `scroll`), 6 (aucune propriété de mise en page animée), 7 (langue en liens, menu et WhatsApp en `<dialog>` avec focus, FAQ native, onglets APG), 8 (textes dans `src/i18n`, année calculée), 9 (`lang` des témoignages), 10 (échec → alternatives) et 13 (pot de miel, `elapsed`) traités ; 11 en partie (description, `hreflang`), le reste en S11 (JSON-LD) et S13 (soft 404) ; 12 en S11 ; 1, 3 et 4 réglés en S01 et S04.
+- **Commits** : `8113cb8`, `326046e`, `adef479`, `9fb97c4`, `38b1b48`, `a23d47b`, puis ce journal.
+- **Points ouverts** :
+  - S06 : bandeau collant ou adaptatif au défilement ; `html[data-controllers="ready"]` disponible ; révélations sous `motion-ok` ;
+  - S10 : envoi sans JS (mutation ci-dessus) ; Mode calme sans rechargement si le moteur de mouvement sait s'arrêter à chaud ;
+  - S11 : bouton « Gérer les cookies » (`data-consent-manage`), Open Graph et JSON-LD ;
+  - logo en `--c-ink` (bleu nuit de la palette) sur clair et en blanc sur la photo ; si Nicholas tient au `#141646` exact de D35, l'ajouter comme token ;
+  - Nicholas : relecture de la page (prévisualisation sur le Pi possible, D31 : il faudrait alors publier `index.html`, ce que la procédure interdit ; une page de prévisualisation `noindex` à part serait à prévoir).
+- **Retour arrière** : `git revert` des commits S05 ; aucun impact sur le site en ligne.

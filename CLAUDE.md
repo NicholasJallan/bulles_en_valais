@@ -77,6 +77,8 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 
 - `public/js/boot.js`: synchronous, first script of `<head>`. Adds `js`, and `motion-ok` unless reduced motion or calm mode is asked (removed after 3 s if the motion module has not added `motion-ready`).
 - `src/scripts/app.ts`: the only module of the page. Elements declare their controllers with `data-controller="name"` (several names separated by spaces); the `CONTROLLERS` registry maps each name to a dynamic `import()` of a module exporting `init(element)`, which returns a cleanup function (`src/lib/controllers.ts`).
+- Once every controller has started, `app.ts` sets `html[data-controllers="ready"]` (the E2E tests wait for it: `tests/e2e/ready.ts`); if one fails, it removes `html.js` so the page falls back to its no-JS version. Elements shown only with or without JavaScript use `.js-only` / `.no-js-only` (`utilities.css`).
+- Shared UI: `ui/Section.astro` (anchor, tone, HUD depths from `sections.ts`; it forwards the parent's `data-astro-cid-*`, otherwise the parent's scoped styles miss it), `ui/TabList.astro` + `ui/tabs.ts` (APG tabs, panels stacked without JS), `ui/ArtPicture.astro` (one crop per media query).
 
 ### Rules that are easy to break
 
@@ -88,6 +90,7 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 ## Contact / WhatsApp
 
 - **WhatsApp number**: `41794368112` (E.164 without `+`); **phone**: `+41 79 436 81 12`; **email**: `nicholas@bullesenvalais.ch`. In the redesign they move to `src/data/contact.ts` (S03).
+- Without JavaScript the form cannot be sent (`contact.php` accepts JSON only): it shows a notice pointing to WhatsApp, phone and e-mail (decision for S10). The submit button stays disabled until `contact-form.ts` starts.
 - The contact form POSTs JSON to `/api/contact` (`public/api/contact.php`), with a hidden honeypot field `website`, `elapsed` (ms since the page loaded) and `locale`. On failure the form shows an error — listing the fields the server rejected, if any — with a pre-filled `mailto:` link (never opened automatically).
 - `contact.php` checks, in order: method, `Content-Type: application/json`, `Origin` allowlist, body ≤ 32 KB, valid JSON, spam (honeypot filled or `elapsed` < 3 s → fake 200, nothing sent, only the reason logged; a missing `elapsed` is accepted: pages loaded before the 30.09.2026 deploy do not send it), field rules. It then sends one plain-text e-mail through Gmail SMTP (STARTTLS + AUTH LOGIN): base64 body, RFC 2047 headers, envelope addresses from the config only.
 - The SMTP credentials live in `mail-config.php` on the Pi, next to `contact.php`: **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
