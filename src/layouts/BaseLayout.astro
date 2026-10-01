@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import '@/styles/tokens.css';
 import '@/styles/global.css';
 import '@/styles/typography.css';
@@ -9,20 +10,22 @@ import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
 
 interface Props {
   locale: Locale;
-  route: RouteId;
+  /** Localised page; a page outside the routes (the styleguide) gets no canonical nor alternates. */
+  route?: RouteId;
   title: string;
   description: string;
+  noindex?: boolean;
 }
 
-const { locale, route, title, description } = Astro.props;
+const { locale, route, title, description, noindex = false } = Astro.props;
 const { site } = Astro;
 if (site === undefined) throw new Error('`site` is missing from astro.config.mjs');
 
-const canonical = new URL(routePath(route, locale), site).href;
-const links = alternates(route).map(({ hreflang, path }) => ({
-  hreflang,
-  href: new URL(path, site).href,
-}));
+const canonical = route === undefined ? undefined : new URL(routePath(route, locale), site).href;
+const links =
+  route === undefined
+    ? []
+    : alternates(route).map(({ hreflang, path }) => ({ hreflang, href: new URL(path, site).href }));
 ---
 
 <!doctype html>
@@ -34,10 +37,15 @@ const links = alternates(route).map(({ hreflang, path }) => ({
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
     {links.map(({ hreflang, href }) => (
       <link rel="alternate" hreflang={hreflang} href={href} />
     ))}
+    {/* Pairing A until Gate 1: three preloaded files at most (00-contexte.md §7). */}
+    <Font cssVariable="--font-fraunces" preload={[{ style: 'normal' }, { style: 'italic' }]} />
+    <Font cssVariable="--font-switzer" preload={[{ style: 'normal' }]} />
+    <slot name="head" />
     <script>
       import '@/scripts/app.ts';
     </script>
