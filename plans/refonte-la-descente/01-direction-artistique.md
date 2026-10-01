@@ -158,7 +158,7 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 
 **E7 — Bulles (loi de Boyle)**
 - Quoi : bulles plausibles. Vitesse de montée ∝ √rayon ; oscillation latérale sinusoïdale ; **le rayon grandit en remontant** : `r = r0 · ((10 + p0) / (10 + p))^(1/3)`, avec `p` la profondeur en mètres (+1 bar tous les 10 m).
-- Déclencheurs : pointeur dans les interludes (pointeur fin), survol et clic des CTA (3 à 5 bulles), succès du formulaire (gerbe), logo (rare, au survol).
+- Déclencheurs : pointeur dans les interludes (pointeur fin), survol et clic des CTA (3 à 5 bulles), succès du formulaire (gerbe). Jamais sur le logo (D35).
 - Comment : **un seul canvas 2D** fixe, pool de 64 particules, piloté par `gsap.ticker`, inactif s'il n'y a aucune bulle.
 - Repli : aucune bulle.
 - Session : S08 (moteur), puis utilisé en S10.
@@ -205,7 +205,7 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 - Session : S10.
 
 **E15 — Intro (≤ 1,2 s, jamais bloquante)**
-- Quoi : le logo « expire » une bulle, les lignes du titre du hero se posent, le HUD s'allume à 0,0 m. L'image hero est visible **dès le premier affichage** : c'est l'élément LCP, elle n'est jamais masquée.
+- Quoi : les lignes du titre du hero se posent, le HUD s'allume à 0,0 m. Le logo reste fixe : aucune animation du logo (Gate 3, D35). L'image hero est visible **dès le premier affichage** : c'est l'élément LCP, elle n'est jamais masquée.
 - Session : S07.
 
 **E16 — Navigation vivante**

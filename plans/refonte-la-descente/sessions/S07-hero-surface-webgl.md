@@ -39,7 +39,7 @@ Le hero est la première impression et **l'effet signature** du site : la photo 
    - mouvement réduit ou Mode calme : image fixe, aucun effet.
 
    > 🔁 Point de sortie possible.
-6. **Intro E15** (≤ 1,2 s, jamais bloquante) : le logo SVG « expire » une bulle, les lignes du titre se posent, le HUD s'allume à 0,0 m. **L'image hero reste visible dès le premier affichage.**
+6. **Intro E15** (≤ 1,2 s, jamais bloquante) : les lignes du titre se posent (le logo n'est pas animé, D35), le HUD s'allume à 0,0 m. **L'image hero reste visible dès le premier affichage.**
 7. **Performance** :
    - trace mobile (CPU ×4, Fast 4G, cache vide) : **LCP ≤ 2,0 s** et élément LCP = `<img>` du hero ;
    - morceau WebGL ≤ 30 Ko gzip, chargé après le LCP ;

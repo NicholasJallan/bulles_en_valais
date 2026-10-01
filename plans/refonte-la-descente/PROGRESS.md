@@ -8,7 +8,7 @@
 - [x] **S01** — Fondations Astro 7 (branche `refonte/la-descente`) — 01.10.2026
 - [x] **S02** — Design system & styleguide — 01.10.2026 (Gate 1 validée)
 - [x] **S03** — Contenus & i18n typés FR/EN — 01.10.2026 (Gate 2 validée)
-- [ ] **S04** — Visuels : retouches, IA, logo, favicons, OG — 🛑 Gate 3
+- [x] **S04** — Visuels : retouches, IA, logo, favicons, OG — 01.10.2026 (Gate 3 validée)
 - [ ] **S05** — Page statique complète
 - [ ] **S06** — Moteur de mouvement
 - [ ] **S07** — Hero « Surface » en WebGL + immersion
@@ -25,7 +25,7 @@
 |---|---|---|---|---|
 | 1 | Palette, typographie, sensation du mouvement (styleguide) | ✅ | 2026-10-01 | Appariement **B** (Instrument Serif + Switzer) ; palette gardée, lagon moins « bleu clair » et descente moins verte ; tempo normal ; HUD en Switzer tabulaire (D25). Jugée sur `https://dive.bullesenvalais.ch/styleguide/` (D31) |
 | 2 | Textes FR/EN (`CONTENT-REVIEW.md`) | ✅ | 2026-10-01 | Tout accepté, questions posées dans la session ; TDI Deco à CHF 250, témoignages traduits, fiche Google, « le Léman », deux « Alexandre F. » séparés, confidentialité sans rubrique États-Unis ni délai de réponse |
-| 3 | Visuels (hero, retouches, IA, logo animé) | ⬜ | | |
+| 3 | Visuels (hero, retouches, IA, logo animé) | ✅ | 2026-10-01 | Hero A (Rosel) avec **seuls les fils électriques retirés** ; interlude B : image actuelle sans filigrane ; recadrages, lieux, masque d'eau et images de partage acceptés ; logo bleu sur blanc ou blanc sur noir, **jamais animé** (D32–D35). Jugée sur les planches envoyées dans la session |
 | 4 | Recette complète en préproduction | ⬜ | | |
 
 ## Décisions
@@ -63,6 +63,10 @@
 | 2026-10-01 | D29 | Témoignages : avis Google, traduits sur la page EN avec « Translated from French » ; les deux « Alexandre F. » (deux personnes) jamais côte à côte ; « Laisser un avis Google » mène à la fiche Google ; pas de page Facebook pour l'instant | Nicholas (I-09, I-14, Gate 2) |
 | 2026-10-01 | D30 | Revues de code à **effort modéré** (une passe, modèle plus léger) pour économiser les tokens | Nicholas |
 | 2026-10-01 | D31 | **Prévisualisation sur le Pi** quand Nicholas est à distance : `_astro/`, `js/` et `styleguide/` ajoutés au docroot du site en ligne (`noindex`, liés nulle part), sans toucher à `index.html` ; essai à blanc, `rsync -rlt --omit-dir-times`, `--delete` limité à ces dossiers, `chown` de ces seuls dossiers (procédure dans `CLAUDE.md`) | Nicholas (Gate 1) |
+| 2026-10-01 | D32 | Retouches des vraies photos : **seuls les fils électriques** sont retirés (éolienne, panneau « Western City », toboggans, pylônes et mâts gardés), au hero (option A, Rosel) comme sur la photo des lieux du Rosel ; option B (Sion) écartée | Nicholas (Gate 3, I-15) |
+| 2026-10-01 | D33 | Interlude B : **image actuelle** (`hirondelle.png`) avec le seul filigrane ✦ retiré, agrandie ×2 (`interludes/light.jpg`) ; les deux nouvelles générations écartées | Nicholas (Gate 3) |
+| 2026-10-01 | D34 | Interlude A : recadrages 16:9 et 4:5 **sans la signature**, crédit « © Nicholas Jallan » en légende ; version actuelle de 1707 px gardée (pas d'original plus grand pour l'instant) | Nicholas (Gate 3) |
+| 2026-10-01 | D35 | Logo : **bleu nuit sur blanc ou blanc sur noir** uniquement (aucune variante multicolore ; icônes bleu sur blanc) et **jamais animé** : E15 sans le logo, E7 jamais sur le logo | Nicholas (Gate 3) |
 
 ## Mutations du plan
 
@@ -99,6 +103,11 @@
 | 2026-10-01 | S03 | réduire | `places.ts` : profondeur max des lacs et sites du Léman seulement ; températures, visibilité, accès, niveau et saison abandonnés | I-03 : non fournis, aucun fait inventé |
 | 2026-10-01 | S03 | modifier | Gate 2 présentée dans la session (questions numérotées) et non par la lecture de `CONTENT-REVIEW.md` | Nicholas à distance |
 | 2026-10-01 | S02, S03 | modifier | Revue complète pour S02 (Opus), revue à effort modéré pour S03 (Sonnet, une passe) | D30 |
+| 2026-10-01 | S04 | modifier | Logo : vectorisé depuis `LogoFull.png` (potrace + svgo, `scripts/trace-logo.mjs`) faute de .ai ; groupes `#mark`, `#bubbles` (un tracé par bulle), `#wordmark` au lieu de `#mark`, `#water`, `#bubbles` (le logo n'a pas d'eau) ; `logo.svg` en `currentColor` | I-02 : PNG seul |
+| 2026-10-01 | S04 | modifier | Retouches par **tuiles** (sortie du modèle limitée à ≈ 1 Mpx) recalées et fondues sur l'original pour garder 4080 px ; outils jetables hors dépôt, méthode dans `CREDITS.md` | résolution du hero |
+| 2026-10-01 | S04 | ajouter | `scripts/make-icons.mjs` (favicons, `favicon.ico` de secours) ; `scripts/fonts/` (Instrument Serif, OFL, pour les images OG) ; `opentype.js`, `sharp` et `svgo` en dépendances de développement ; liens des icônes et du manifeste dans `BaseLayout` | revue de code ; Pango ignore les polices fournies sur macOS |
+| 2026-10-01 | S04 | remplacer | Gate 3 jugée sur des planches envoyées dans la session (`gates/gate-3/`), sans prévisualisation sur le Pi | Nicholas à distance, contenu purement visuel |
+| 2026-10-01 | S04 | abandonner | Animation du logo (E15 « le logo expire une bulle », bulles E7 au survol du logo) ; `01-direction-artistique.md` §7, briefs S04 et S07 mis à jour | D35 |
 
 ## Mesures
 
@@ -345,3 +354,31 @@
   - S12–S13 : fixer la rotation des journaux nginx et en écrire la durée dans la page Confidentialité (aujourd'hui « conservés pour la sécurité du site, puis supprimés »).
   - Point à garder en tête : Google (Gmail) et WhatsApp peuvent traiter des données hors de Suisse ; la rubrique a été retirée à la demande de Nicholas.
 - **Retour arrière** : `git revert` des commits S03 (données, dictionnaires, typographie, `gift` côté PHP) ; aucun impact sur le site en ligne.
+
+### S04 — 2026-10-01 (visuels : retouches, IA, logo, favicons, OG)
+- **Inputs** : originaux HD reçus (I-13, dans `src/assets/original/`, ignoré par git) ; logo en PNG seulement (I-02) ; accord pour `nano-banana` (Gemini 3 Pro Image) et les retouches (I-15).
+- **Fait** :
+  - images rangées par section (`hero/`, `instructor/`, `places/`, `interludes/`, `prepare/`) ; anciens fichiers retirés (historique git) ; `CREDITS.md` (source, outil, prompts, retouches) ;
+  - hero : `rosel_2.jpg` en 4080 px, fils électriques retirés par tuiles (D32) ;
+  - lieux en 4:5 depuis les originaux HD (Sion, Rosel sans les lignes, Chillon) ; portrait 4:5 et 1:1 ; interlude A 16:9 et 4:5 sans signature (D34) ; interlude B sans filigrane, 2752 px (D33) ;
+  - masque d'eau d'E1 (`scripts/make-water-mask.mjs`, TDD sur `scripts/lib/water-mask.mjs`) : rive réglée à la main, rocher émergé exclu, bords du cadre gardés blancs ;
+  - logo SVG vectorisé, favicons (SVG clair/sombre, `.ico`), icônes 180/192/512, manifeste ;
+  - images OG FR/EN (`scripts/make-og.mjs`, texte tracé en chemins par `scripts/lib/text-path.mjs`, TDD) ;
+  - planches de la gate (`gates/gate-3/`, JPEG ≤ 200 Ko).
+- **Constats** :
+  - le modèle d'image ne rend que ≈ 1 Mpx (1200×896, 928×1152, 1376×768) et redessine toute l'image : d'où les tuiles recalées et le calage colorimétrique ;
+  - `sharp` : `dilate()` sur un masque à un canal se comporte en érosion ; un attribut `d` de plus de ≈ 10 000 caractères est tronqué sans erreur ; Pango passe par CoreText sur macOS et ignore `fontfile` ;
+  - `opentype.js` 2.0 : `Glyph.getPath()` renvoie des `NaN` au second tracé d'un même glyphe, et `Font.getPath()` échoue sur la substitution `ccmp` d'Instrument Serif ;
+  - un `npm i` lancé dans un dossier dont `node_modules` était un lien vers celui du projet a remplacé le lien (projet intact, vérifié).
+- **Vérifications** : `npm run build` (+ `check:dist`), `astro check` 0/0/0, 354 tests Vitest, `format:check`, smoke E2E 16/16 ; scripts d'images déterministes (deux exécutions, mêmes octets) ; aucun filigrane visible (contrôle à 100 %).
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30) : approuvée, 0 CRITICAL, 0 HIGH. MEDIUM corrigés : svgo en dépendance (reproductibilité), `favicon.ico` de secours (nginx servirait `index.html`). LOW corrigés : glyphe absent, logo sans `currentColor`, structure du logo vérifiée, tampon de police. `astro check` signalait 5 erreurs de types dans les scripts, manquées avant la revue : corrigées (`e36730a`).
+- **Gate 3 validée le 01.10.2026** (D32–D35) ; candidats écartés supprimés (`hero/sion.jpg`, `light-2/3`, vidéo du concept E15).
+- **Poids** : `src/assets/images` ≈ 7 Mo de masters (hero 2,6 Mo) ; OG 160 Ko chacune ; icônes ≤ 11 Ko ; logo 10 Ko ; masque d'eau 512×386.
+- **Commits** : `482386a`, `443c329`, `2e110b9`, `0542158`, `2f898ca`, `71949b8`, `e36730a`, puis les décisions de la gate et ce journal.
+- **Points ouverts** :
+  - Nicholas : fichier .ai du logo (remplacera la vectorisation ; une version simplifiée pour le favicon 16 px serait bienvenue) ; original plus grand de `bde.jpg` s'il le retrouve ;
+  - S05 : `logo.svg` en `currentColor`, bleu nuit `#141646` sur clair et blanc sur sombre seulement (D35) ; légende « © Nicholas Jallan » de l'interlude A ; légende « Visuel généré par IA » de l'interlude B et crédits du pied de page ; balises `og:image` (`/og/og-fr.jpg`, `/og/og-en.jpg`) avec S11 ;
+  - S07 : `textures/water-mask.png` aligné sur `hero/rosel.jpg` (relancer `make-water-mask.mjs` si le hero change) ; intro E15 sans logo ;
+  - S09 : `places/*.jpg` en 4:5 (1600×2000) ;
+  - relancer `make-og.mjs` si le titre du hero change.
+- **Retour arrière** : `git revert` des commits S04 ; les anciennes images sont dans l'historique (`5ce9495`).
