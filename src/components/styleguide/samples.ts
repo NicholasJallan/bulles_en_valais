@@ -1,7 +1,19 @@
-// Real content for the styleguide specimens, copied from legacy/components/i18n.jsx (French).
-// Exception to « visible texts live in src/i18n/ »: the styleguide is noindex, French only, and
-// removed in S13; S03 owns the dictionaries meanwhile.
-import type { Emphasis } from '@/i18n/types.ts';
+// Real content for the styleguide specimens, read from the dictionaries and the data (French).
+// The styleguide is noindex, French only, and removed in S13.
+import { INTEREST_LABELS, type Interest } from '@/data/contact.ts';
+import {
+  type Course,
+  type CourseId,
+  courseById,
+  cursusCourses,
+  isOnRequest,
+} from '@/data/courses.ts';
+import { PLACES } from '@/data/places.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { SPECIALTIES } from '@/data/specialties.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Emphasis, Localized } from '@/i18n/types.ts';
+import { formatCHF, formatCoordinates } from '@/lib/format.ts';
 
 export interface PriceRow {
   readonly name: string;
@@ -9,65 +21,85 @@ export interface PriceRow {
   readonly price: string;
 }
 
+const LOCALE = 'fr';
+const t = getDictionary(LOCALE);
+const text = (value: Localized): string => localize(value, LOCALE);
+
+function priceOf(course: Course): string {
+  return isOnRequest(course.price) ? t.courses.onRequest : formatCHF(course.price.amount, LOCALE);
+}
+
+function found<T>(value: T | undefined, what: string): T {
+  if (value === undefined) throw new Error(`Styleguide sample not found: ${what}`);
+  return value;
+}
+
 export const SECTION = {
-  depth: 12,
-  eyebrow: 'Cursus',
-  title: { before: 'Trois écoles,', em: 'un instructeur.' } satisfies Emphasis,
-  lead: 'SDI/TDI et PADI partagent exactement les mêmes standards RSTC — même contenu, même reconnaissance. FFESSM dépend de la CMAS. Vous pouvez suivre un cursus unique, ou mélanger les trois (criss-cross) pour plonger sans restriction partout où vous irez.',
-  body: "Je forme des plongeurs, pas des certifiés. La différence tient dans l'aisance, la lecture du milieu, et cette économie de geste qui ne vient qu'avec des heures d'immersion. Mes cours se tiennent en petit comité — souvent en un-à-un, rarement plus de trois élèves. Chacun progresse à son rythme, et le contenu s'adapte au profil, pas l'inverse.",
-} as const;
+  depth: markerDepth('agencies'),
+  eyebrow: t.courses.eyebrow,
+  title: t.courses.title,
+  lead: t.courses.lead,
+  body: `${t.manifesto.body} ${t.instructor.body[0]}`,
+};
+
+const sdiTdi = t.courses.agencies['sdi-tdi'];
 
 export const PRICES = {
-  title: 'Cours & tarifs · SDI / TDI',
-  rows: [
-    { name: 'Open Water Scuba Diver', meta: 'Équivalent OWD', price: 'CHF 690' },
-    { name: 'Advanced Adventure Diver', meta: 'Équivalent AOWD', price: 'CHF 450' },
-    { name: 'Rescue Diver', meta: 'Secours et sauvetage', price: 'CHF 890' },
-    { name: 'TDI Nitrox avancé', meta: 'Mélanges enrichis', price: 'CHF 250' },
-    { name: 'TDI Decompression Procedures', meta: 'Plongée avec paliers', price: 'CHF 250' },
-  ] satisfies PriceRow[],
-  note: 'Tarifs de base ci-dessus. Les formations les plus avancées (Trimix, recycleur, caverne) se construisent sur mesure.',
-} as const;
+  title: `${t.courses.priceListTitle} · ${sdiTdi.label}`,
+  rows: cursusCourses('sdi-tdi', 'row').map((course): PriceRow => ({
+    name: text(course.name),
+    meta: course.meta === undefined ? '' : text(course.meta),
+    price: priceOf(course),
+  })),
+  note: sdiTdi.note ?? '',
+};
 
 export const HERO = {
-  eyebrow: 'Surface',
-  lead: 'Cours multi-écoles SDI/TDI, PADI et FFESSM au lac du Rosel, aux Îles de Sion et sur le Léman. Un instructeur, trois certifications, votre rythme.',
-  primary: 'Planifier une session',
-  secondary: 'Découvrir les cursus',
-} as const;
+  eyebrow: t.hero.eyebrow,
+  lead: t.hero.lead,
+  primary: t.hero.primaryCta,
+  secondary: t.hero.secondaryCta,
+};
 
-export const MANIFESTO: Emphasis = { before: 'Je forme des plongeurs,', em: 'pas des certifiés.' };
+export const MANIFESTO: Emphasis = t.manifesto.title;
+
+const DEEP: CourseId = 'sdi-deep';
+const deepCard = found(
+  SPECIALTIES.sdi.find((card) => card.course === DEEP),
+  DEEP,
+);
+const rosel = found(
+  PLACES.find((place) => place.id === 'rosel'),
+  'rosel',
+);
+const review = found(
+  t.testimonials.items.find((item) => item.author === 'Florent Q.'),
+  'Florent Q.',
+);
 
 export const CARDS = {
   course: {
-    name: 'Deep Diver',
-    sub: '40 m',
-    desc: "Prérogatives jusqu'à 40 mètres, gestion de la profondeur et de la narcose.",
-    price: 'CHF 290',
+    name: text(courseById(DEEP).name),
+    sub: text(deepCard.sub),
+    desc: text(deepCard.description),
+    price: priceOf(courseById(DEEP)),
   },
   place: {
-    name: 'Rosel',
-    coords: '46°05′N · 7°04′E',
-    desc: "À deux pas de Martigny, un plan d'eau clair, calme, et parfaitement adapté à la formation initiale.",
+    name: text(rosel.name),
+    coords: formatCoordinates(rosel.coords, LOCALE),
+    desc: text(rosel.description),
   },
-  quote: {
-    text: 'Une franche réussite, son accompagnement permet une vraie progression !',
-    author: 'Alexandre F.',
-    course: 'PADI Open Water',
-  },
-} as const;
+  quote: { text: review.text.join(' '), author: review.author, course: review.course },
+};
+
+const FORM_INTERESTS: readonly Interest[] = ['sdi-owd', 'padi-owd', 'ffessm', 'other'];
 
 export const FORM = {
-  interests: [
-    { value: 'sdi-owd', label: 'SDI Open Water Scuba Diver' },
-    { value: 'padi-owd', label: 'PADI Open Water Diver' },
-    { value: 'ffessm', label: 'FFESSM (N1 à N4, Trimix)' },
-    { value: 'other', label: 'Autre — je précise ci-dessous' },
-  ],
-} as const;
+  interests: FORM_INTERESTS.map((value) => ({ value, label: text(INTEREST_LABELS[value]) })),
+};
 
 /** Interludes and the return to the surface, for the motion demos. */
 export const QUOTES = {
-  light: 'À quarante mètres, le rouge a disparu. Seule la lampe se souvient des couleurs.',
-  surface: { before: 'Sous l’eau, on ne parle pas.', em: 'Remontons.' } satisfies Emphasis,
-} as const;
+  light: t.interludes.light.quote,
+  surface: t.contact.title,
+};
