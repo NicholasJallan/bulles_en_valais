@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   WCAG_MIN,
+  compositeOver,
   contrastRatio,
+  contrastRatioRgb,
   isInSrgbGamut,
   oklchToSrgb,
   relativeLuminance,
@@ -89,6 +91,32 @@ describe('contrastRatio', () => {
   it('gives the well-known 4.48:1 of #777 on white', () => {
     // #777777 → linear 0.1845 → L = ∛0.1845 = 0.5693
     expect(contrastRatio({ l: 0.5693, c: 0, h: 0 }, WHITE)).toBeCloseTo(4.48, 1);
+  });
+});
+
+describe('compositeOver', () => {
+  const white: Rgb = { r: 1, g: 1, b: 1 };
+  const black: Rgb = { r: 0, g: 0, b: 0 };
+
+  it('blends gamma-encoded channels, as browsers paint a translucent layer', () => {
+    expectRgb(compositeOver(white, 0.5, black), { r: 0.5, g: 0.5, b: 0.5 }, 6);
+    expectRgb(compositeOver({ r: 1, g: 0, b: 0 }, 0.25, white), { r: 1, g: 0.75, b: 0.75 }, 6);
+  });
+
+  it('keeps the bottom colour at alpha 0 and the top one at alpha 1', () => {
+    expectRgb(compositeOver(white, 0, black), black, 6);
+    expectRgb(compositeOver(white, 1, black), white, 6);
+  });
+});
+
+describe('contrastRatioRgb', () => {
+  it('measures two sRGB colours, whatever their order', () => {
+    const grey: Rgb = { r: 0.5, g: 0.5, b: 0.5 };
+    expect(contrastRatioRgb({ r: 0, g: 0, b: 0 }, { r: 1, g: 1, b: 1 })).toBeCloseTo(21, 6);
+    expect(contrastRatioRgb(grey, { r: 1, g: 1, b: 1 })).toBeCloseTo(
+      contrastRatioRgb({ r: 1, g: 1, b: 1 }, grey),
+      10,
+    );
   });
 });
 

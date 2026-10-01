@@ -124,8 +124,10 @@ export const TONE_ROLES: Readonly<Record<Tone, ToneRoles>> = {
   },
 };
 
+type Use = keyof typeof WCAG_MIN;
+
 /** Pairs every tone must keep readable: foreground role, background role, kind of use. */
-export const CONTRAST_PAIRS: ReadonlyArray<readonly [ToneRole, ToneRole, keyof typeof WCAG_MIN]> = [
+export const CONTRAST_PAIRS: ReadonlyArray<readonly [ToneRole, ToneRole, Use]> = [
   ['fg', 'bg', 'text'],
   ['fg', 'bgPanel', 'text'],
   ['fgSoft', 'bg', 'text'],
@@ -137,9 +139,32 @@ export const CONTRAST_PAIRS: ReadonlyArray<readonly [ToneRole, ToneRole, keyof t
   ['actionInk', 'action', 'text'],
   ['actionText', 'bg', 'text'],
   ['actionText', 'bgPanel', 'text'],
-  ['alert', 'bg', 'ui'],
-  ['alert', 'bgPanel', 'ui'],
+  ['alert', 'bg', 'text'], // also the text of the HUD alarms (14–15 px)
+  ['alert', 'bgPanel', 'text'],
 ];
+
+/**
+ * Translucent layers laid over a tone background (hover of the ghost button…), declared in
+ * tokens.css as `--veil-<name>: color-mix(in oklch, var(<role>) <percent>%, transparent)`.
+ */
+export const VEILS = {
+  hover: { role: 'fg', percent: 7 },
+} as const satisfies Record<string, { readonly role: ToneRole; readonly percent: number }>;
+
+export type VeilName = keyof typeof VEILS;
+
+/** Text on a veil over a background: text role, veil, background role under the veil, use. */
+export const VEIL_PAIRS: ReadonlyArray<readonly [ToneRole, VeilName, ToneRole, Use]> = [
+  ['fg', 'hover', 'bg', 'text'],
+  ['fg', 'hover', 'bgPanel', 'text'],
+];
+
+export const veilProperty = (name: VeilName): `--veil-${VeilName}` => `--veil-${name}`;
+
+export function veilCss(name: VeilName): string {
+  const { role, percent } = VEILS[name];
+  return `color-mix(in oklch, var(${ROLE_PROPERTIES[role]}) ${percent}%, transparent)`;
+}
 
 export const colorProperty = (name: ColorName): `--c-${ColorName}` => `--c-${name}`;
 

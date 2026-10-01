@@ -67,10 +67,22 @@ export function relativeLuminance({ r, g, b }: Rgb): number {
   return 0.2126 * decodeGamma(r) + 0.7152 * decodeGamma(g) + 0.0722 * decodeGamma(b);
 }
 
+/**
+ * A translucent layer painted over a colour. Browsers blend the gamma-encoded channels, so a
+ * `color-mix(in oklch, X N%, transparent)` veil is X at alpha N/100 composited this way.
+ */
+export function compositeOver(top: Rgb, alpha: number, bottom: Rgb): Rgb {
+  const blend = (over: number, under: number): number => alpha * over + (1 - alpha) * under;
+  return { r: blend(top.r, bottom.r), g: blend(top.g, bottom.g), b: blend(top.b, bottom.b) };
+}
+
+/** WCAG contrast ratio between two sRGB colours, from 1 to 21, whatever their order. */
+export function contrastRatioRgb(first: Rgb, second: Rgb): number {
+  const [lighter, darker] = [first, second].map(relativeLuminance).sort((x, y) => y - x);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 /** WCAG contrast ratio between two colours, from 1 to 21, whatever their order. */
 export function contrastRatio(first: Oklch, second: Oklch): number {
-  const [lighter, darker] = [first, second]
-    .map((color) => relativeLuminance(oklchToSrgb(color)))
-    .sort((x, y) => y - x);
-  return (lighter + 0.05) / (darker + 0.05);
+  return contrastRatioRgb(oklchToSrgb(first), oklchToSrgb(second));
 }

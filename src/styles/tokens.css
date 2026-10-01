@@ -86,19 +86,7 @@
   --radius-soft: 14px;
   --radius-round: 999px;
 
-  /* Underwater shadows: large, diffuse, tinted by deep water. */
-  --shadow-float:
-    0 1px 2px oklch(22% 0.045 240 / 0.08), 0 12px 28px -14px oklch(22% 0.06 235 / 0.32);
-  --shadow-drift:
-    0 2px 6px oklch(22% 0.045 240 / 0.06), 0 28px 56px -28px oklch(22% 0.07 230 / 0.42);
-  --shadow-depth:
-    0 4px 12px oklch(18% 0.05 240 / 0.08), 0 48px 96px -40px oklch(18% 0.08 232 / 0.55);
-
-  /* Light: whatever can be clicked lights up, the keyboard focus is a halo. In daylight the lamp
-     only pools a warm light beneath; in dark water it glows (see the dark tones below). */
-  --glow-lit:
-    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 50%, transparent),
-    0 10px 22px -8px color-mix(in oklch, var(--c-torch) 55%, transparent);
+  /* Shadows and the glow of the lamp depend on the water: see « light water » and « dark water ». */
   --focus-width: 2px;
   --focus-offset: 3px;
 
@@ -191,18 +179,38 @@
   --alert: var(--c-alert);
 }
 
-/* Derived from the roles of the nearest tone (decorative only: no contrast requirement). */
+/* Derived from the roles of the nearest tone. Lines and glows are decorative; the veil carries
+   text (ghost button hovered): palette.test.ts checks text on it in every tone. */
 :root,
 [data-tone] {
   --line: color-mix(in oklch, var(--fg) 16%, var(--bg));
   --line-faint: color-mix(in oklch, var(--fg) 8%, var(--bg));
+  --veil-hover: color-mix(in oklch, var(--fg) 7%, transparent);
   --glow: color-mix(in oklch, var(--c-torch-glow) 45%, transparent);
+  --glow-soft: 0 0 22px -2px var(--glow);
+  --glow-text: 0 0 14px var(--glow);
   --focus-halo:
     0 0 0 7px color-mix(in oklch, var(--action) 20%, transparent),
     0 0 26px 4px color-mix(in oklch, var(--c-torch-glow) 32%, transparent);
 }
 
-/* In dark water a long shadow only bands: depth comes from a rim of light on top instead. */
+/* Light water: large, diffuse shadows tinted by deep water; in daylight the lamp only pools a
+   warm light beneath. Also on the light tones, so that one nested in dark water gets them. */
+:root,
+[data-tone='surface'],
+[data-tone='lagoon'] {
+  --shadow-float:
+    0 1px 2px oklch(22% 0.045 240 / 0.08), 0 12px 28px -14px oklch(22% 0.06 235 / 0.32);
+  --shadow-drift:
+    0 2px 6px oklch(22% 0.045 240 / 0.06), 0 28px 56px -28px oklch(22% 0.07 230 / 0.42);
+  --shadow-depth:
+    0 4px 12px oklch(18% 0.05 240 / 0.08), 0 48px 96px -40px oklch(18% 0.08 232 / 0.55);
+  --glow-lit:
+    0 0 0 1px color-mix(in oklch, var(--c-torch-glow) 50%, transparent),
+    0 10px 22px -8px color-mix(in oklch, var(--c-torch) 55%, transparent);
+}
+
+/* Dark water: a long shadow only bands, depth comes from a rim of light on top; the lamp glows. */
 [data-tone='emerald'],
 [data-tone='deep'],
 [data-tone='abyss'] {
