@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @ts-check
 // Traces src/assets/brand/LogoFull.png (Nicholas's logo, navy on transparent and white) into
-// src/assets/brand/logo.svg, with named groups for the animations (E15):
+// src/assets/brand/logo.svg, with named groups:
 //   #mark      the circle, the Matterhorn and the bubbles fused to the circle
 //   #bubbles   the free bubbles, one <path class="bubble"> each, from the circle upwards
 //   #wordmark  "Bulles en Valais"

@@ -17,8 +17,8 @@ const FEATHER = 3;
 const OVERLAY_WIDTH = 1200;
 
 /**
- * Shorelines hand-tuned on each hero option (normalised coordinates).
- * @type {Record<'rosel' | 'sion', { src: string, water: Polygon, holes: readonly Polygon[] }>}
+ * Shoreline hand-tuned on the hero (normalised coordinates), Gate 3: option A.
+ * @type {Record<'rosel', { src: string, water: Polygon, holes: readonly Polygon[] }>}
  */
 const HEROES = {
   rosel: {
@@ -51,21 +51,6 @@ const HEROES = {
         [0.52, 0.905],
       ],
     ],
-  },
-  sion: {
-    src: 'src/assets/images/hero/sion.jpg',
-    water: [
-      [-0.02, 0.636],
-      [0.25, 0.634],
-      [0.5, 0.634],
-      [0.8, 0.642],
-      [1.02, 0.645],
-      [1.02, 1.02],
-      [0.1, 1.02],
-      [0.06, 0.95],
-      [-0.02, 0.93],
-    ],
-    holes: [],
   },
 };
 

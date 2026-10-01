@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // @ts-check
 // Favicons from the symbol of the logo (#mark of src/assets/brand/logo.svg):
-//   public/favicon.svg            navy, foam when the browser is in dark mode
+//   public/favicon.svg            navy, white when the browser is in dark mode
 //   public/favicon.ico            32 px navy fallback
-//   public/apple-touch-icon.png   180 px, foam symbol on a navy tile
+//   public/apple-touch-icon.png   180 px, navy symbol on a white tile
 //   public/icon-192.png, icon-512.png (site.webmanifest)
 // Usage: node scripts/make-icons.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -13,9 +13,9 @@ import sharp from 'sharp';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const LOGO = path.join(ROOT, 'src/assets/brand/logo.svg');
 const PUBLIC = path.join(ROOT, 'public');
-/** Navy of the logo, and the foam of the palette (--c-foam). */
+/** The logo is only ever navy on white or white on black (Gate 3, D35). */
 const NAVY = '#141646';
-const FOAM = '#f4f2ea';
+const WHITE = '#ffffff';
 /** Share of the tile left around the symbol (the safe zone of a maskable icon is 80 %). */
 const TILE_PADDING = 0.16;
 const FAVICON_PADDING = 0.02;
@@ -56,7 +56,7 @@ const box = await markBox();
 
 const favicon =
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${square(box, FAVICON_PADDING)}">` +
-  `<style>path{fill:${NAVY}}@media (prefers-color-scheme:dark){path{fill:${FOAM}}}</style>` +
+  `<style>path{fill:${NAVY}}@media (prefers-color-scheme:dark){path{fill:${WHITE}}}</style>` +
   `<path d="${markPath}"/></svg>\n`;
 writeFileSync(path.join(PUBLIC, 'favicon.svg'), favicon);
 
@@ -82,8 +82,8 @@ writeFileSync(path.join(PUBLIC, 'favicon.ico'), Buffer.concat([header, png32]));
 const tile = (/** @type {number} */ size) =>
   Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${square(box, TILE_PADDING)}" width="${size}" height="${size}">` +
-      `<rect x="-99999" y="-99999" width="199999" height="199999" fill="${NAVY}"/>` +
-      `<path d="${markPath}" fill="${FOAM}"/></svg>`,
+      `<rect x="-99999" y="-99999" width="199999" height="199999" fill="${WHITE}"/>` +
+      `<path d="${markPath}" fill="${NAVY}"/></svg>`,
   );
 for (const [name, size] of /** @type {const} */ ([
   ['apple-touch-icon.png', 180],
@@ -91,7 +91,7 @@ for (const [name, size] of /** @type {const} */ ([
   ['icon-512.png', 512],
 ])) {
   await sharp(tile(size))
-    .flatten({ background: NAVY })
+    .flatten({ background: WHITE })
     .png({ compressionLevel: 9, palette: true })
     .toFile(path.join(PUBLIC, name));
 }
