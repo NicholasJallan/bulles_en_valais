@@ -1,4 +1,6 @@
 ---
+import { formatDepthMarker } from '@/lib/format.ts';
+
 /** Eyebrow with the depth marker of its section: « — 12 m · Cursus » (the dash is a gauge tick). */
 interface Props {
   /** Depth in metres, as shown by the HUD. */
@@ -8,10 +10,8 @@ interface Props {
   class?: string;
 }
 
-const NO_BREAK_SPACE = String.fromCharCode(0xa0);
-
 const { depth, label, as: Tag = 'p', class: className } = Astro.props;
-const depthText = `${String(depth).padStart(2, '0')}${NO_BREAK_SPACE}m`;
+const depthText = formatDepthMarker(depth);
 ---
 
 <Tag class:list={['eyebrow', className]}>
