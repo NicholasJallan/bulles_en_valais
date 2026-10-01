@@ -24,12 +24,4 @@ export type Rich = ReadonlyArray<
     }
 >;
 
-export interface Dictionary {
-  readonly meta: {
-    readonly title: string;
-    readonly description: string;
-  };
-  readonly hero: {
-    readonly title: Emphasis;
-  };
-}
+// The Dictionary interface, which lists every text of the site, lives in dictionary.ts.
