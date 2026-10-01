@@ -1,5 +1,6 @@
 ---
 import { getDictionary } from '@/i18n/index.ts';
+import { typeset } from '@/lib/typography.ts';
 import Button from '@/components/ui/Button.astro';
 import EmphasisText from '@/components/ui/EmphasisText.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
@@ -12,7 +13,7 @@ const QUESTIONS = [
   'Palette et tons : faut-il ajuster une couleur, un ton ?',
   'Sensation du mouvement : plus lent, plus rapide, ou juste ?',
   'Chiffres du HUD : grotesque tabulaire ou police mono ?',
-] as const;
+].map((question) => typeset(question, 'fr'));
 
 const CONTENTS = [
   { href: '#typographie', label: 'Typographie' },
@@ -77,7 +78,8 @@ const CONTENTS = [
     align-items: start;
   }
 
-  .hero-eyebrow,
+  /* The eyebrow is the root of a child component: it does not carry the scope of this one. */
+  .hero-grid > :global(.hero-eyebrow),
   .hero-title,
   .hero-copy,
   .hero-gate {
