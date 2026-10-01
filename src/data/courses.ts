@@ -75,7 +75,7 @@ const SDI_TDI_COURSES = [
     group: 'tech',
     name: { fr: 'TDI Nitrox avancé', en: 'TDI Advanced Nitrox' },
     meta: { fr: 'Mélanges enrichis', en: 'Enriched mixes' },
-    price: chf(250),
+    price: chf(290),
     cursus: 'row',
     formInterest: 'tdi',
   },
@@ -85,7 +85,7 @@ const SDI_TDI_COURSES = [
     group: 'tech',
     name: same('TDI Decompression Procedures'),
     meta: { fr: 'Plongée avec paliers', en: 'Staged decompression' },
-    price: chf(250),
+    price: chf(290),
     cursus: 'row',
     maxDepth: 45,
     inLadder: true,
@@ -118,7 +118,7 @@ const PADI_COURSES = [
     meta: { fr: '2 heures · baptême', en: '2 hours · intro dive' },
     price: chf(90),
     cursus: 'row',
-    maxDepth: 12,
+    maxDepth: 6,
     inLadder: true,
     formInterest: 'baptism',
   },
@@ -359,8 +359,9 @@ const PADI_SPECIALTIES = [
   },
 ] as const satisfies readonly Course[];
 
-// N1 to N4 show the prices of the FFESSM specialty tab everywhere (I-10, Nicholas, 01.10.2026);
-// N5 and PTH120 stay on request.
+// N1 to N4 show the prices of the FFESSM specialty tab everywhere (I-10 a); N5, PTH70 and PTH120
+// are on request. Prerogatives as defined by the federation (I-10 b): N1 supervised to 20 m (PE20),
+// N2 autonomous to 20 m and supervised to 40 m, N3 autonomous to 60 m.
 const FFESSM_COURSES = [
   {
     id: 'ffessm-n1',
@@ -412,6 +413,21 @@ const FFESSM_COURSES = [
     },
     price: chf(990),
     cursus: 'row',
+    formInterest: 'ffessm',
+  },
+  {
+    id: 'ffessm-pth70',
+    agency: 'ffessm',
+    group: 'federal',
+    name: same('PTH70'),
+    meta: {
+      fr: "Trimix hypoxique · jusqu'à 70 m, avant le PTH120",
+      en: 'Hypoxic trimix · to 70 m, before PTH120',
+    },
+    price: ON_REQUEST,
+    cursus: 'row',
+    maxDepth: 70,
+    inLadder: true,
     formInterest: 'ffessm',
   },
   {

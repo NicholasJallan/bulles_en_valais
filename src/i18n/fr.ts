@@ -251,15 +251,7 @@ export const fr: Dictionary = {
     route: 'Le Rhône, de Sion au Léman',
     facts: {
       maxDepth: 'Profondeur max',
-      temperatures: 'Températures',
-      summer: 'Été',
-      winter: 'Hiver',
-      surface: 'Surface',
-      bottom: 'Fond',
-      visibility: 'Visibilité',
-      access: 'Accès',
-      level: 'Niveau requis',
-      season: 'Meilleure saison',
+      sites: 'Quelques sites',
     },
   },
   prepare: {
@@ -328,12 +320,20 @@ export const fr: Dictionary = {
     title: { before: 'Offrir une première', em: "respiration sous l'eau." },
     lead: 'Un bon cadeau à utiliser à son rythme, en petit comité.',
     offersTitle: 'Les offres',
-    offers: [
-      {
-        title: 'TODO(I-12)',
-        text: 'TODO(I-12) : offres (baptême CHF 90, formations, montant libre ?)',
+    offers: {
+      baptism: {
+        title: 'Un baptême',
+        text: "Environ deux heures pour une première respiration sous l'eau, encadrée de près.",
       },
-    ],
+      course: {
+        title: 'Une formation',
+        text: 'Open Water, spécialité ou niveau fédéral : le bon couvre le cours choisi.',
+      },
+      amount: {
+        title: 'Un montant libre',
+        text: 'Vous fixez le montant, la personne choisit sa plongée.',
+      },
+    },
     stepsTitle: 'Comment ça marche',
     steps: [
       {
@@ -342,21 +342,21 @@ export const fr: Dictionary = {
       },
       {
         title: 'Vous recevez le bon',
-        text: 'TODO(I-12) : format du bon (PDF par e-mail, imprimé) et moyen de paiement.',
+        text: 'Je vous envoie le bon en PDF, à imprimer ou à transmettre.',
       },
       {
         title: 'La personne plonge',
-        text: 'Elle choisit sa date avec moi, pendant la durée de validité du bon.',
+        text: "Elle choisit sa date avec moi, dans l'année qui suit.",
       },
     ],
     conditionsTitle: 'Conditions',
     conditions: [
-      'TODO(I-12) : durée de validité',
-      'TODO(I-12) : paiement (TWINT, virement…)',
-      'TODO(I-12) : report et remboursement',
+      'Valable un an.',
+      'Paiement : le moyen qui vous arrange.',
+      "Report ou remboursement : au cas par cas, il suffit d'en parler.",
     ],
     cta: 'Offrir un bon cadeau',
-    card: { label: 'Bon cadeau', validity: 'TODO(I-12)' },
+    card: { label: 'Bon cadeau', validity: 'Valable 1 an' },
   },
   testimonials: {
     eyebrow: 'Témoignages',
@@ -366,6 +366,7 @@ export const fr: Dictionary = {
     cta: 'Partager un retour',
     previous: 'Témoignage précédent',
     next: 'Témoignage suivant',
+    source: 'Avis publiés sur Google',
     languageNote: 'Avis rédigés en français',
     items: [
       {
@@ -389,9 +390,10 @@ export const fr: Dictionary = {
       },
       {
         author: 'Alexandre F.',
-        course: 'PADI Open Water',
+        course: 'Open Water · Nitrox',
         text: [
-          'Nous avons passé le Open Water avec Nicholas. Une franche réussite, son accompagnement permet une vraie progression ! Merci Nicholas 🤘',
+          "J'ai passé mon Open Waters et Nitrox avec Nicholas et cela a été une super expérience ! Très bon instructeur et sa formation est très complète !",
+          'Si vous cherchez à passer votre formation en Suisse Romande, je vous recommande à la passer avec Nicholas.',
         ],
         lang: 'fr',
         translated: false,
@@ -414,6 +416,29 @@ export const fr: Dictionary = {
         text: [
           'Open water fait avec Nicholas, au top 👌',
           'Une super approche de la plongée, qui donne envie de continuer ! …',
+        ],
+        lang: 'fr',
+        translated: false,
+      },
+      {
+        author: 'Stefano T.',
+        course: 'PADI Open Water',
+        text: [
+          "J'ai passé mon PADI Open Water avec Nicolas et je ne pouvais pas rêver meilleur accompagnement !",
+          'Une formation sérieuse, complète et toujours dans une super ambiance. Nicolas a su me mettre en confiance, me faire progresser et surtout me donner de très bonnes bases pour continuer à évoluer en plongée.',
+          "Et puis il y a les petits moments qui font aussi partie de la formation… comme la pause dîner où Monsieur se prend tranquillement une crêpe complète… suivie d'une crêpe au Nutella ! 😂😂 Ça, forcément, ça crée des souvenirs !",
+          "J'attends maintenant avec impatience un créneau en octobre pour trois nouvelles plongées avec lui, dont ma toute première plongée de nuit 🌙🤿… et ensuite, direction le niveau 2 ! 😁",
+          "Merci Nicolas pour ta patience, tes conseils et tous ces bons moments. Au-delà de l'instructeur, j'ai surtout eu la chance de rencontrer quelqu'un que je considère aujourd'hui comme un ami.",
+          "À très vite sous l'eau ! 🤿",
+        ],
+        lang: 'fr',
+        translated: false,
+      },
+      {
+        author: 'Adeline V.',
+        course: 'Baptême offert',
+        text: [
+          "J'ai offert un baptême de plongée et je peux clairement dire que mon compagnon était enchanté! Un super moment avec un super instructeur. Merci !",
         ],
         lang: 'fr',
         translated: false,
@@ -537,6 +562,7 @@ export const fr: Dictionary = {
       off: 'désactivé',
     },
     cookies: 'Gérer les cookies',
+    social: 'Réseaux',
     backToSurface: 'Remonter à la surface',
   },
   notFound: {

@@ -248,11 +248,11 @@ const FFESSM_CARDS = [
     course: 'ffessm-n1',
     num: 'N1',
     title: same('Niveau 1'),
-    // TODO(I-10): « autonome » here, « plongée encadrée à 20 m » in the Cursus panel.
-    sub: { fr: 'Plongeur autonome', en: 'Autonomous diver' },
+    // Official prerogatives (I-10 b): supervised to 20 m (PE20).
+    sub: { fr: 'Encadré 20 m', en: 'Supervised 20 m' },
     description: {
-      fr: "Plongées en autonomie jusqu'à 20 m avec un guide de palanquée, encadré jusqu'à 40 m. Idéal pour débuter en bouteille.",
-      en: 'Autonomous dives to 20 m with a guide, supervised to 40 m. The entry point for scuba diving.',
+      fr: "Plongées encadrées par un guide de palanquée jusqu'à 20 m. Idéal pour débuter en bouteille.",
+      en: 'Dives to 20 m, led by a dive guide. The entry point for scuba diving.',
     },
   },
   {
@@ -293,6 +293,16 @@ const FFESSM_CARDS = [
     description: {
       fr: "Direction de l'activité plongée : sécurité, organisation du poste de secours, responsabilité de l'ensemble de la sortie.",
       en: 'Directing the full diving activity: safety, rescue station organisation, overall responsibility.',
+    },
+  },
+  {
+    course: 'ffessm-pth70',
+    num: 'PTH70',
+    title: { fr: 'Trimix hypoxique 70 m', en: 'Hypoxic trimix 70 m' },
+    sub: { fr: "Jusqu'à 70 m", en: 'Down to 70 m' },
+    description: {
+      fr: "Plongée au trimix hypoxique jusqu'à 70 m : l'étape nécessaire avant la formation PTH120.",
+      en: 'Hypoxic trimix diving to 70 m: the step required before the PTH120 course.',
     },
   },
   {

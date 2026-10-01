@@ -4,6 +4,7 @@
 // an emphasis are `Emphasis`, texts with links are `Rich`. Eyebrows hold their label only: the depth
 // marker (« — 12 m ») comes from src/data/sections.ts.
 import type { AgencyId } from '../data/courses.ts';
+import type { GiftOfferId } from '../data/gifts.ts';
 import type { SpecialtyTabId } from '../data/specialties.ts';
 import type { Emphasis, Locale, Localized, Rich } from './types.ts';
 
@@ -171,15 +172,8 @@ export interface Dictionary {
     readonly route: string;
     readonly facts: {
       readonly maxDepth: string;
-      readonly temperatures: string;
-      readonly summer: string;
-      readonly winter: string;
-      readonly surface: string;
-      readonly bottom: string;
-      readonly visibility: string;
-      readonly access: string;
-      readonly level: string;
-      readonly season: string;
+      /** Before the list of sites of a lake. */
+      readonly sites: string;
     };
   };
   readonly prepare: SectionIntro & {
@@ -201,7 +195,9 @@ export interface Dictionary {
   };
   readonly gifts: SectionIntro & {
     readonly offersTitle: string;
-    readonly offers: readonly { readonly title: string; readonly text: string }[];
+    readonly offers: Readonly<
+      Record<GiftOfferId, { readonly title: string; readonly text: string }>
+    >;
     readonly stepsTitle: string;
     readonly steps: readonly { readonly title: string; readonly text: string }[];
     readonly conditionsTitle: string;
@@ -220,6 +216,8 @@ export interface Dictionary {
      * French » for the originals, « Translated from French » for translations (I-09).
      */
     readonly languageNote: string;
+    /** Where the reviews were published. */
+    readonly source: string;
     readonly items: readonly Testimonial[];
   };
   readonly faq: SectionIntro & {
@@ -259,6 +257,8 @@ export interface Dictionary {
       readonly off: string;
     };
     readonly cookies: string;
+    /** Title of the links to the public profiles (src/data/contact.ts). */
+    readonly social: string;
     readonly backToSurface: string;
   };
   readonly notFound: {

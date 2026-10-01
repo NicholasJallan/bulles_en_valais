@@ -5,9 +5,9 @@ import { courseById } from './courses.ts';
 import { SPECIALTIES, SPECIALTY_TABS } from './specialties.ts';
 
 describe('SPECIALTIES', () => {
-  it('has as many cards per tab as the current site', () => {
+  it('has the cards of the current site, plus PTH70 (I-04)', () => {
     const counts = Object.fromEntries(SPECIALTY_TABS.map((tab) => [tab, SPECIALTIES[tab].length]));
-    expect(counts).toEqual({ sdi: 10, tdi: 4, padi: 10, ffessm: 6 });
+    expect(counts).toEqual({ sdi: 10, tdi: 4, padi: 10, ffessm: 7 });
   });
 
   it('keeps each card in the tab of its agency', () => {

@@ -3,17 +3,10 @@ import type { Coordinates } from '../lib/format.ts';
 import type { Localized } from '../i18n/types.ts';
 
 export interface PlaceFacts {
-  /** Metres. */
+  /** Maximum depth of the lake, in metres (I-03). */
   readonly maxDepth: number;
-  /** °C at the surface and at the bottom, in summer and in winter. */
-  readonly temperatures: {
-    readonly summer: { readonly surface: number; readonly bottom: number };
-    readonly winter: { readonly surface: number; readonly bottom: number };
-  };
-  readonly visibility: Localized;
-  readonly access: Localized;
-  readonly level: Localized;
-  readonly season: Localized;
+  /** A few of its dive sites, when it has several. */
+  readonly sites?: readonly Localized[];
 }
 
 export interface Place {
@@ -25,8 +18,7 @@ export interface Place {
   readonly coords: Coordinates;
   readonly description: Localized;
   readonly photo: { readonly file: string; readonly alt: Localized };
-  /** Data of the site (I-03); `null` until Nicholas provides it. */
-  readonly facts: PlaceFacts | null;
+  readonly facts: PlaceFacts;
 }
 
 export const PLACES = [
@@ -46,7 +38,7 @@ export const PLACES = [
         en: 'The lake at Les Îles, in Sion, at sunset.',
       },
     },
-    facts: null, // TODO(I-03)
+    facts: { maxDepth: 38 },
   },
   {
     id: 'rosel',
@@ -64,12 +56,12 @@ export const PLACES = [
         en: 'Dive gear laid out on the shore of Lac du Rosel.',
       },
     },
-    facts: null, // TODO(I-03)
+    facts: { maxDepth: 23 },
   },
   {
     id: 'leman',
     name: { fr: 'Léman', en: 'Lake Geneva' },
-    area: { fr: 'Rive sud-est', en: 'South-east shore' },
+    area: { fr: 'De Rivaz à Hermance', en: 'From Rivaz to Hermance' },
     coords: { lat: 46.4, lng: 6.8333 },
     description: {
       fr: 'Le grand bleu alpin. Des plongées plus profondes, des parois, des épaves, et ce silence unique des grands lacs.',
@@ -82,7 +74,16 @@ export const PLACES = [
         en: 'Chillon Castle, on the shore of Lake Geneva.',
       },
     },
-    facts: null, // TODO(I-03)
+    facts: {
+      maxDepth: 300,
+      sites: [
+        { fr: 'Rivaz Gare', en: 'Rivaz Gare' },
+        { fr: 'Château de Chillon', en: 'Chillon Castle' },
+        { fr: 'Bikini', en: 'Bikini' },
+        { fr: 'Hermance', en: 'Hermance' },
+        { fr: 'Tougues', en: 'Tougues' },
+      ],
+    },
   },
 ] as const satisfies readonly Place[];
 

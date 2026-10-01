@@ -6,6 +6,17 @@ export const PHONE = { href: 'tel:+41794368112', display: '+41 79 436 81 12' } a
 export const WHATSAPP_NUMBER = '41794368112';
 export const EMAIL = 'nicholas@bullesenvalais.ch';
 
+/** Public profiles (I-14): footer links and `sameAs` of the JSON-LD (S11). */
+export const SOCIAL_PROFILES = [
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    handle: '@nicho_dive',
+    url: 'https://www.instagram.com/nicho_dive/',
+  },
+  // TODO(I-14): address of the Facebook page « Bulles en Valais ».
+] as const;
+
 /** wa.me link, with an optional message written in advance in the chat box. */
 export function whatsappUrl(message?: string): string {
   const base = `https://wa.me/${WHATSAPP_NUMBER}`;

@@ -17,7 +17,7 @@ export const legalEn: Dictionary['legal'] = {
       {
         heading: 'Controller',
         paragraphs: [
-          [{ text: 'Nicholas Jallan, Bulles en Valais. Address: TODO(I-08).' }],
+          [{ text: 'Nicholas Jallan, Bulles en Valais (UID CHE-249.028.561).' }],
           [
             { text: 'Email: ' },
             {
@@ -97,8 +97,8 @@ export const legalEn: Dictionary['legal'] = {
         heading: 'Retention',
         paragraphs: [[{ text: 'Data is kept for as long as its purpose requires, then deleted:' }]],
         list: [
-          'messages received (form, email, WhatsApp): TODO(I-08);',
-          'server logs: TODO(I-08).',
+          'messages received (form, email, WhatsApp): kept as long as they serve your request or your training, and deleted on request;',
+          'server logs: kept for the security of the website, then deleted.',
         ],
       },
       {
@@ -176,9 +176,7 @@ export const legalEn: Dictionary['legal'] = {
         heading: 'Publisher',
         paragraphs: [
           [{ text: 'Nicholas Jallan, Bulles en Valais' }],
-          [{ text: 'Legal form: TODO(I-08)' }],
-          [{ text: 'Address: TODO(I-08)' }],
-          [{ text: 'Business identification number (UID): TODO(I-08)' }],
+          [{ text: 'Business identification number (UID): CHE-249.028.561' }],
           [
             { text: 'Email: ' },
             {

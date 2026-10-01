@@ -17,7 +17,7 @@ export const legalFr: Dictionary['legal'] = {
       {
         heading: 'Responsable du traitement',
         paragraphs: [
-          [{ text: 'Nicholas Jallan, Bulles en Valais. Adresse : TODO(I-08).' }],
+          [{ text: 'Nicholas Jallan, Bulles en Valais (IDE CHE-249.028.561).' }],
           [
             { text: 'E-mail : ' },
             {
@@ -109,8 +109,8 @@ export const legalFr: Dictionary['legal'] = {
           ],
         ],
         list: [
-          'messages reçus (formulaire, e-mail, WhatsApp) : TODO(I-08) ;',
-          'journaux du serveur : TODO(I-08).',
+          "messages reçus (formulaire, e-mail, WhatsApp) : conservés tant qu'ils servent à votre demande ou à votre formation, et supprimés sur simple demande ;",
+          'journaux du serveur : conservés pour la sécurité du site, puis supprimés.',
         ],
       },
       {
@@ -188,9 +188,7 @@ export const legalFr: Dictionary['legal'] = {
         heading: 'Éditeur',
         paragraphs: [
           [{ text: 'Nicholas Jallan, Bulles en Valais' }],
-          [{ text: 'Forme juridique : TODO(I-08)' }],
-          [{ text: 'Adresse : TODO(I-08)' }],
-          [{ text: 'Numéro IDE : TODO(I-08)' }],
+          [{ text: 'Numéro IDE : CHE-249.028.561' }],
           [
             { text: 'E-mail : ' },
             {

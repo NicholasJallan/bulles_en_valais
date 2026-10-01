@@ -2,7 +2,14 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { LOCALES } from '../i18n/types.ts';
 import { blankStrings, localizedIssues } from '../test/content-checks.ts';
-import { INTEREST_LABELS, INTERESTS, PHONE, WHATSAPP_NUMBER, whatsappUrl } from './contact.ts';
+import {
+  INTEREST_LABELS,
+  INTERESTS,
+  PHONE,
+  SOCIAL_PROFILES,
+  WHATSAPP_NUMBER,
+  whatsappUrl,
+} from './contact.ts';
 
 /** `ALLOWED_INTERESTS` of the contact endpoint, read from its source. */
 function allowedInterestsOfEndpoint(): string[] {
@@ -30,6 +37,16 @@ describe('contact details', () => {
     const digits = PHONE.display.replace(/\D/g, '');
     expect(PHONE.href).toBe(`tel:+${digits}`);
     expect(WHATSAPP_NUMBER).toBe(digits);
+  });
+});
+
+describe('SOCIAL_PROFILES', () => {
+  it('link to the public profiles over HTTPS, with the handle in the address', () => {
+    expect(SOCIAL_PROFILES.length).toBeGreaterThan(0);
+    for (const profile of SOCIAL_PROFILES) {
+      expect(profile.url).toMatch(/^https:\/\//);
+      expect(profile.url).toContain(profile.handle.replace(/^@/, ''));
+    }
   });
 });
 

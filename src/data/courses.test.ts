@@ -15,13 +15,14 @@ const ids = (courses: readonly Course[]): string[] => courses.map((course) => co
 /** Widened to `Course`, so that optional fields can be read on every entry. */
 const ALL_COURSES: readonly Course[] = COURSES;
 
-/** Prices of legacy/components/i18n.jsx, after the S00 changes (D9) and the choice of I-10. */
+/** Prices of legacy/components/i18n.jsx (S00, D9), with the changes decided by Nicholas in I-10. */
 const LEGACY_PRICES: Readonly<Record<string, number>> = {
   'sdi-owsd': 690,
   'sdi-aad': 450,
   'sdi-rescue': 890,
-  'tdi-advanced-nitrox': 250,
-  'tdi-deco': 250,
+  // TDI Advanced Nitrox and Decompression Procedures: CHF 250 before I-10 c.
+  'tdi-advanced-nitrox': 290,
+  'tdi-deco': 290,
   'tdi-nitrox': 290,
   'tdi-dpv': 150,
   'padi-dsd': 90,
@@ -63,7 +64,7 @@ describe('COURSES', () => {
     expect(new Set(ids(COURSES)).size).toBe(COURSES.length);
   });
 
-  it('keeps the prices of the current site', () => {
+  it('keeps the prices of the current site, as amended in I-10', () => {
     const prices = Object.fromEntries(
       COURSES.flatMap(({ id, price }) => (isOnRequest(price) ? [] : [[id, price.amount]])),
     );
@@ -117,6 +118,7 @@ describe('cursusCourses', () => {
       'ffessm-n2',
       'ffessm-n3',
       'ffessm-n4',
+      'ffessm-pth70',
       'ffessm-pth120',
     ]);
   });
@@ -135,9 +137,9 @@ describe('ladderCourses', () => {
     expect(ladderCourses().at(-1)?.id).toBe('ffessm-pth120');
   });
 
-  it('places each certification at the depth proposed in I-04', () => {
+  it('places each certification at the depth validated in I-04', () => {
     const depthOf = (id: CourseId): number | undefined => courseById(id).maxDepth;
-    expect(depthOf('padi-dsd')).toBe(12);
+    expect(depthOf('padi-dsd')).toBe(6);
     expect([depthOf('sdi-owsd'), depthOf('padi-owd')]).toEqual([18, 18]);
     expect(depthOf('ffessm-n1')).toBe(20);
     expect([depthOf('sdi-aad'), depthOf('padi-aowd')]).toEqual([30, 30]);
@@ -145,6 +147,7 @@ describe('ladderCourses', () => {
     expect([depthOf('sdi-deep'), depthOf('padi-deep')]).toEqual([40, 40]);
     expect(depthOf('tdi-deco')).toBe(45);
     expect(depthOf('ffessm-n3')).toBe(60);
+    expect(depthOf('ffessm-pth70')).toBe(70);
     expect(depthOf('ffessm-pth120')).toBe(120);
   });
 });

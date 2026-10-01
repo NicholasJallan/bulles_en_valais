@@ -28,6 +28,13 @@ describe('PLACES', () => {
     }
   });
 
+  it('gives the depth of each lake and a few sites of Lake Geneva (I-03)', () => {
+    const facts = Object.fromEntries(PLACES.map((place) => [place.id, place.facts.maxDepth]));
+    expect(facts).toEqual({ sion: 38, rosel: 23, leman: 300 });
+    const leman = PLACES.find((place) => place.id === 'leman');
+    expect(leman !== undefined && 'sites' in leman.facts ? leman.facts.sites.length : 0).toBe(5);
+  });
+
   it('has its texts in every language', () => {
     expect(blankStrings(PLACES)).toEqual([]);
     expect(localizedIssues(PLACES, LOCALES)).toEqual([]);
