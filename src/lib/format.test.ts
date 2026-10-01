@@ -51,7 +51,7 @@ describe('formatDepth', () => {
     expect(formatDepth(-0, 'fr', 1)).toBe(`0,0${NBSP}m`);
   });
 
-  it.each([-0.5, Number.NaN])('rejects %s', (metres) => {
+  it.each([-0.5, Number.NaN, Number.POSITIVE_INFINITY])('rejects %s', (metres) => {
     expect(() => formatDepth(metres, 'fr')).toThrow(RangeError);
   });
 

@@ -37,7 +37,9 @@ export function formatCHF(amount: number, locale: Locale): string {
 
 /** « 12,4 m » in French, « 12.4 m » in English. */
 export function formatDepth(metres: number, locale: Locale, decimals = 0): string {
-  if (!(metres >= 0)) throw new RangeError(`A depth is a number of metres ≥ 0, got ${metres}`);
+  if (!(metres >= 0) || !Number.isFinite(metres)) {
+    throw new RangeError(`A depth is a finite number of metres ≥ 0, got ${metres}`);
+  }
   if (!Number.isInteger(decimals) || decimals < 0) {
     throw new RangeError(`Decimals must be a whole number ≥ 0, got ${decimals}`);
   }

@@ -164,7 +164,7 @@ const padiVersion = (
   description: Localized,
 ): SpecialtyCard => ({ course, num, equivalent, sub, description });
 
-const PADI_CARDS = [
+const PADI_CARDS: readonly SpecialtyCard[] = [
   padiVersion('padi-nitrox', '01', 'sdi-nitrox', same('Nitrox'), {
     fr: 'La version PADI de la formation aux mélanges suroxygénés. Mêmes prérogatives, même reconnaissance internationale.',
     en: 'The PADI version of the oxygen-enriched mixes course. Same prerogatives, same international recognition.',
