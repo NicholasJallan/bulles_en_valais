@@ -1,8 +1,9 @@
 // Motion of the tabs (S08, Cursus; also the Specialties tabs): a light that slides from one tab
 // to the next (clip-path over the tab list), the new panel that fades in and rises slightly, its
-// headline lines and its price rows in cascade. The tabs themselves (tabs.ts) do not change:
-// keyboard, roles and states stay those of the APG pattern.
+// headline lines and its rows (prices, specialty cards) in cascade, settled within 0.6 s. The
+// tabs themselves (tabs.ts) do not change: keyboard, roles and states stay those of the APG pattern.
 import type { Cleanup } from '@/lib/controllers.ts';
+import { cascadeStagger } from '@/lib/motion/cascade.ts';
 import { DURATIONS_MS, STAGGER_MS, seconds } from '@/lib/motion/tokens.ts';
 import { gsap, type SplitText } from '@/scripts/motion/gsap.ts';
 import { splitLines } from '@/scripts/motion/split.ts';
@@ -11,6 +12,9 @@ import { TABS_EVENT, type TabsDetail } from './tabs.ts';
 const PANEL_RISE_PX = 16;
 const ROW_RISE_PX = 8;
 const LINE_START_PERCENT = 120;
+/** The rows (prices, specialty cards) have all settled within this time (brief S09: 0.6 s). */
+const CASCADE_TOTAL_MS = 600;
+const ROW_MS = DURATIONS_MS.fast;
 
 /** A headline split by an entrance still running: undone before the next one (quick switches). */
 const splits = new WeakMap<HTMLElement, SplitText>();
@@ -103,17 +107,23 @@ function enterPanel(panel: HTMLElement): void {
   }
   const rows = panel.querySelectorAll('[data-tab-row]');
   if (rows.length > 0) {
+    const step = cascadeStagger({
+      count: rows.length,
+      step: STAGGER_MS.line / 2,
+      duration: ROW_MS,
+      total: CASCADE_TOTAL_MS,
+    });
     timeline.from(
       rows,
       {
         opacity: 0,
         y: ROW_RISE_PX,
-        duration: seconds(DURATIONS_MS.base),
+        duration: seconds(ROW_MS),
         ease: 'buoyant',
-        stagger: seconds(STAGGER_MS.line) / 2,
+        stagger: seconds(step),
         clearProps: 'opacity,transform',
       },
-      seconds(DURATIONS_MS.fast) / 2,
+      0,
     );
   }
 }
