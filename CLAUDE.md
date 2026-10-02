@@ -61,7 +61,8 @@ src/
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
 public/                    copied as is: api/contact.php, js/boot.js, js/consent-default.js, robots.txt, llms.txt
-ops/nginx/                 security-headers.conf: final CSP and headers (S11), applied by nginx in S13
+ops/                       deploy.sh · rollback.sh (releases on the Pi, S12) · lib/common.sh
+ops/nginx/                 security-headers.conf: final CSP and headers (S11), applied by nginx in S13 · dive.conf: reference copy of the live config
 scripts/                   check-budgets.mjs · check-dist.mjs (+ lib/, tested)
 tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contact endpoint)
 ```
