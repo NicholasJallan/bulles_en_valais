@@ -48,10 +48,18 @@ export interface Testimonial {
   readonly translated: boolean;
 }
 
+export interface LegalTable {
+  readonly caption: string;
+  readonly headers: readonly string[];
+  /** One row per item; its first cell names it (row header). */
+  readonly rows: readonly (readonly string[])[];
+}
+
 export interface LegalSection {
   readonly heading: string;
   readonly paragraphs: readonly Rich[];
   readonly list?: readonly string[];
+  readonly table?: LegalTable;
 }
 
 export interface LegalPage {

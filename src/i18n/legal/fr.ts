@@ -1,6 +1,7 @@
 import type { Dictionary } from '../dictionary.ts';
 
-// Texts to be reviewed by Nicholas: this is not legal advice. The cookie table comes in S11.
+// Texts to be reviewed by Nicholas: this is not legal advice. Cookie table (S11): names and
+// durations from Google's documentation, to be checked in the browser once in production (S13).
 
 export const legalFr: Dictionary['legal'] = {
   privacy: {
@@ -10,7 +11,7 @@ export const legalFr: Dictionary['legal'] = {
         'Les données que Bulles en Valais traite, pourquoi, combien de temps, et comment exercer vos droits (nLPD et RGPD).',
     },
     title: 'Politique de confidentialité',
-    updated: 'Dernière mise à jour : 1er octobre 2026',
+    updated: 'Dernière mise à jour : 2 octobre 2026',
     intro:
       "Cette page explique quelles données personnelles sont traitées quand vous visitez ce site ou que vous me contactez, pourquoi, pendant combien de temps, et quels sont vos droits. Elle s'appuie sur la loi fédérale sur la protection des données (nLPD) et, pour les visiteurs de l'Union européenne, sur le règlement général sur la protection des données (RGPD).",
     sections: [
@@ -135,12 +136,38 @@ export const legalFr: Dictionary['legal'] = {
               text: "Aucun cookie de mesure ou de publicité n'est déposé sans votre accord. Le bandeau de consentement vous laisse accepter ou refuser chaque catégorie, et le lien « Gérer les cookies », en bas de chaque page, permet de changer d'avis à tout moment.",
             },
           ],
+          [
+            {
+              text: "Tant que vous n'avez pas accepté, la balise Google n'envoie que des signaux anonymes, sans cookie ni identifiant, qui servent à estimer la fréquentation de façon globale (« mode de consentement » de Google).",
+            },
+          ],
         ],
         list: [
           "Nécessaires, toujours actifs : votre choix de consentement et, si vous l'activez, la préférence du Mode calme.",
           "Mesure d'audience (Google Analytics) : seulement avec votre accord.",
           'Publicité (Google Ads) : seulement avec votre accord, pour mesurer les demandes venues des annonces.',
         ],
+        table: {
+          caption: 'Cookies et stockage local utilisés par le site',
+          headers: ['Nom', 'Fournisseur', 'Finalité', 'Durée'],
+          rows: [
+            ['cc_cookie', 'Bulles en Valais', 'Mémoriser votre choix de consentement', '6 mois'],
+            [
+              'bv-calm (stockage local)',
+              'Bulles en Valais',
+              "Mémoriser le Mode calme, si vous l'activez",
+              "Jusqu'à ce que vous le désactiviez",
+            ],
+            ['_ga', 'Google Analytics', "Distinguer les visiteurs (mesure d'audience)", '2 ans'],
+            ['_ga_QG5ZCVY1Z7', 'Google Analytics', "Conserver l'état de la visite", '2 ans'],
+            [
+              '_gcl_au, _gcl_aw',
+              'Google Ads',
+              "Relier une demande à l'annonce qui l'a amenée",
+              '90 jours',
+            ],
+          ],
+        },
       },
       {
         heading: 'Sécurité',

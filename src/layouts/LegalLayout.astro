@@ -47,6 +47,31 @@ const page = dictionary.legal[route];
             ))}
           </ul>
         )}
+        {section.table && (
+          /* Scrolls sideways on a phone: focusable, so the keyboard can scroll it too. */
+          <div class="legal-table" role="region" aria-label={section.table.caption} tabindex="0">
+            <table>
+              <caption>{section.table.caption}</caption>
+              <thead>
+                <tr>
+                  {section.table.headers.map((header) => (
+                    <th scope="col">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {section.table.rows.map(([name, ...cells]) => (
+                  <tr>
+                    <th scope="row">{name}</th>
+                    {cells.map((cell) => (
+                      <td>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     ))}
     <p class="legal-back">
@@ -99,5 +124,46 @@ const page = dictionary.legal[route];
     display: grid;
     gap: var(--space-2xs);
     padding-inline-start: 1.2em;
+  }
+
+  .legal-table {
+    overflow-x: auto;
+    border-radius: var(--radius-sharp);
+  }
+
+  .legal-table:focus-visible {
+    outline: var(--focus-width) solid var(--action);
+    outline-offset: var(--focus-offset);
+  }
+
+  .legal-table table {
+    inline-size: 100%;
+    min-inline-size: 36rem;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .legal-table caption {
+    padding-block-end: var(--space-2xs);
+    text-align: start;
+    color: var(--fg-soft);
+  }
+
+  .legal-table :is(th, td) {
+    padding: var(--space-2xs) var(--space-s) var(--space-2xs) 0;
+    border-block-end: 1px solid var(--line);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .legal-table thead th {
+    font-weight: var(--text-strong);
+    color: var(--fg-soft);
+  }
+
+  .legal-table tbody th {
+    font-family: var(--font-hud);
+    font-weight: var(--text-strong);
+    white-space: nowrap;
   }
 </style>
