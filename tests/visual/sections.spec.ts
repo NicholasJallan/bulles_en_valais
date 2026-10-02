@@ -40,6 +40,20 @@ async function settle(page: Page): Promise<void> {
   });
 }
 
+/** Same frame on every run: an element screenshot rounds a fractional box either way. */
+async function expectSection(page: Page, selector: string, name: string): Promise<void> {
+  const clip = await page.locator(selector).evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return {
+      x: 0,
+      y: Math.round(box.top + window.scrollY),
+      width: Math.round(box.width),
+      height: Math.round(box.height),
+    };
+  });
+  await expect(page).toHaveScreenshot(name, { ...OPTIONS, fullPage: true, clip });
+}
+
 for (const width of WIDTHS) {
   test(`sections at ${width} px`, async ({ page }) => {
     test.skip(
@@ -49,12 +63,7 @@ for (const width of WIDTHS) {
     await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
     await gotoReady(page, '/');
     await settle(page);
-    for (const id of SECTIONS) {
-      await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}-${width}.png`, OPTIONS);
-    }
-    await expect(page.locator('footer.site-footer')).toHaveScreenshot(
-      `footer-${width}.png`,
-      OPTIONS,
-    );
+    for (const id of SECTIONS) await expectSection(page, `#${id}`, `${id}-${width}.png`);
+    await expectSection(page, 'footer.site-footer', `footer-${width}.png`);
   });
 }
