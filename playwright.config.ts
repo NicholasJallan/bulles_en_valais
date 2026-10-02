@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4321;
+// PW_PORT lets two worktrees run their E2E suites side by side.
+const PORT = Number(process.env.PW_PORT ?? 4321);
 const DESKTOP_VIEWPORT = { width: 1440, height: 900 };
 const isCI = Boolean(process.env.CI);
 
