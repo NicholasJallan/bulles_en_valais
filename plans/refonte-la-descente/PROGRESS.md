@@ -17,7 +17,7 @@
 - [x] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp — 02.10.2026
 - [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
 - [x] **S12** — Préproduction & recette — 02.10.2026 (Gate 4 validée)
-- [ ] **S13** — Mise en production, suivi, nettoyage
+- [x] **S13** — Mise en production, suivi, nettoyage — 02.10.2026 (site en ligne, `v2.0.0`)
 
 ## Gates
 
@@ -83,6 +83,11 @@
 | 2026-10-02 | D49 | **Hero (E1) : les ondes vivent sur le lac, pas sur l'écran.** Caméra de la photo calée (Pixel 8 Pro, 24 mm éq.) sur l'orthophoto SWISSIMAGE : rive est, 46.12718 N 7.06000 E (le repère de Nicholas), cap 279°, 1,45 m au-dessus de l'eau, rive opposée à 140–220 m ; chaque pixel d'eau est ramené à son point du lac en mètres, anneaux du pointeur (12 cm, dispersion) et rides de vent (vent du nord-ouest, rafales) calculés sur le plan d'eau puis vus en perspective ; reflet déplacé ×2 la pente, fond vu par réfraction, Fresnel ; détails plus fins que le pixel → flou (pas de scintillement) | Nicholas (« on génère des ondes comme si on voyait l'eau du dessus ») |
 | 2026-10-02 | D50 | **Interlude B = l'épave de l'Hirondelle, dans le Léman** : photo de Nicholas (il y figure, à gauche), nettoyée (filigrane retiré), pas un visuel généré ; légende « L'Hirondelle, dans le Léman · Photo © Nicholas Jallan » (EN : « The Hirondelle, in Lake Geneva · … »), plus aucune mention IA (légende, alt, pied de page, Mentions légales) | Nicholas (Gate 4) |
 | 2026-10-02 | D51 | **Mode calme toujours accessible** : interrupteur dans la barre sur ordinateur (« Calme », nom accessible « Mode calme »), dans le menu sur téléphone, en plus du pied de page ; logos agrandis (barre, carte cadeau) ; de 64 à 80 rem la barre prend le couloir du HUD pour tenir sur une ligne | Nicholas (Gate 4) |
+| 2026-10-02 | D52 | **Pas de `report-uri`** : aucun endpoint de rapports CSP (pas de nouveau PHP exposé) ; le projet Playwright `csp` et la vérification en production en tiennent lieu | Nicholas (S13) |
+| 2026-10-02 | D53 | Bloc `http` du Pi en **TLS 1.2 et 1.3 seulement** (tous les sites) ; **logrotate** hebdomadaire des journaux `dive.*_log` (8 gardés, `/etc/logrotate.d/nginx-dive`) | Nicholas (S13) |
+| 2026-10-02 | D54 | Domaine canonique : **`dive.bullesenvalais.ch` gardé** (I-16) | Nicholas (S13) |
+| 2026-10-02 | D55 | **PHP 7.4 reste le défaut** des sites du Pi ; PHP 8.2 testé (148 tests unitaires de `contact.php` verts, rien écrit) mais le bloc `dive` reste sur FPM 7.4 le jour de la bascule ; passage de `dive` à un pool 8.2 dédié = étape séparée, en vérifiant les autres sites | Nicholas (S13) |
+| 2026-10-02 | D56 | CSP : `https://googleads.g.doubleclick.net/pagead/viewthroughconversion/` ajouté à `script-src` (violation vue en production après consentement), **chemin seul** (l'hôte sert du JSONP, revue de sécurité) | S13 (constat en production) |
 
 ## Mutations du plan
 
@@ -177,6 +182,10 @@
 | 2026-10-02 | S12 | modifier | Releases à `root:root` (et non `www-data`), nommées en UTC, fumée avant la bascule, suppression d'une release ratée, retour automatique si la production ne répond plus ; `02-architecture` §16 mis à jour | revue de sécurité S12 |
 | 2026-10-02 | S12 | corriger | Lighthouse par `npx lighthouse@12` + Chromium de Playwright (MCP `chrome-devtools` absent) ; la préproduction (option B : ancien nginx sans gzip des JS/CSS, manifeste et 404 sur le repli SPA, `noindex`) n'est pas représentative : mesure de référence sur `serve-with-csp.mjs` (en-têtes finaux, **gzip ajouté** comme le futur bloc nginx), en simulation et en bridage réel (`--throttling-method=devtools`) | environnement, option B |
 | 2026-10-02 | S12 | ajouter | `tests/visual/sections.spec.ts` : 14 zones (13 sections + pied de page) × 4 largeurs = 56 références sous mouvement réduit, éléments fixes masqués par `floating.css`, cadrage sur coordonnées arrondies | tâche 5 |
+| 2026-10-02 | S13 | retirer | Styleguide, `scripts/preview-pi.mjs` + `scripts/lib/preview-page.*`, script `preview:pi` et `legacy/` supprimés ; les sélecteurs `data-sg-state` de `Button.astro` et les contrôleurs `styleguide-*` d'`app.ts` avec eux ; le filtre `/styleguide/` du sitemap retiré | tâche 2 |
+| 2026-10-02 | S13 | corriger | Vérifications navigateur faites par un script Playwright contre la production (console, `securitypolicyviolation`, consentement accepté et refusé, rechargement), Lighthouse 12 avec le Chromium de Playwright : MCP `chrome-devtools` absent | environnement |
+| 2026-10-02 | S13 | modifier | nginx `dive` : `include fastcgi_params` + `SCRIPT_FILENAME` / `DOCUMENT_ROOT` en `$realpath_root` au lieu de `snippets/fastcgi-php.conf` (qui fixe `$document_root`) ; `client_max_body_size` 16M → 1m ; `fastcgi_read_timeout` 300 → 60 s ; `proxy_read_timeout` retiré ; `site.webmanifest` servi en `application/manifest+json` (inconnu de `mime.types` 1.22) | revue de la config |
+| 2026-10-02 | S13 | reporter | Assistant de balises, conversions Ads et temps réel GA4 → `plans/mesure-google/` phase A (D40) ; la production montre déjà `gtag/js` 200 et `g/collect` 204 vers `G-QG5ZCVY1Z7` après consentement | D40 |
 
 ## Mesures
 
@@ -198,6 +207,7 @@
 | 2026-10-02 | S12, préproduction `/preview/` sur le Pi (option B : ancien nginx, sans gzip des JS/CSS), Lighthouse 12 mobile simulé | 3,8 s | 0 | 200 ms | — (273 Kio non compressés) | — | 651 Kio | 84/100/96/54 (SEO : `noindex` et canonical de la préproduction ; BP : manifeste sur le repli SPA) |
 | 2026-10-02 | S12, local sous les en-têtes finaux + gzip (`serve-with-csp.mjs`), Lighthouse 12 mobile **simulé** (FR et EN identiques) ; sans bridage FCP = LCP = 65 ms | 3,1 s (FCP 1,8 s ; écart dû à la simulation) | 0 | 40–50 ms | 3,3 / 114,8 Ko | 16,6 Ko (accueil) | 347 Kio | 93/100/100/100 |
 | 2026-10-02 | S12, idem en **bridage réel** (`--throttling-method=devtools` : CPU ×4, 4G lente 562 ms / 1,6 Mbit/s, plus dur que la cible Fast 4G) | 2,2 s (= FCP) | 0 | 0 ms | 3,3 / 114,8 Ko | 16,6 Ko | 389 Kio | **96/100/100/100** (FR et EN) |
+| 2026-10-02 | **S13, production** (`dive.bullesenvalais.ch`, Lighthouse 12 mobile simulé, FR et EN identiques) | 1,7 s (FCP 1,1 s) | 0 | 90–110 ms | 3,2 / 111,4 Ko | 16,3 Ko (accueil) | 503 Kio (après défilement du robot Lighthouse) | **99/100/100/100** |
 
 ## Journal
 
@@ -649,4 +659,37 @@
 - **Retour arrière** : supprimer `/var/www/bullesenvalais` (rien ne le sert) ; `git revert` des commits S12.
 - **Gate 4** (réponses de Nicholas) : 1, 2 et 6 ok ; 3 logos agrandis ; 4 VoiceOver expliqué (lecteur d'écran d'Apple), facultatif ; 5 Mode calme dans la barre et le menu (D51) ; 7 « arrange au mieux » ; 8 mise en ligne dès que possible. En cours de route : interlude B = l'Hirondelle, sans mention IA (D50).
 - **Retouches** (un commit chacune, tests de non-régression) : `81e7e3b` (Hirondelle), `220db55` (Mode calme + logos ; test « barre sur une ligne » de 1024 à 1279 px, FR et EN, RED sans le correctif), `b85790e` (e-mail coupé avant « @ »), `324a491` (avis longs coupés en CSS dès le premier rendu dans le rail statique, dialogue dans `reviews.ts` ; une première version qui mesurait les cartes décalait de 300 px une page ouverte sur `#faq` : test ajouté), `177aa48` (références visuelles revues). Vitest 610, Playwright 324 réussis, 53 sautés, 0 échec ; préproduction republiée (sans erreur console, ordinateur et Pixel 7) ; `staging` → `releases/20261002-133432` (`177aa48`). Pas de nouvelle revue de code (changements d'interface couverts par les tests, D30).
+
+### S13 — 2026-10-02 (mise en production, suivi, nettoyage)
+- **Feu vert de Nicholas** (début de session) : bascule immédiate ; pas de `report-uri` (D52) ; TLS 1.0/1.1 coupés et logrotate des journaux `dive` (D53) ; `dive.` gardé (D54) ; PHP 8.2 à tester sans changer le défaut des autres sites, puis vérifier tous les sites (D55).
+- **Nettoyage** (`e1deb49`) : styleguide, prévisualisation sur le Pi et `legacy/` supprimés ; `dist/` sans `styleguide` ; JS total 114,8 → 111,4 Ko.
+- **Release** : `ops/deploy.sh production --dry-run` propre, puis `releases/20261002-135429` (`e1deb49`) et `current` créé ; fumée avant la bascule (fichiers, `php7.4 -l`).
+- **nginx** : sauvegarde `sites-available/bullesenvalais.bak-20261002-155459-s13` ; seul le bloc `dive` 443 remplacé (copie : `ops/nginx/dive.conf`) ; en-têtes dans `/etc/nginx/snippets/bulles-security-headers.conf` ; `nginx -t` puis `reload`. Puis `nginx.conf` (sauvegarde `nginx.conf.bak-…-s13`) : `ssl_protocols TLSv1.2 TLSv1.3` ; `/etc/logrotate.d/nginx-dive` (vérifié par `logrotate -d`).
+- **Recette serveur** (option B de S12) :
+  - `/` et `/en/` 200, servent la release ; URL inconnue → **404 réelle** (page 404) ; `/en` → 301 `/en/` ; `robots.txt` et `llms.txt` en `text/plain`, sitemaps en XML, `site.webmanifest` en `application/manifest+json` ; `/.git/config` 403 ; `/app.jsx`, `/api/mail-config.php` 404 ;
+  - en-têtes : HSTS, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` (`geolocation=()`), CSP finale sans `unsafe-eval`, unpkg ni script inline, sur les HTML, les fichiers en cache long et les 404 ; `/_astro/` 1 an `immutable`, images 30 jours, HTML et `js/*.js` `no-cache` ; gzip des JS, CSS, SVG, XML ;
+  - `/api/contact` : `GET` 405, `POST` sans `Origin` ou d'une origine étrangère 403 ; **message réel envoyé par Nicholas : reçu, accents et `Reply-To` corrects** ; compteur `shared/state/contact-quota` créé (`2026-10-02 1`) ; aucune ligne `contact:` d'erreur ;
+  - navigateur (Playwright contre la production) : 0 erreur console, 0 violation CSP sur ordinateur FR et Pixel 7 EN, consentement accepté puis rechargé, et refusé ; une violation trouvée au premier passage (`googleads.g.doubleclick.net`, script de la balise Ads après consentement) corrigée (D56) ; après consentement, `gtag/js` 200 et `g/collect` 204 (`G-QG5ZCVY1Z7`), `ccm/collect` et `rmkt/collect` de `AW-10798308119` ;
+  - Lighthouse mobile en production : **99/100/100/100** (FR et EN ; avant : —/91/73/83) ;
+  - ancres historiques (`#agencies`, `#about`, `#compare`, `#specialties`, `#places`, `#gear`, `#insurance`, `#testimonials`, `#faq`, `#contact`, `#top`) toutes présentes ;
+  - redirections 301 de `bullesenvalais.ch`, `www.` et `http://` conservées ; TLS 1.1 refusé (alerte « protocol version »), 1.2 et 1.3 acceptés ;
+  - **autres sites du Pi** (shop, fede, silence, dp-fede, en HTTP et HTTPS, pages PHP comprises) : mêmes statuts et mêmes réponses avant et après chaque rechargement de nginx (seule la page PHP de la boutique change, elle est dynamique).
+- **PHP 8.2** (D55) : `php8.2` 8.2.33 avec `openssl`, `mbstring`, `json`, `iconv` ; tests unitaires de `contact.php` 148/148 sous 8.2 sur le Pi (même méthode que `run_unit_php74.sh`, rien écrit) ; le pool `php8.2-fpm` est arrêté (activé au démarrage, inactif) : rien changé.
+- **Revue** (`security-reviewer`, Sonnet, une passe, D30) : 0 CRITICAL, 0 HIGH ; MEDIUM corrigé : `script-src` restreint au chemin `viewthroughconversion/` (D56) ; MEDIUM laissé (préexistant) : `contact.php` tourne dans le pool FPM `www` partagé avec les autres sites PHP du Pi, sans `open_basedir`, donc `mail-config.php` est lisible par leur code → pool dédié (utilisateur et socket propres, `open_basedir`) à faire avec le passage à 8.2 ; notes basses : `limit_req` par IPv6 contournable (le plafond de 50/jour borne l'abus), `preload` du HSTS sans inscription (inoffensif).
+- **Commits** : `e1deb49`, `2d0a8f9`, `f1d0350`, puis ce journal ; branche fusionnée dans `main` (PR), tag `v2.0.0` ; l'ancien site est taggé `v1-legacy`.
+- **Search Console** (Nicholas, guidé dans la conclusion de la session) : propriété, sitemap `https://dive.bullesenvalais.ch/sitemap-index.xml`, inspection de `/` et `/en/`, demande d'indexation.
+- **Points ouverts** :
+  - J+1 (03.10) : `dive.error_log` (lignes `contact:`), 404 inattendues et 429 dans `dive.access_log`, messages reçus ;
+  - J+7 (09.10) : couverture Search Console, erreurs PHP, performance ; D48 (plafond épuisable par une IP) à revoir d'après `contact: daily limit reached` ;
+  - J+14 (16.10) : avec l'accord de Nicholas, archiver puis supprimer `/var/www/html/dive` (garder le dossier `.well-known/acme-challenge` ou changer `webroot_path` de certbot ; supprimer la copie de `mail-config.php` qu'il contient) ;
+  - pool PHP-FPM dédié en 8.2 pour `dive` (MEDIUM de la revue, D55) ; les autres journaux `*_log` du Pi (shop, fede, silence, dp-fede) ne sont pas non plus tournés ;
+  - `plans/mesure-google/` phase A (assistant de balises, conversions, temps réel GA4, cookies relevés en production) ;
+  - Safari réel et iOS, coût GPU du hero sur téléphone moyen de gamme : à surveiller ; Firefox (D21).
+- **Retour arrière** : `ops/rollback.sh --list` puis `ops/rollback.sh <release>` (une seule release de production pour l'instant ; les releases `staging` de S12 restent disponibles) ; dernier recours : restaurer `sites-available/bullesenvalais.bak-20261002-155459-s13` (et `nginx.conf.bak-…-s13` pour TLS), `sudo nginx -t && sudo systemctl reload nginx` ; l'ancien docroot est intact.
+
+### 🔁 Bilan du plan — 2026-10-02
+- **Livré** : 14 sessions (S00–S13) en trois jours ; site statique Astro FR/EN, parité garantie par les tests ; WebGL du hero calé sur le vrai lac (D49), profondimètre, échelle, lampe, parcours du Rhône, bulles, palier ; formulaire durci (S00) puis plafonné (S10) ; consentement et Consent Mode v2 ; déploiement atomique par releases avec retour arrière.
+- **Avant / après** (mobile) : Lighthouse —/91/73/83 → **99/100/100/100** ; LCP ≈ 1,8 s cache chaud (compilation Babel) → 1,7 s cache vide simulé ; ≈ 5 Mo d'images décodées → 503 Kio transférés ; JS : React + Babel par unpkg (≈ 1 Mo+) → 3,2 Ko initial, 111,4 Ko au total (WebGL à la demande) ; CSP avec `unsafe-eval` et `unsafe-inline` → sans script inline ; soft 404 → vraie 404 ; GA4 bloqué → reçu après consentement.
+- **Écarts** : MCP `chrome-devtools` jamais disponible (Playwright + Lighthouse en ligne de commande à la place) ; Firefox non validé (D21) ; pas de `next.` (option B) ; conversions Ads et GA4 détaillé sortis vers `plans/mesure-google/` (D40) ; animation du logo abandonnée (D35).
+- **Idées pour la suite** : allemand (`'de'` dans `LOCALES`) ; vidéo sous-marine si Nicholas en tourne ; journal de plongées ; pool PHP 8.2 dédié ; `plans/mesure-google/`.
 
