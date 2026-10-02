@@ -39,7 +39,9 @@ function send(response, status, file) {
     'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
     'Cache-Control': 'no-store',
   });
-  createReadStream(file).pipe(response);
+  createReadStream(file)
+    .on('error', () => response.destroy())
+    .pipe(response);
 }
 
 const { values } = parseArgs({ options: { port: { type: 'string', default: '4341' } } });
@@ -49,7 +51,8 @@ createServer((request, response) => {
     response.writeHead(405, Object.fromEntries(HEADERS)).end();
     return;
   }
-  const { pathname } = new URL(request.url ?? '/', 'http://localhost');
+  // Collapse leading slashes: `//host` in a redirect would leave this server.
+  const pathname = new URL(request.url ?? '/', 'http://localhost').pathname.replace(/^\/+/, '/');
   const target = staticTarget(ROOT, pathname, isDirectory);
   if ('redirect' in target) {
     response.writeHead(301, { ...Object.fromEntries(HEADERS), Location: target.redirect }).end();
