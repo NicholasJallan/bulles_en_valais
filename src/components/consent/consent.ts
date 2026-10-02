@@ -2,9 +2,10 @@
 // controller sits on the « Manage cookies » button of the footer, which carries the texts of the
 // page: the library and its styles are loaded with this module, never in the initial bundle.
 // public/js/consent-default.js has already set the default consent; this module sends the update.
-import 'vanilla-cookieconsent/dist/cookieconsent.css';
-import './consent.css';
 import * as CookieConsent from 'vanilla-cookieconsent';
+// As URLs, not imports: Astro would link imported CSS from every page, render-blocking.
+import libraryStyles from 'vanilla-cookieconsent/dist/cookieconsent.css?url';
+import themeStyles from './consent.css?url';
 import type { Dictionary } from '@/i18n/dictionary.ts';
 import { consentState, isAnyGranted } from '@/lib/analytics/consent-mode.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
@@ -107,9 +108,21 @@ function trackOpenModals(): Pick<CookieConsent.CookieConsentConfig, 'onModalShow
   };
 }
 
-export function init(button: HTMLElement): Cleanup {
-  const texts = readTexts(button);
-  void CookieConsent.run({
+/** Adds a stylesheet to the page and resolves once it applies (the banner must not flash unstyled). */
+function loadStylesheet(href: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.addEventListener('load', () => resolve());
+    link.addEventListener('error', () => reject(new Error(`Stylesheet ${href} failed to load`)));
+    document.head.append(link);
+  });
+}
+
+async function start(texts: ConsentTexts): Promise<void> {
+  await Promise.all([loadStylesheet(libraryStyles), loadStylesheet(themeStyles)]);
+  await CookieConsent.run({
     cookie: { name: 'cc_cookie', expiresAfterDays: 182, sameSite: 'Lax' },
     guiOptions: {
       consentModal: { layout: 'box', position: 'bottom right', equalWeightButtons: true },
@@ -125,10 +138,17 @@ export function init(button: HTMLElement): Cleanup {
     onChange: sendConsent,
     ...trackOpenModals(),
   });
+}
 
+export function init(button: HTMLElement): Cleanup {
+  const texts = readTexts(button);
   const open = (): void => CookieConsent.showPreferences();
   button.addEventListener('click', open);
-  button.removeAttribute('disabled');
+  // Consent Mode already holds the default: a banner that fails to load must not break the page,
+  // and the button stays disabled until the preferences can open.
+  start(texts)
+    .then(() => button.removeAttribute('disabled'))
+    .catch((error: unknown) => console.error('Consent banner failed to start', error));
   const stopConversions = listenForConversions(document);
 
   return () => {
