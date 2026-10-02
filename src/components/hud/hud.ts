@@ -5,6 +5,13 @@ import type { Cleanup } from '@/lib/controllers.ts';
 import { HUD_PROFILE } from '@/data/sections.ts';
 import { isFastAscent, type DepthSample } from '@/lib/depth/ascent.ts';
 import { profilePoint } from '@/lib/depth/profile.ts';
+import {
+  idleStop,
+  pauseStop,
+  remainingSeconds,
+  resumeStop,
+  type StopClock,
+} from '@/lib/depth/safety-stop.ts';
 import type { DepthReading } from '@/lib/depth/resolve-depth.ts';
 import { temperatureAt } from '@/lib/depth/temperature.ts';
 import { formatDecimal, formatDuration, formatTemperature } from '@/lib/format.ts';
@@ -18,22 +25,30 @@ export type HudMode = 'normal' | 'hidden' | 'safety-stop';
 /** The « ▲ SLOW » ascent alarm is behind a flag, off by default (S06 brief). */
 const ASCENT_ALARM = false;
 const ALARM_MS = 1200;
-const SAFETY_STOP_S = 180;
 const SAFETY_STOP_DEPTH = 5;
 const TICK_MS = 1000;
 
 interface Hud {
   show(reading: DepthReading, precise: boolean): void;
   setMode(mode: HudMode | null): void;
+  resetSafetyStop(): void;
   release(): void;
   depth(): number;
 }
 
 let current: Hud | undefined;
+/** A mode asked before the gauge started (a page opened on the FAQ). */
+let pendingMode: HudMode | null = null;
 
 /** Forces a mode (`null` gives the control back to the sections: hidden in the depth ladder). */
 export function setMode(mode: HudMode | null): void {
-  current?.setMode(mode);
+  if (current === undefined) pendingMode = mode;
+  else current.setMode(mode);
+}
+
+/** The next safety stop starts again from 3:00 (the diver went back down). */
+export function resetSafetyStop(): void {
+  current?.resetSafetyStop();
 }
 
 /** Depth shown by the gauge (0 before its first reading): the bubbles start from there. */
@@ -106,7 +121,7 @@ function createHud(root: HTMLElement): Hud & { destroy: Cleanup } {
   let override: HudMode | null = null;
   let reading: DepthReading | undefined;
   let section = '';
-  let stopStartedAt = 0;
+  let stop: StopClock = idleStop();
   let sample: DepthSample | undefined;
   let alarmTimer = 0;
 
@@ -115,7 +130,7 @@ function createHud(root: HTMLElement): Hud & { destroy: Cleanup } {
   const renderAlarm = (): void => {
     const safetyStop = mode() === 'safety-stop';
     if (safetyStop) {
-      const left = Math.max(0, SAFETY_STOP_S - (performance.now() - stopStartedAt) / 1000);
+      const left = remainingSeconds(stop, performance.now());
       const label = root.dataset.labelSafetyStop ?? '';
       alarmText(
         `${label} ${formatDecimal(SAFETY_STOP_DEPTH, locale, 0)} m · ${formatDuration(left)}`,
@@ -185,8 +200,17 @@ function createHud(root: HTMLElement): Hud & { destroy: Cleanup } {
   return {
     show,
     setMode(next) {
-      if (next === 'safety-stop' && override !== 'safety-stop') stopStartedAt = performance.now();
+      // The stop clock runs only while the gauge shows it: out of view, it waits.
+      stop =
+        next === 'safety-stop'
+          ? resumeStop(stop, performance.now())
+          : pauseStop(stop, performance.now());
       override = next;
+      render();
+    },
+    resetSafetyStop() {
+      stop = idleStop();
+      if (mode() === 'safety-stop') stop = resumeStop(stop, performance.now());
       render();
     },
     release() {
@@ -237,6 +261,8 @@ export function init(root: HTMLElement): Cleanup {
     hud.show({ id: first.id, index: 0, progress: 0, depth: first.start, hidden: false }, false);
   }
   current = hud;
+  if (pendingMode !== null) hud.setMode(pendingMode);
+  pendingMode = null;
   const unbind = closeProfileOnLink();
   return () => {
     unbind();
