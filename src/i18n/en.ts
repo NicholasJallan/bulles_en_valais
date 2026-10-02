@@ -142,7 +142,7 @@ export const en: Dictionary = {
       quote: 'At forty metres, red is gone. Only the torch remembers colour.',
       imageAlt:
         'Rebreather divers explore the wreck of the Hirondelle in Lake Geneva, their red torches cutting through dark water.',
-      credit: 'The Hirondelle, in Lake Geneva',
+      credit: 'The Hirondelle, in Lake Geneva · Photo © Nicholas Jallan',
     },
   },
   depthLadder: {

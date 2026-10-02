@@ -144,7 +144,7 @@ export const fr: Dictionary = {
       quote: 'À quarante mètres, le rouge a disparu. Seule la lampe se souvient des couleurs.',
       imageAlt:
         "Des plongeurs en recycleur explorent l'épave de l'Hirondelle, dans le Léman ; leurs lampes rouges percent l'eau sombre.",
-      credit: "L'Hirondelle, dans le Léman",
+      credit: "L'Hirondelle, dans le Léman · Photo © Nicholas Jallan",
     },
   },
   depthLadder: {
