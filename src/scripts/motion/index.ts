@@ -4,6 +4,8 @@
 import { startHero } from '@/components/hero/hero.ts';
 import { trackWater } from '@/components/water/water.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
+import { createEmitter } from '@/scripts/bubbles/emitter.ts';
+import { bubblesOnLamps } from '@/scripts/bubbles/lamps.ts';
 import { trackDepth } from './depth.ts';
 import { fontsSettled } from './fonts.ts';
 import { ScrollTrigger, setupGsap } from './gsap.ts';
@@ -23,13 +25,16 @@ export function startMotion(): Cleanup | undefined {
   root.classList.add('motion-ready');
 
   const stop = whileMotion(({ fine }) => {
+    const bubbles = createEmitter();
     const cleanups = [
       trackDepth(),
       trackWater(),
       animateNav(),
       fine ? startLenis() : noop,
       fine ? magnetize() : noop,
+      fine ? bubblesOnLamps(bubbles) : noop,
       startHero({ fine }),
+      () => bubbles.destroy(),
     ];
     let cancelled = false;
     let stopReveals = noop;

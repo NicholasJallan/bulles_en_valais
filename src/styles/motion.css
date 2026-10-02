@@ -76,3 +76,13 @@ html:not(.motion-ok)::view-transition-old(*),
 html:not(.motion-ok)::view-transition-new(*) {
   animation: none;
 }
+
+/* Bubbles (E7): one canvas over the page, created by the emitter on the first release. */
+.bubbles-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-bubbles);
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}

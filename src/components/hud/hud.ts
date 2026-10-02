@@ -26,6 +26,7 @@ interface Hud {
   show(reading: DepthReading, precise: boolean): void;
   setMode(mode: HudMode | null): void;
   release(): void;
+  depth(): number;
 }
 
 let current: Hud | undefined;
@@ -33,6 +34,11 @@ let current: Hud | undefined;
 /** Forces a mode (`null` gives the control back to the sections: hidden in the depth ladder). */
 export function setMode(mode: HudMode | null): void {
   current?.setMode(mode);
+}
+
+/** Depth shown by the gauge (0 before its first reading): the bubbles start from there. */
+export function currentDepth(): number {
+  return current?.depth() ?? 0;
 }
 
 /** A reading from the motion module: from then on, the coarse tracking stops. */
@@ -186,6 +192,7 @@ function createHud(root: HTMLElement): Hud & { destroy: Cleanup } {
     release() {
       precise = false;
     },
+    depth: () => (mode() === 'safety-stop' ? SAFETY_STOP_DEPTH : (reading?.depth ?? 0)),
     destroy() {
       stopObserving();
       window.clearInterval(interval);

@@ -1,5 +1,5 @@
 // E7 prototype for the styleguide: one 2D canvas, a pool of 64 bubbles, Boyle's law.
-// The tested engine (src/lib/bubbles/boyle.ts, emitter.ts) comes in S08.
+// The tested engine of the page: src/lib/bubbles/ (S08), drawn by src/scripts/bubbles/emitter.ts.
 import type { Cleanup } from '@/lib/controllers.ts';
 
 type TickerCallback = (time: number, deltaTime: number, frame: number) => void;
