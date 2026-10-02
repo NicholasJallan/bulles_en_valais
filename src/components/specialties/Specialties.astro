@@ -73,10 +73,27 @@ const tabs = SPECIALTY_TABS.map((tab) => ({
     z-index: var(--z-raised);
   }
 
+  /* In the dark the cards are dimmed (still AA: --torch-dim, palette.test.ts); the beam brings
+     them back to full light and warms their title. Only their opacity moves. */
+  .specialties[data-torch] :global(.specialty > *) {
+    opacity: var(--torch-dim);
+    transition: opacity var(--dur-base) var(--ease-surface);
+  }
+
+  .specialties[data-torch] :global(.specialty.is-lit > *) {
+    opacity: 1;
+  }
+
+  .specialties[data-torch] :global(.specialty.is-lit .specialty-title) {
+    color: var(--c-torch-pale);
+  }
+
+  /* Cut at the sides only: at the top and bottom edges the light spills over the picture above
+     and the water below instead of stopping at a straight line. */
   .specialties :global(.torch) {
     position: absolute;
     inset: 0;
-    overflow: clip;
+    overflow: clip visible;
     pointer-events: none;
   }
 

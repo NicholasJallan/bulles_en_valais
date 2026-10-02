@@ -69,6 +69,17 @@ describe('palette', () => {
     expect(CONTRAST_PAIRS).toContainEqual(['alert', 'bgPanel', 'text']);
   });
 
+  it("keeps the cards of the abyss readable out of the lamp's beam (E8, --torch-dim)", () => {
+    const dim = Number(customProperties(TOKENS_CSS, ':root').get('--torch-dim'));
+    expect(dim).toBeGreaterThan(0);
+    expect(dim).toBeLessThan(1);
+    const abyss = oklchToSrgb(COLORS.abyss);
+    for (const text of ['foam', 'foam-soft'] as const) {
+      const dimmed = compositeOver(oklchToSrgb(COLORS[text]), dim, abyss);
+      expect(contrastRatioRgb(dimmed, abyss)).toBeGreaterThanOrEqual(WCAG_MIN.text);
+    }
+  });
+
   describe.each(TONES)('tone %s', (tone) => {
     it.each(CONTRAST_PAIRS)('%s on %s meets the WCAG minimum for %s', (front, back, use) => {
       const roles = TONE_ROLES[tone];
