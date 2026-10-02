@@ -47,7 +47,7 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── hero/       Hero · hero.ts · hero-surface.ts (WebGL après load + idle)
 │   │   ├── manifesto/  Manifesto
 │   │   ├── instructor/ Instructor
-│   │   ├── courses/    Courses · AgencyPanel · PriceList · tabs.ts
+│   │   ├── courses/    Courses · AgencyPanel · PriceList (onglets : ui/TabList · ui/tabs.ts · ui/tabs-motion.ts)
 │   │   ├── interlude/  Interlude · interlude.ts
 │   │   ├── depth-ladder/ DepthLadder · CompareTable · ladder.ts
 │   │   ├── specialties/  Specialties · SpecialtyCard · torch.ts
@@ -64,12 +64,13 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   ├── scripts/app.ts                 # point d'entrée unique, orchestre l'initialisation (§7)
 │   ├── scripts/motion/  index · gsap · reduced-motion · lenis · reveal · split · fonts · magnetic · depth · nav (DOM, hors couverture)
 │   ├── scripts/webgl/   surface.ts (OGL, S07 ; DOM, hors couverture)
+│   ├── scripts/bubbles/ emitter.ts (canvas 2D) · lamps.ts (bulles des CTA) (S08 ; DOM, hors couverture)
 │   ├── i18n/  types.ts · dictionary.ts · fr.ts · en.ts · legal/{fr,en}.ts · index.ts · routes.ts (+ tests)
 │   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
 │   ├── lib/
 │   │   ├── motion/  eases.ts · tokens.ts · waterline.ts · magnetic.ts (logique pure, + tests)
 │   │   ├── depth/   resolve-depth.ts · temperature.ts · profile.ts · ascent.ts · ladder-scale.ts (+ tests)
-│   │   ├── bubbles/ boyle.ts (+ test) · emitter.ts
+│   │   ├── bubbles/ boyle.ts · pool.ts (+ tests)
 │   │   ├── webgl/   capability.ts · viewport.ts · ripples.ts (+ tests) · shaders/{surface.vert,surface.frag,noise.glsl}
 │   │   ├── color/   palette.ts · contrast.ts (+ test)
 │   │   ├── geo.ts (+ test)             # projection des coordonnées des lieux (S09)
@@ -238,7 +239,8 @@ export interface Course {
 ## 10. Bulles
 
 - `boyle.ts` : `radiusAtDepth(r0, fromDepth, toDepth) = r0 * ((10 + fromDepth) / (10 + toDepth)) ** (1 / 3)` et `riseSpeed(r)` ∝ √r. Testés (valeurs de référence : à 10 m, une bulle a un volume ×2 en surface, donc un rayon ×1,26).
-- `emitter.ts` : un canvas 2D fixe (`pointer-events: none`, `aria-hidden`), pool de 64, API `burst(x, y, n, depth)` et `trail(el)`. Rendu : cercle en dégradé radial avec reflet. Ne tourne que s'il y a des bulles actives.
+- `pool.ts` (logique pure, testée) : réserve de 64 particules réécrite sans allocation, `spawnBubbles()` et `stepBubbles()` (montée ∝ √r, oscillation, rayon de Boyle selon la hauteur parcourue : 40 px = 1 m).
+- `src/scripts/bubbles/emitter.ts` (S08) : un canvas 2D fixe (`pointer-events: none`, `aria-hidden`) créé à la première émission par le module de mouvement, API `burst(x, y, n, depth)` et `trail(el, depth)`. Rendu : une bulle dessinée une fois (dégradé radial, liseré, reflet) puis mise à l'échelle. Ne tourne sur `gsap.ticker` que s'il y a des bulles actives. Tout script peut demander une gerbe par l'évènement `bv:bubbles` (`{ x, y, count, depth? }`), sans effet hors du module de mouvement (succès du formulaire en S10). La profondeur de départ vient du HUD (`currentDepth()`).
 
 ## 11. Formulaire et `/api/contact`
 

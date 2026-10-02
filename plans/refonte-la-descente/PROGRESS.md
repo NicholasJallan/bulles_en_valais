@@ -12,7 +12,7 @@
 - [x] **S05** — Page statique complète — 01.10.2026
 - [x] **S06** — Moteur de mouvement — 02.10.2026
 - [x] **S07** — Hero « Surface » en WebGL + immersion — 02.10.2026
-- [ ] **S08** — Cursus, échelle de profondeur, interludes, bulles
+- [x] **S08** — Cursus, échelle de profondeur, interludes, bulles — 02.10.2026
 - [ ] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône)
 - [ ] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp
 - [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
@@ -139,6 +139,12 @@
 | 2026-10-02 | S07 | ajouter | Intro E15 : `motion.css` masque le titre du hero et les chiffres du HUD sous `html.motion-ok` jusqu'à `html[data-intro]` (posé par `hero.ts`, même en cas d'échec ; garde-fou de 3 s de `boot.js` sinon) ; voile du hero allégé de 35 % pendant l'immersion ; rendu plafonné à 60 i/s | E15, lisibilité sous l'eau, écrans 120 Hz |
 | 2026-10-02 | S07 | corriger | Tâche 7 : trace par un script Playwright + CDP (Pixel 7, CPU ×4, 150 ms / 9 Mbit/s, cache vide) et Lighthouse 12 local, au lieu du MCP `chrome-devtools`, absent de la session | environnement |
 | 2026-10-02 | S07 | ajouter | `tests/visual/` créé (référence du hero sans WebGL, chromium et mobile-chrome) | tâche 8 |
+| 2026-10-02 | S08 | déplacer | Moteur de bulles : logique pure `src/lib/bubbles/boyle.ts` + `pool.ts` (réserve, montée, Boyle ; testés), colle canvas dans `src/scripts/bubbles/emitter.ts` et `lamps.ts`, et non `src/lib/bubbles/emitter.ts` ; `02-architecture` §2 et §10 mis à jour | même règle qu'en S06 et S07 (couverture ≥ 80 % sur `src/lib`) |
+| 2026-10-02 | S08 | ajouter | Évènements `bv:tabs` (émis par `ui/tabs.ts` au changement d'onglet, animé par `ui/tabs-motion.ts`, aussi pour les onglets des Spécialités) et `bv:bubbles` (gerbe demandée par n'importe quel script, sans effet hors du module de mouvement : succès du formulaire en S10) ; `currentDepth()` dans `hud.ts` (profondeur de départ des bulles) | crochets entre contrôleurs essentiels et module de mouvement |
+| 2026-10-02 | S08 | modifier | Onglets : pas de vrai fondu enchaîné, l'ancien panneau disparaît aussitôt (`display: none` de `tabs.ts`) et le nouveau entre (fondu + montée de 16 px, lignes du titre, cascade des tarifs) ; l'indicateur glisse en `clip-path` (et non en `transform` + `scale`, qui déformerait les arrondis) | garder `tabs.ts`, le clavier et l'ARIA intacts, sans saut de hauteur |
+| 2026-10-02 | S08 | préciser | Interludes : parallaxe, anneau et traînée de bulles sur pointeur fin seulement ; thermoclines d'entrée et de sortie = bords en dégradé vers le ton des sections voisines (props `from` / `to`), dans tous les modes ; citation révélée par le `data-reveal="lines"` commun | « rien de tout cela sur tactile » du brief ; aucun texte sur le dégradé |
+| 2026-10-02 | S08 | préciser | Échelle : seule la scène (règle + marqueur, `[data-ladder-stage]`) est épinglée, l'en-tête défile avant (sinon le titre sortait de l'écran à 768 px de haut) ; 0 → 120 m sur 2,4 écrans pendant un épinglage de 3 écrans ; `refreshPriority: 1` ; HUD masqué par `data-hud="hidden"` (S06), sans appel explicite à `setMode` ; libellé « Remontée · 40 m » sur la thermocline qui suit l'échelle (prop `label` de `Thermocline`) | mise en page à 1024 × 768 ; une source par profondeur (`markerDepth('compare')`) |
+| 2026-10-02 | S08 | corriger | Trace de performance par un script Playwright (CDP, molette, `longtask`) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
 
 ## Mesures
 
@@ -153,6 +159,7 @@
 | 2026-10-02 | S11 seule (`check:budgets`) | n.m. | n.m. | n.m. | 3,0 / 53,9 Ko | 11,3 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S06 + S11 fusionnées (`check:budgets`) | n.m. | n.m. | n.m. | 3,2 / 82,0 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S07 (`check:budgets`) ; trace mobile Playwright + CDP (Pixel 7, CPU ×4, 150 ms / 9 Mbit/s, cache vide, 3 passes) ; Lighthouse 12 local (simulé) : S07 94, base S06 95 dans les mêmes conditions | FCP = LCP ≈ 0,6 s (trace) ; 2,9 s (Lighthouse, S06 : 2,8 s) | 0 | ≈ 120 ms (trace) ; 0 ms (Lighthouse) | 3,2 / 102,9 Ko (WebGL : 18,7 Ko, chargé vers 1,1 s, après le LCP) | 13,1 Ko (accueil) | n.m. | 94/100/100/100 |
+| 2026-10-02 | S08 (`check:budgets`) ; traversée de l'échelle épinglée à la molette, Chromium 1440 px : 0 tâche longue, images p50/p95 16,7 ms (CPU ×1 et ×4) | n.m. | n.m. | 0 tâche longue | 3,2 / 106,2 Ko | 14,1 Ko (accueil) | n.m. | n.m. |
 
 ## Journal
 
@@ -483,6 +490,32 @@
   - S08 : bulles sur `bv:lamp` ; l'intro E15 n'anime pas le logo (D35) ;
   - Nicholas : avis sur l'intensité de l'effet (captures `gates/s07/`) ; réglages simples dans `surface.frag` (amplitude des ondes, force des caustiques, teinte sous l'eau).
 - **Retour arrière** : `WEBGL_SURFACE = false` dans `src/components/hero/hero.ts` (ligne d'eau CSS seule) ; ou `git revert` des commits S07 (hero statique de S05).
+
+### S08 — 2026-10-02 (Cursus, interludes, échelle de profondeur, comparatif, bulles)
+- **Fait** :
+  - bulles (E7) en TDD : `lib/bubbles/boyle.ts` (`radiusAtDepth`, `riseSpeed` ; 10 m → surface ×1,26, 30 m → ×1,587), `pool.ts` (64 bulles, montée ∝ √r, oscillation, rayon de Boyle selon la hauteur parcourue, 40 px = 1 m) ; `scripts/bubbles/emitter.ts` (canvas fixe créé à la première émission, bulle pré-dessinée en couleur `--c-foam`, `gsap.ticker` seulement s'il y a des bulles, `burst`, `trail`, évènement `bv:bubbles`) ; CTA « lampe » : 2 ou 3 bulles au survol, gerbe de 14 au clic (E17) ;
+  - Cursus : lumière qui glisse d'onglet en onglet (`clip-path`), entrée du panneau, lignes du titre d'agence et cascade des tarifs (`ui/tabs-motion.ts`, aussi sur les onglets des Spécialités) ; titre du premier panneau révélé au scroll ;
+  - interludes : parallaxe de 12 % (pointeur fin), citation ligne à ligne, anneau à la place du curseur et traînée de bulles, bords en thermocline vers les tons voisins ;
+  - échelle (E9) : `ladderTicks()` et `depthAtPosition()` en TDD ; sur ordinateur avec mouvement, scène épinglée 3 écrans, règle graduée (5 m jusqu'à 40, puis 10 m), « Vous êtes ici » en très grands chiffres, cartes alternées gauche/droite qui s'allument à leur profondeur et s'estompent ensuite ; thermocline « Remontée · 40 m » ; liste statique de S05 sur mobile, en mouvement réduit et en Mode calme ;
+  - comparatif : en-tête collant (≥ 48 rem), ligne survolée éclairée, lignes révélées tour à tour ;
+  - tests : `tests/e2e/descent.spec.ts` (9 profondeurs de l'échelle dans le DOM dans tous les modes, épinglage sur ordinateur seulement, aucun épinglage ni `pin-spacer` ni bulle en mouvement réduit, onglets APG au clavier sous l'indicateur, canvas unique `aria-hidden`, curseur des interludes, page ouverte sur une ancre sous l'échelle), `motion.spec.ts` (page ouverte sur une ancre) ; captures `gates/s08/`.
+- **Profondeurs** : conformes à I-04 (D24) : 6, 18, 20, 30, 40, 45, 60, 70 et 120 m ; aucun `TODO(I-04)`.
+- **Vérifications** : `npm run build` (+ `check:dist`) ; `astro check` 0/0/0 ; Vitest 536 tests ; Playwright e2e 217 réussis (35 sautés), a11y 28/28, `csp` 0 violation, visuels 2/2 ; `format:check` ; budgets : JS initial 3,2 Ko, total 106,2 Ko, CSS 14,1 Ko ; trace de la traversée de l'échelle : 0 tâche longue, 60 i/s à CPU ×1 et ×4.
+- **Constats** :
+  - défaut de S06 : une page ouverte sur une ancre (`/#agencies`) faisait échouer le module de mouvement (`resolveDepth` appelé avant la première mesure) ; corrigé, test ajouté ;
+  - sous WebKit, le `ResizeObserver` de Lenis ne voit pas la place ajoutée par un épinglage : Lenis gardait sa limite et un lien vers `#faq` s'arrêtait 220 px trop haut ; Lenis est recalculé à chaque `refresh` de ScrollTrigger ;
+  - le navigateur saute à l'ancre de l'adresse avant que l'épinglage ajoute trois écrans au-dessus : le défilement suit l'ancre après le premier `refresh` ;
+  - ScrollTrigger range les déclencheurs par création : l'épinglage, créé après le HUD et l'eau, a `refreshPriority: 1`.
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30) : approuvée, 0 CRITICAL, 0 HIGH ; 2 MEDIUM corrigés (changements d'onglets rapides : découpe et cascade en cours terminées avant la suivante) ; LOW corrigés : anneau des interludes rendu visible si le module redémarre sous un pointeur immobile, indicateur recalé quand la largeur d'un onglet change, bulle tirée de `--c-foam` avec des constantes nommées, redimensionnement du canvas limité à une fois par image, lien commenté entre `--track-length` et `PIN_SCREENS` ; LOW laissé : tailles de mise en page de l'échelle et de l'anneau écrites dans leurs composants (propriétés nommées, pas des tokens du design system).
+- **Commits** : `bb8640d`, `dda390b`, `da98031`, `1e66567`, `d13bea9`, `e1e0be0`, `a18355d`, `856d6c3`, `aa39918`, `d4df9c0`, puis ce journal.
+- **Points ouverts** :
+  - S10 : gerbe de bulles au succès du formulaire par `bv:bubbles` (`{ x, y, count }`) ; `setMode('safety-stop')` au palier ;
+  - S09 : les onglets des Spécialités ont déjà la lumière qui glisse et l'entrée du panneau (`data-tab-headline` / `data-tab-row` à poser si leur titre et leurs lignes doivent suivre) ;
+  - la texture de miroitement des thermoclines (S06) montre une couture verticale tous les 60 rem (visible à 960 px sur `gates/s08/thermocline-ascent.jpg`) : texture à rendre raccordable ;
+  - Nicholas : avis sur l'échelle (`gates/s08/ladder-*.jpg`), la discrétion des bulles et l'anneau des interludes ;
+  - le prototype de bulles du styleguide (`styleguide/bubbles-demo.ts`, point ouvert de S02) n'est pas remplacé : la page est supprimée en S13, son commentaire renvoie au moteur ;
+  - Safari réel et Firefox (D21) non vérifiés à la main.
+- **Retour arrière** : `git revert` par sous-fonction (bulles `bb8640d`, Cursus `da98031`, interludes `1e66567`, échelle `d13bea9` + `d4df9c0`, comparatif `e1e0be0`) ; sans le module de mouvement, la page statique de S05 reste complète.
 
 ### S11 — 2026-10-02 (consentement, mesure, SEO, CSP ; en parallèle de S06, worktree `refonte/s11`)
 - **Fait** : `consent-default.js` (défauts refusés ou relus dans `cc_cookie`, `ads_data_redaction`, balise Google en production seulement, `bvLoadGoogleTag()`), bandeau vanilla-cookieconsent 3.1.0 (contrôleur `consent`, textes FR/EN, styles chargés à la demande, ton `deep`, « Gérer les cookies » branché, `html[data-consent-open]` masque le HUD et WhatsApp), `events.ts` et `consent-mode.ts` (TDD), conversions formulaire, WhatsApp et téléphone ; tableau des cookies et signaux sans cookie dans Confidentialité (FR/EN) ; OG, Twitter, `theme-color`, JSON-LD `@graph` (TDD, accueil), `robots.txt`, `llms.txt`, alternates `hreflang` de toutes les pages du sitemap ; `ops/nginx/security-headers.conf`, `serve-with-csp.mjs`, projet Playwright `csp`.
