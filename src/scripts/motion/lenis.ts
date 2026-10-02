@@ -42,17 +42,45 @@ function samePageTarget(event: MouseEvent): { hash: string; target: HTMLElement 
 }
 
 function handleAnchors(lenis: Lenis): Cleanup {
+  // A refresh of ScrollTrigger (fonts ready, a pin measured again) moves the target: the jump
+  // carries on to it.
+  let gliding: HTMLElement | undefined;
+  const glide = (target: HTMLElement): void => {
+    gliding = target;
+    // Lenis caps the target at the height it last measured: measure the page now (the pins may
+    // have grown it since, and the observer of Lenis only reports it after a delay).
+    lenis.resize();
+    // Lenis subtracts the scroll-padding of the page (the fixed nav) by itself.
+    lenis.scrollTo(target, {
+      onComplete: () => {
+        if (gliding === target) gliding = undefined;
+      },
+    });
+  };
+  const onRefresh = (): void => {
+    if (gliding !== undefined) glide(gliding);
+  };
+  // The visitor takes over: never pull them back to the old target.
+  const letGo = (): void => {
+    gliding = undefined;
+  };
+  const takeovers = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
   const onClick = (event: MouseEvent): void => {
     const jump = samePageTarget(event);
     if (jump === undefined || lenis.isStopped) return;
     event.preventDefault();
     if (window.location.hash !== jump.hash) window.history.pushState(null, '', jump.hash);
-    // Lenis subtracts the scroll-padding of the page (the fixed nav) by itself.
-    lenis.scrollTo(jump.target);
+    glide(jump.target);
     focusSection(jump.target);
   };
   document.addEventListener('click', onClick);
-  return () => document.removeEventListener('click', onClick);
+  ScrollTrigger.addEventListener('refresh', onRefresh);
+  for (const type of takeovers) window.addEventListener(type, letGo, { passive: true });
+  return () => {
+    document.removeEventListener('click', onClick);
+    ScrollTrigger.removeEventListener('refresh', onRefresh);
+    for (const type of takeovers) window.removeEventListener(type, letGo);
+  };
 }
 
 export function startLenis(): Cleanup {
