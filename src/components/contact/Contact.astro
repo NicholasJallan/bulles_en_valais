@@ -39,6 +39,9 @@ const channels = [
   },
   { label: t.channels.email, value: EMAIL, href: `mailto:${EMAIL}`, icon: 'mail', external: false },
 ] as const;
+/** Pieces of a value with a line-break opportunity before each « @ »: an address that has to
+ * wrap does so at « @ », not before its last letters. */
+const breakable = (value: string) => value.split(/(?=@)/);
 ---
 
 <Section id="contact" tone="surface" class="contact">
@@ -77,7 +80,14 @@ const channels = [
               >
                 <Icon name={channel.icon} class="contact-channel-icon" />
                 <span class="contact-channel-label">{channel.label}</span>
-                <span class="contact-channel-value tabular">{channel.value}</span>
+                <span class="contact-channel-value tabular">
+                  {breakable(channel.value).map((piece, index) => (
+                    <>
+                      {index > 0 && <wbr />}
+                      {piece}
+                    </>
+                  ))}
+                </span>
                 {channel.external && <span class="visually-hidden">{dictionary.a11y.newTab}</span>}
               </a>
             </li>
