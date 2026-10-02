@@ -72,7 +72,7 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── torch/   torch.ts (+ test)      # lampe des Spécialités : carte éclairée, dérive, particules (S09)
 │   │   ├── depth/   resolve-depth.ts · temperature.ts · profile.ts · ascent.ts · ladder-scale.ts (+ tests)
 │   │   ├── bubbles/ boyle.ts · pool.ts (+ tests)
-│   │   ├── webgl/   capability.ts · viewport.ts · ripples.ts (+ tests) · shaders/{surface.vert,surface.frag,noise.glsl}
+│   │   ├── webgl/   capability.ts · viewport.ts · lake.ts · ripples.ts (+ tests) · shaders/{surface.vert,surface.frag,lake.glsl,noise.glsl}
 │   │   ├── color/   palette.ts · contrast.ts (+ test)
 │   │   ├── geo.ts (+ test)             # projection des coordonnées des lieux, position des stations le long du Rhône (S09)
 │   │   ├── form/    validate.ts (+ test) · submit.ts
@@ -233,7 +233,8 @@ export interface Course {
 - `src/scripts/webgl/surface.ts` → `createSurface({ canvas, image, mask, focal, mobile, onContextLost })` retourne `{ setImmersion, addRipple, start, stop, destroy }`. Boucle sur `gsap.ticker`, arrêtée hors écran (IntersectionObserver) et sur `visibilitychange` ; DPR ≤ 1,5 ; `webglcontextlost` → retour à l'image fixe.
 - Textures : l'image du hero (via `currentSrc`, même origine) et `water-mask.png` (512 px, niveaux de gris, blanc = eau).
 - Shaders écrits par nous. Bruit : `webgl-noise` (MIT, Ashima Arts / Stefan Gustavson), crédité en tête du fichier. **Rien de Shadertoy.**
-- Uniforms : `uTime`, `uImage`, `uMask`, `uResolution`, `uImmersion` (0 → 1), `uRipples[8]` (`vec3` : x, y, âge ; tableau JS pour OGL), `uCoverScale` / `uCoverOffset` (cadrage de l'`<img>`), `uTint`, `uDeep`, `uLight` (couleurs de `palette.ts`). `uPointer` abandonné en S07.
+- Uniforms : `uTime`, `uImage`, `uMask`, `uResolution`, `uImmersion` (0 → 1), `uCoverScale` / `uCoverOffset` (cadrage de l'`<img>`), `uTint`, `uDeep`, `uLight` (couleurs de `palette.ts`) ; pour le lac (D49) : `uLakeLens` (rapport, focale, horizon, roulis) et `uLakeCamera` (hauteur, sinus et cosinus du tangage) de `lakeUniforms()`, `uRipples[16]` (`vec3` : x, z sur le lac en mètres, âge ; tableau JS pour OGL), `uRingWave` (nombre d'onde, vitesses de phase et de groupe), `uWindWaves` / `uWindDrift` (trois octaves de rides de vent). `uPointer` abandonné en S07.
+- Géométrie du lac (D49) : `lake.ts` porte la caméra calée sur la photo et l'orthophoto swisstopo (`LAKE_VIEW`), `imageToWater` / `waterToImage` (miroir GLSL : `lakeAt` dans `lake.glsl`), la dispersion des ondes (`phaseSpeed`, `groupSpeed`) et `maskAt` (le pointeur ne crée un anneau que sur l'eau). Le shader calcule les pentes sur le plan d'eau, déplace le reflet (2 × la pente, surtout verticalement) et le fond (réfraction, via la jacobienne `dFdx`/`dFdy` du point du lac), pondère par Fresnel (Schlick), éclaire le fond sous les crêtes, et change en flou vertical les rides plus fines que trois pixels. Si la photo du hero change, refaire le calage (`LAKE_VIEW`) et `make-water-mask.mjs`.
 - Chargement : `hero.ts` (démarré par le module de mouvement dans `whileMotion`) appelle `hero-surface.ts`, qui attend `load` puis l'idle, vérifie `canUseWebGL()`, importe `surface.ts`, décode l'image et le masque, puis fond le canvas au-dessus de l'`<img>`. Sans WebGL : ligne d'eau CSS (`clip-path`) et voile. Drapeau de retour arrière : `WEBGL_SURFACE` dans `hero.ts`.
 - LCP : la photo plein écran n'est pas candidate pour Chromium (D41) ; l'élément LCP est le texte du hero, peint avec la première image.
 
