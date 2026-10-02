@@ -256,6 +256,7 @@ export const en: Dictionary = {
     title: { before: 'Three bodies of water,', em: 'three atmospheres.' },
     lead: 'Courses run mainly at Lac du Rosel near Martigny, at Les Îles in Sion, and on Lake Geneva. Residential stages are also possible — just ask.',
     route: 'The Rhône, from Sion to Lake Geneva',
+    openMap: 'open in Google Maps',
     facts: {
       maxDepth: 'Max depth',
       sites: 'Some of the sites',

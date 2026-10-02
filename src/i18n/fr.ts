@@ -254,6 +254,7 @@ export const fr: Dictionary = {
     title: { before: "Trois plans d'eau,", em: 'trois ambiances.' },
     lead: "Les cours se donnent principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur le Léman. Des stages avec hébergement sont possibles — n'hésitez pas à demander.",
     route: 'Le Rhône, de Sion au Léman',
+    openMap: 'ouvrir dans Google Maps',
     facts: {
       maxDepth: 'Profondeur max',
       sites: 'Quelques sites',

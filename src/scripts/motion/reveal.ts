@@ -104,8 +104,16 @@ const REVEALS: Readonly<Record<string, (element: HTMLElement) => void>> = {
   stagger: revealStagger,
 };
 
+/** Plays the reveal of an element now (a trigger of its own: Places, in its horizontal track). */
+export function revealElement(element: HTMLElement): void {
+  if ('revealed' in element.dataset) return;
+  REVEALS[element.dataset.reveal ?? '']?.(element);
+}
+
 /**
- * Arms every reveal of the page; the returned cleanup undoes the animations and the splits.
+ * Arms every reveal of the page, except those deferred to a trigger of their own
+ * (`data-reveal-defer`, set by places.ts); the returned cleanup undoes the animations and the
+ * splits.
  * What is already in view, or above it (a page opened on an anchor), shows at once; a jump
  * over a reveal (onLeave without onEnter) shows it too.
  */
@@ -113,7 +121,9 @@ export function startReveals(): Cleanup {
   const context = gsap.context(() => undefined);
   for (const element of document.querySelectorAll<HTMLElement>('[data-reveal]')) {
     const play = REVEALS[element.dataset.reveal ?? ''];
-    if (play === undefined || 'revealed' in element.dataset) continue;
+    if (play === undefined || 'revealed' in element.dataset || 'revealDefer' in element.dataset) {
+      continue;
+    }
     const run = (): void => {
       if ('revealed' in element.dataset) return;
       context.add(() => play(element));

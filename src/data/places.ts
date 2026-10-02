@@ -88,3 +88,8 @@ export const PLACES = [
 ] as const satisfies readonly Place[];
 
 export type PlaceId = (typeof PLACES)[number]['id'];
+
+/** The coordinates of a site in Google Maps (Maps URLs: no key, nothing loaded on this site). */
+export function mapUrl({ lat, lng }: Coordinates): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`;
+}

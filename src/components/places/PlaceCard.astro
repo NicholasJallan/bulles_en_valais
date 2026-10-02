@@ -1,7 +1,8 @@
 ---
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import type { Place } from '@/data/places.ts';
+import Icon from '@/components/ui/Icon.astro';
+import { mapUrl, type Place } from '@/data/places.ts';
 import { getDictionary, localize } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
 import { formatCoordinates, formatDepth } from '@/lib/format.ts';
@@ -20,7 +21,7 @@ const photo = photos[`/src/assets/images/${place.photo.file}`]?.default;
 if (photo === undefined) throw new Error(`Missing photo ${place.photo.file}`);
 ---
 
-<li class="place">
+<li class="place" data-places-panel data-place={place.id}>
   <Picture
     src={photo}
     alt={localize(place.photo.alt, locale)}
@@ -34,7 +35,11 @@ if (photo === undefined) throw new Error(`Missing photo ${place.photo.file}`);
     <h3 class="place-name">{localize(place.name, locale)}</h3>
     <p class="place-area">
       {localize(place.area, locale)} ·{' '}
-      <span class="tabular">{formatCoordinates(place.coords, locale)}</span>
+      <a class="place-map-link" href={mapUrl(place.coords)}>
+        <span class="tabular">{formatCoordinates(place.coords, locale)}</span>
+        <span class="visually-hidden">, {t.openMap}</span>
+        <Icon name="arrow-up-right" />
+      </a>
     </p>
     <p>{localize(place.description, locale)}</p>
     <dl class="place-facts">
@@ -54,6 +59,8 @@ if (photo === undefined) throw new Error(`Missing photo ${place.photo.file}`);
 
 <style>
   .place {
+    /* Holds the visually hidden text of its link inside the scrolling row (narrow screens). */
+    position: relative;
     display: grid;
     gap: var(--space-m);
     align-content: start;
@@ -80,6 +87,16 @@ if (photo === undefined) throw new Error(`Missing photo ${place.photo.file}`);
   .place-area {
     font-size: var(--step--1);
     color: var(--fg-soft);
+  }
+
+  .place-map-link {
+    white-space: nowrap;
+  }
+
+  .place-map-link :global(.icon) {
+    display: inline-block;
+    margin-inline-start: 0.1em;
+    vertical-align: -0.25em;
   }
 
   .place-facts {

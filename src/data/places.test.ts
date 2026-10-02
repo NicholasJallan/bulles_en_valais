@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { LOCALES } from '../i18n/types.ts';
 import { formatCoordinates } from '../lib/format.ts';
 import { blankStrings, localizedIssues } from '../test/content-checks.ts';
-import { PLACES } from './places.ts';
+import { mapUrl, PLACES } from './places.ts';
 
 describe('PLACES', () => {
   it('follows the Rhône downstream: Sion, then the Rosel (Martigny), then Lake Geneva', () => {
@@ -38,5 +38,13 @@ describe('PLACES', () => {
   it('has its texts in every language', () => {
     expect(blankStrings(PLACES)).toEqual([]);
     expect(localizedIssues(PLACES, LOCALES)).toEqual([]);
+  });
+});
+
+describe('mapUrl', () => {
+  it('opens the coordinates of a site in Google Maps (Maps URLs, no key)', () => {
+    expect(mapUrl({ lat: 46.0833, lng: 7.0667 })).toBe(
+      'https://www.google.com/maps/search/?api=1&query=46.0833%2C7.0667',
+    );
   });
 });

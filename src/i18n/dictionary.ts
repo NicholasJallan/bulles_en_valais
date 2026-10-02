@@ -182,6 +182,8 @@ export interface Dictionary {
   readonly places: SectionIntro & {
     /** Name of the drawn route of the Rhône (E10). */
     readonly route: string;
+    /** Accessible end of the link of the coordinates (« 46°05′N · 7°04′E, … »). */
+    readonly openMap: string;
     readonly facts: {
       readonly maxDepth: string;
       /** Before the list of sites of a lake. */

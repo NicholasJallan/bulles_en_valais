@@ -4,6 +4,7 @@
 import { pinLadder } from '@/components/depth-ladder/ladder.ts';
 import { startHero } from '@/components/hero/hero.ts';
 import { startInterludes } from '@/components/interlude/interlude.ts';
+import { pinPlaces } from '@/components/places/places.ts';
 import { startTorch } from '@/components/specialties/torch.ts';
 import { animateTabs } from '@/components/ui/tabs-motion.ts';
 import { trackWater } from '@/components/water/water.ts';
@@ -40,6 +41,7 @@ export function startMotion(): Cleanup | undefined {
       animateTabs(),
       startInterludes({ fine, bubbles }),
       desktop ? pinLadder() : noop,
+      desktop ? pinPlaces() : noop,
       startTorch(),
       startHero({ fine }),
       () => bubbles.destroy(),
