@@ -43,6 +43,9 @@ function declarationCount(text: string, property: string): number {
   return text.match(new RegExp(`(?<![\\w-])${property}\\s*:`, 'g'))?.length ?? 0;
 }
 
+/** Floors of the dimmed cards (D44): shapes still readable as text, far from AA on purpose. */
+const DISCERNIBLE = { title: 2, text: 1.6 } as const;
+
 const srgbOf = (tone: Tone, role: ToneRole) => oklchToSrgb(COLORS[TONE_ROLES[tone][role]]);
 
 describe('formatOklch', () => {
@@ -69,15 +72,18 @@ describe('palette', () => {
     expect(CONTRAST_PAIRS).toContainEqual(['alert', 'bgPanel', 'text']);
   });
 
-  it("keeps the cards of the abyss readable out of the lamp's beam (E8, --torch-dim)", () => {
+  it("leaves the cards of the abyss discernible out of the lamp's beam (E8, --torch-dim)", () => {
+    // Below AA by decision (D44): the lamp has to reveal the text. Without motion (reduced
+    // motion, calm mode) no lamp runs and the cards keep their full contrast.
     const dim = Number(customProperties(TOKENS_CSS, ':root').get('--torch-dim'));
     expect(dim).toBeGreaterThan(0);
     expect(dim).toBeLessThan(1);
     const abyss = oklchToSrgb(COLORS.abyss);
-    for (const text of ['foam', 'foam-soft'] as const) {
-      const dimmed = compositeOver(oklchToSrgb(COLORS[text]), dim, abyss);
-      expect(contrastRatioRgb(dimmed, abyss)).toBeGreaterThanOrEqual(WCAG_MIN.text);
-    }
+    const dimmed = (text: ColorName) =>
+      contrastRatioRgb(compositeOver(oklchToSrgb(COLORS[text]), dim, abyss), abyss);
+    expect(dimmed('foam')).toBeGreaterThanOrEqual(DISCERNIBLE.title);
+    expect(dimmed('foam-soft')).toBeGreaterThanOrEqual(DISCERNIBLE.text);
+    expect(dimmed('foam-soft')).toBeLessThan(WCAG_MIN.text);
   });
 
   describe.each(TONES)('tone %s', (tone) => {

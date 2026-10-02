@@ -89,8 +89,8 @@
 
   /* Shadows and the glow of the lamp depend on the water: see « light water » and « dark water ». */
   --focus-width: 2px;
-  /* Opacity of the specialty cards out of the lamp's beam (E8): AA, palette.test.ts. */
-  --torch-dim: 0.62;
+  /* Opacity of the specialty cards out of the lamp's beam (E8): below AA on purpose, D44. */
+  --torch-dim: 0.25;
   /* Opacity of the specialty cards out of the lamp's beam (E8): AA, palette.test.ts. */
   /* Opacity of the specialty cards out of the lamp's beam (E8): AA, palette.test.ts. */
   --focus-offset: 3px;

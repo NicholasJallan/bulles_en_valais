@@ -149,6 +149,8 @@ test.describe('specialties and places with reduced motion', () => {
     await expectPlaces(page, PLACES.fr);
     await expect(page.locator('#specialties .torch')).toHaveCount(0);
     await expect(page.locator('#specialties .is-lit')).toHaveCount(0);
+    // The dimmed cards (D44) belong to the lamp: without it, every card at full contrast.
+    await expect(page.locator('#specialties .specialty-text').first()).toHaveCSS('opacity', '1');
     await expect(page.locator('#places[data-pinned]')).toHaveCount(0);
     const offset = await page
       .locator('[data-rhone-river]')

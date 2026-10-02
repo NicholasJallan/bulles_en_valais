@@ -73,8 +73,8 @@ const tabs = SPECIALTY_TABS.map((tab) => ({
     z-index: var(--z-raised);
   }
 
-  /* In the dark the cards are dimmed (still AA: --torch-dim, palette.test.ts); the beam brings
-     them back to full light and warms their title. Only their opacity moves. */
+  /* In the dark the cards are dimmed (--torch-dim, below AA on purpose: D44; full contrast without
+     motion); the beam brings them back to full light and warms their title. Only opacity moves. */
   .specialties[data-torch] :global(.specialty > *) {
     opacity: var(--torch-dim);
     transition: opacity var(--dur-base) var(--ease-surface);
