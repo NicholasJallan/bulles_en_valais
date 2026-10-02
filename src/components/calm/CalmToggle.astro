@@ -1,0 +1,75 @@
+---
+/**
+ * « Calm mode » switch (calm-mode.ts). Several on a page (masthead, menu, footer), all in step.
+ * Needs JavaScript: hidden without it. `short` is the visible label where room is scarce; the
+ * accessible name stays the full label, which contains it (WCAG 2.5.3).
+ */
+interface Props {
+  label: string;
+  short?: string;
+  /** id of the sentence that explains the mode (in the footer). */
+  describedBy?: string;
+  class?: string;
+}
+
+const { label, short, describedBy, class: className } = Astro.props;
+---
+
+<button
+  class:list={['calm-toggle', 'js-only', className]}
+  type="button"
+  aria-pressed="false"
+  aria-label={short === undefined ? undefined : label}
+  aria-describedby={describedBy}
+  data-controller="calm-mode"
+>
+  <span class="calm-switch" aria-hidden="true"></span>
+  {short ?? label}
+</button>
+
+<style>
+  .calm-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-block-size: var(--tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* A small switch: off, a bubble at the bottom of its track; on, it has risen. */
+  .calm-switch {
+    position: relative;
+    inline-size: 2.4rem;
+    block-size: 1.4rem;
+    border: 1px solid var(--fg-soft);
+    border-radius: var(--radius-round);
+  }
+
+  .calm-switch::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0.2rem;
+    inline-size: 0.9rem;
+    block-size: 0.9rem;
+    margin-block-start: -0.45rem;
+    border-radius: var(--radius-round);
+    background-color: var(--fg-soft);
+    transition: transform var(--dur-fast) var(--ease-buoyant);
+  }
+
+  .calm-toggle[aria-pressed='true'] .calm-switch {
+    border-color: var(--action);
+    background-color: var(--action);
+  }
+
+  .calm-toggle[aria-pressed='true'] .calm-switch::after {
+    background-color: var(--action-ink);
+    transform: translateX(1rem);
+  }
+</style>

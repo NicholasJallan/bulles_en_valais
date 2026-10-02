@@ -93,14 +93,46 @@ test.describe('essential controllers', () => {
   });
 
   test('calm mode is remembered and stops the motion classes', async ({ page }) => {
-    const toggle = page.getByRole('button', { name: 'Mode calme' });
+    const toggle = page.locator('.site-footer').getByRole('button', { name: 'Mode calme' });
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await Promise.all([page.waitForEvent('load'), toggle.click()]);
-    await expect(page.getByRole('button', { name: 'Mode calme' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    for (const each of await page.getByRole('button', { name: 'Mode calme' }).all()) {
+      await expect(each).toHaveAttribute('aria-pressed', 'true');
+    }
     await expect(page.locator('html')).not.toHaveClass(/motion-ok/);
     expect(await page.evaluate(() => localStorage.getItem('bv-calm'))).toBe('1');
+  });
+
+  test('calm mode is always at hand: in the masthead, or in the menu on a phone', async ({
+    page,
+  }) => {
+    if (isMobile(page)) {
+      await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
+      await expect(
+        page.getByRole('dialog').getByRole('button', { name: 'Mode calme' }),
+      ).toBeVisible();
+      return;
+    }
+    const toggle = page.locator('.site-header').getByRole('button', { name: 'Mode calme' });
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveText('Calme');
+    await Promise.all([page.waitForEvent('load'), toggle.click()]);
+    await expect(page.locator('html')).not.toHaveClass(/motion-ok/);
+  });
+
+  test('the masthead holds on one row from 1024 px, in French and in English', async ({ page }) => {
+    test.skip(isMobile(page), 'the links live in the menu below 1024 px');
+    for (const path of ['/', '/en/']) {
+      for (const width of [1024, 1152, 1279]) {
+        await page.setViewportSize({ width, height: 800 });
+        await gotoReady(page, path);
+        // A second row would start below the logo, which opens the first one.
+        const wrapped = await page.locator('.site-header-inner > *').evaluateAll((items) => {
+          const logoBottom = items[0]?.getBoundingClientRect().bottom ?? 0;
+          return items.some((item) => item.getBoundingClientRect().top >= logoBottom);
+        });
+        expect(wrapped, `${path} at ${width} px`).toBe(false);
+      }
+    }
   });
 });

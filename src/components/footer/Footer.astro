@@ -1,5 +1,6 @@
 ---
 import Logo from '@/assets/brand/logo.svg';
+import CalmToggle from '@/components/calm/CalmToggle.astro';
 import LanguageSwitch from '@/components/nav/LanguageSwitch.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { SOCIAL_PROFILES } from '@/data/contact.ts';
@@ -54,16 +55,7 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
 
     <div class="footer-column footer-settings">
       <LanguageSwitch locale={locale} route={route} />
-      <button
-        class="calm-toggle js-only"
-        type="button"
-        aria-pressed="false"
-        aria-describedby="calm-mode-description"
-        data-controller="calm-mode"
-      >
-        <span class="calm-switch" aria-hidden="true"></span>
-        {t.calmMode.label}
-      </button>
+      <CalmToggle label={t.calmMode.label} describedBy="calm-mode-description" />
       <p id="calm-mode-description" class="fine js-only">
         {t.calmMode.description}
       </p>
@@ -162,7 +154,6 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
     justify-items: start;
   }
 
-  .calm-toggle,
   .footer-cookies {
     display: inline-flex;
     align-items: center;
@@ -179,38 +170,6 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
   .footer-cookies:disabled {
     color: var(--fg-soft);
     cursor: not-allowed;
-  }
-
-  /* A small switch: off, a bubble at the bottom of its track; on, it has risen. */
-  .calm-switch {
-    position: relative;
-    inline-size: 2.4rem;
-    block-size: 1.4rem;
-    border: 1px solid var(--fg-soft);
-    border-radius: var(--radius-round);
-  }
-
-  .calm-switch::after {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 0.2rem;
-    inline-size: 0.9rem;
-    block-size: 0.9rem;
-    margin-block-start: -0.45rem;
-    border-radius: var(--radius-round);
-    background-color: var(--fg-soft);
-    transition: transform var(--dur-fast) var(--ease-buoyant);
-  }
-
-  .calm-toggle[aria-pressed='true'] .calm-switch {
-    border-color: var(--action);
-    background-color: var(--action);
-  }
-
-  .calm-toggle[aria-pressed='true'] .calm-switch::after {
-    background-color: var(--action-ink);
-    transform: translateX(1rem);
   }
 
   .footer-bottom {

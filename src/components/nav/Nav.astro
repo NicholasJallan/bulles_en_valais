@@ -1,5 +1,6 @@
 ---
 import Logo from '@/assets/brand/logo.svg';
+import CalmToggle from '@/components/calm/CalmToggle.astro';
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { markerDepth } from '@/data/sections.ts';
@@ -47,6 +48,11 @@ const links = [
       </ul>
     </nav>
     <div class="nav-tools">
+      <CalmToggle
+        label={t.footer.calmMode.label}
+        short={t.footer.calmMode.short}
+        class="nav-calm"
+      />
       <LanguageSwitch locale={locale} route={route} class="nav-language" />
       <Button href={anchor('contact')} class="nav-cta">
         {t.nav.contact}
@@ -88,6 +94,7 @@ const links = [
         <Button href={anchor('contact')} data-menu-link>
           {t.nav.contact}
         </Button>
+        <CalmToggle label={t.footer.calmMode.label} />
         <LanguageSwitch locale={locale} route={route} />
       </div>
     </div>
@@ -153,7 +160,7 @@ const links = [
 
   .brand :global(.brand-logo) {
     inline-size: auto;
-    block-size: clamp(3rem, 2.6rem + 2vw, 4.25rem);
+    block-size: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
   }
 
   .nav-links {
@@ -196,6 +203,11 @@ const links = [
     gap: var(--space-2xs);
   }
 
+  /* The size of the links beside it; the menu and the footer keep the full label. */
+  .nav-tools :global(.nav-calm) {
+    font-size: var(--step--1);
+  }
+
   .menu-button,
   .menu-close {
     display: inline-grid;
@@ -214,7 +226,8 @@ const links = [
   @media (width < 64rem) {
     html.js .nav-inline,
     html.js .nav-tools :global(.nav-cta),
-    html.js .nav-tools :global(.nav-language) {
+    html.js .nav-tools :global(.nav-language),
+    .nav-tools :global(.nav-calm) {
       display: none;
     }
 
@@ -225,6 +238,14 @@ const links = [
 
     html:not(.js) .nav-tools :global(.nav-cta) {
       display: none;
+    }
+  }
+
+  /* Laptops: the masthead never meets the depth gauge, so it takes the lane the page keeps for
+     it (utilities.css); otherwise the links, the tools and the CTA wrap onto two rows. */
+  @media (64rem <= width < 80rem) {
+    :global(html.js:has(.hud)) .site-header-inner {
+      inline-size: min(100% - 2 * var(--gutter), var(--page-max));
     }
   }
 

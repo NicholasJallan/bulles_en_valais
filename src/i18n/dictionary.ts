@@ -268,6 +268,8 @@ export interface Dictionary {
     readonly legalLinks: { readonly privacy: string; readonly legalNotice: string };
     readonly calmMode: {
       readonly label: string;
+      /** Visible label in the masthead, contained in `label` (accessible name). */
+      readonly short: string;
       readonly description: string;
       readonly on: string;
       readonly off: string;

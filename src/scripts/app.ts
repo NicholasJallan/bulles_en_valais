@@ -8,7 +8,7 @@ const CONTROLLERS: ControllerRegistry = {
   rail: () => import('@/components/testimonials/rail.ts'),
   'contact-form': () => import('@/components/contact/contact-form.ts'),
   whatsapp: () => import('@/components/whatsapp/whatsapp.ts'),
-  'calm-mode': () => import('@/components/footer/calm-mode.ts'),
+  'calm-mode': () => import('@/components/calm/calm-mode.ts'),
   hud: () => import('@/components/hud/hud.ts'),
   'safety-stop': () => import('@/components/faq/safety-stop.ts'),
   // Consent banner and conversion clicks (S11): the library is loaded with the controller.

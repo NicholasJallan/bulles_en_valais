@@ -28,7 +28,10 @@ export function init(element: HTMLElement): Cleanup {
 
   const onClick = () => {
     const calm = element.getAttribute('aria-pressed') !== 'true';
-    element.setAttribute('aria-pressed', String(calm));
+    // Masthead, menu and footer each hold a switch: all show the same state.
+    for (const toggle of document.querySelectorAll('[data-controller~="calm-mode"]')) {
+      toggle.setAttribute('aria-pressed', String(calm));
+    }
     document.documentElement.classList.toggle('calm', calm);
     if (remember(calm)) window.location.reload();
   };

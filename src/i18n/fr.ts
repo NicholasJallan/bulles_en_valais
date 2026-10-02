@@ -578,6 +578,7 @@ export const fr: Dictionary = {
     legalLinks: { privacy: 'Confidentialité', legalNotice: 'Mentions légales' },
     calmMode: {
       label: 'Mode calme',
+      short: 'Calme',
       description: 'Coupe les animations et le défilement doux.',
       on: 'activé',
       off: 'désactivé',
