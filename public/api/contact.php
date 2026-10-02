@@ -514,6 +514,11 @@ function take_daily_quota(string $path, string $today, int $limit): ?bool
         return null;
     }
     try {
+        // A shared temporary directory: only a plain file of our own making, never a hard link.
+        $stat = fstat($handle);
+        if ($stat === false || ($stat['mode'] & 0170000) !== 0100000 || $stat['nlink'] !== 1) {
+            return null;
+        }
         if (!flock($handle, LOCK_EX)) {
             return null;
         }

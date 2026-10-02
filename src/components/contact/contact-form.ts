@@ -30,8 +30,9 @@ interface Messages {
 }
 
 const CHECKED: readonly CheckedField[] = ['name', 'email', 'phone', 'message'];
-/** MIN_ELAPSED_MS of contact.php. */
+/** MIN_ELAPSED_MS of contact.php, and a margin against timers that fire a little early. */
 const MIN_ELAPSED_MS = 3000;
+const ELAPSED_MARGIN_MS = 150;
 /** What the visitor reads when the message did not leave. */
 const FAILURE_TEXTS = {
   'rate-limited': 'errorRateLimit',
@@ -180,7 +181,9 @@ async function submitForm(context: FormContext): Promise<void> {
   setSending(context, true);
   // contact.php silently drops a message sent less than 3 s after the page loaded (robots):
   // a quick autofill and send waits out the rest instead of being lost.
-  await new Promise((resolve) => setTimeout(resolve, MIN_ELAPSED_MS - performance.now()));
+  await new Promise((resolve) =>
+    setTimeout(resolve, MIN_ELAPSED_MS + ELAPSED_MARGIN_MS - performance.now()),
+  );
   const website = control(form, 'website').value;
   const payload = buildPayload(fields, {
     locale: context.locale,
@@ -229,7 +232,9 @@ function prefill(context: FormContext, target: EventTarget | null): void {
   if (!value || !Array.from(select.options).some((option) => option.value === value)) return;
   select.value = value;
   // After the jump and Lenis' own focus on the target: the scroll is theirs, the focus ours.
-  setTimeout(() => control(context.form, 'name').focus({ preventScroll: true }));
+  setTimeout(() => {
+    if (!context.form.hidden) control(context.form, 'name').focus({ preventScroll: true });
+  });
 }
 
 function contextOf(element: HTMLElement): FormContext {

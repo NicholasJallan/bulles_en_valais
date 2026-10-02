@@ -269,5 +269,6 @@ export function init(root: HTMLElement): Cleanup {
     unfollow();
     hud.destroy();
     if (current === hud) current = undefined;
+    pendingMode = null;
   };
 }

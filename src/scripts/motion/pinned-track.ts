@@ -99,6 +99,7 @@ function followFocus(parts: TrackParts, track: PinnedTrack): Cleanup {
   const keepWindowStill = (): void => {
     if (parts.window.scrollLeft !== 0) parts.window.scrollLeft = 0;
   };
+  let frame = 0;
   const onFocus = (event: FocusEvent): void => {
     keepWindowStill();
     const target = event.target instanceof Node ? event.target : null;
@@ -111,11 +112,13 @@ function followFocus(parts: TrackParts, track: PinnedTrack): Cleanup {
     };
     go();
     // WebKit brings the focused link into view after focusin, over this scroll: again next frame.
-    requestAnimationFrame(go);
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(go);
   };
   parts.track.addEventListener('focusin', onFocus);
   parts.window.addEventListener('scroll', keepWindowStill, { passive: true });
   return () => {
+    cancelAnimationFrame(frame);
     parts.track.removeEventListener('focusin', onFocus);
     parts.window.removeEventListener('scroll', keepWindowStill);
   };

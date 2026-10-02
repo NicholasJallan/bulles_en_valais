@@ -221,6 +221,10 @@ if (!defined('CONTACT_TEST_NO_FILES')) {
     @symlink($quotaFile, $quotaLink);
     check('counter behind a symbolic link → unknown (null), never followed', take_daily_quota($quotaLink, '2026-10-02', 2) === null);
     @unlink($quotaLink);
+    $quotaHardLink = $quotaFile . '-hard';
+    @link($quotaFile, $quotaHardLink);
+    check('counter with another hard link → unknown (null)', take_daily_quota($quotaFile, '2026-10-02', 2) === null);
+    @unlink($quotaHardLink);
     file_put_contents($quotaFile, '2026-10-02 50');
     $busy = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02');
     check('limit reached → 503 busy, nothing sent', $busy['status'] === 503 && $busy['body'] === ['ok' => false, 'error' => 'busy']);

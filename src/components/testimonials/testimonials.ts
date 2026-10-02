@@ -73,6 +73,14 @@ function clampReviews(parts: TrackParts, reviews: readonly Review[]): void {
   }
 }
 
+/** The review as written: without the cut of the rail, its quote mark or its button. */
+function wholeReview(figure: Element): Node {
+  const copy = figure.cloneNode(true) as Element;
+  copy.querySelector('blockquote')?.removeAttribute('style');
+  for (const extra of copy.querySelectorAll('[data-review-open], [data-rail-mark]')) extra.remove();
+  return copy;
+}
+
 /** « Read the full review »: the whole review in a modal dialog; the focus comes back after. */
 function openReviews(section: HTMLElement): Cleanup {
   const dialog = section.querySelector<HTMLDialogElement>('[data-review-dialog]');
@@ -86,7 +94,7 @@ function openReviews(section: HTMLElement): Cleanup {
     const figure = button?.closest('figure');
     if (!(button instanceof HTMLElement) || !figure) return;
     title.textContent = figure.querySelector('.testimonial-author')?.textContent ?? '';
-    body.replaceChildren(figure.cloneNode(true));
+    body.replaceChildren(wholeReview(figure));
     opener = button;
     dialog.showModal();
   };
@@ -114,7 +122,11 @@ function openReviews(section: HTMLElement): Cleanup {
     section.removeEventListener('click', onOpen);
     dialog.removeEventListener('click', onDialogClick);
     dialog.removeEventListener('close', onClose);
-    if (dialog.open) dialog.close();
+    // The close event comes later: tidy up now.
+    if (dialog.open) {
+      dialog.close();
+      onClose();
+    }
   };
 }
 

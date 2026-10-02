@@ -23,9 +23,17 @@ export function takeOverRail(onStep: (direction: Direction) => void): RailTakeov
   return current?.(onStep);
 }
 
-/** A disabled button drops the focus to <body>: hand it to the other one first. */
-function setDisabled(button: HTMLButtonElement, other: HTMLButtonElement, disabled: boolean) {
-  if (disabled && document.activeElement === button) other.focus();
+/** A disabled button drops the focus to <body>: hand it to the other one (or the rail) first. */
+function setDisabled(
+  button: HTMLButtonElement,
+  other: HTMLButtonElement,
+  disabled: boolean,
+  fallback: HTMLElement,
+) {
+  if (disabled && document.activeElement === button) {
+    if (other.disabled) fallback.focus();
+    else other.focus();
+  }
   button.disabled = disabled;
 }
 
@@ -56,7 +64,7 @@ export function init(element: HTMLElement): Cleanup {
       for (const entry of entries) {
         const button = entry.target === first ? previous : next;
         const other = button === previous ? next : previous;
-        setDisabled(button, other, entry.intersectionRatio >= FULLY_VISIBLE);
+        setDisabled(button, other, entry.intersectionRatio >= FULLY_VISIBLE, rail);
       }
     },
     { root: rail, threshold: [0, FULLY_VISIBLE] },
@@ -66,6 +74,14 @@ export function init(element: HTMLElement): Cleanup {
     observer.observe(last);
   };
 
+  const release = () => {
+    drive = undefined;
+    rail.setAttribute('tabindex', '0');
+    previous.disabled = false;
+    next.disabled = false;
+    observer.disconnect();
+    observe();
+  };
   current = (onStep) => {
     drive = onStep;
     observer.disconnect();
@@ -73,14 +89,13 @@ export function init(element: HTMLElement): Cleanup {
     rail.removeAttribute('tabindex');
     return {
       setEdges(atStart, atEnd) {
-        setDisabled(previous, next, atStart);
-        setDisabled(next, previous, atEnd);
+        // Pinned, the rail cannot take the focus: the section's heading does.
+        const heading = document.getElementById('testimonials-title') ?? rail;
+        if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+        setDisabled(previous, next, atStart, heading);
+        setDisabled(next, previous, atEnd, heading);
       },
-      release() {
-        drive = undefined;
-        rail.setAttribute('tabindex', '0');
-        observe();
-      },
+      release,
     };
   };
   previous.addEventListener('click', onPrevious);
@@ -88,6 +103,8 @@ export function init(element: HTMLElement): Cleanup {
   observe();
   return () => {
     current = undefined;
+    drive = undefined;
+    rail.setAttribute('tabindex', '0');
     previous.removeEventListener('click', onPrevious);
     next.removeEventListener('click', onNext);
     observer.disconnect();
