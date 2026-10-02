@@ -123,8 +123,18 @@ export function startReveals(): Cleanup {
       continue;
     }
     context.add(() => {
-      ScrollTrigger.create({ trigger: element, start: START, onEnter: run, onLeave: run });
+      const once = (self: ScrollTrigger): void => {
+        run();
+        self.kill();
+      };
+      ScrollTrigger.create({ trigger: element, start: START, onEnter: once, onLeave: once });
     });
   }
-  return () => context.revert();
+  return () => {
+    context.revert();
+    // The water line is drawn by hand: an interrupted reveal must not leave its polygon behind.
+    for (const image of document.querySelectorAll<HTMLElement>('[data-reveal="image"]')) {
+      image.style.clipPath = '';
+    }
+  };
 }

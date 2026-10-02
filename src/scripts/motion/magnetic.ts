@@ -24,6 +24,8 @@ function attract(button: HTMLElement): Cleanup {
   const apply = (): void => {
     frame = 0;
     if (box === undefined) return;
+    // Measured again on each frame: Lenis may scroll the page under a still pointer.
+    box = button.getBoundingClientRect();
     const { x, y } = magneticOffset(box, pointer.x, pointer.y);
     button.style.setProperty('--magnet-x', `${x}px`);
     button.style.setProperty('--magnet-y', `${y}px`);

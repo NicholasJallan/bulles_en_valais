@@ -20,12 +20,20 @@ const CONTROLLERS: ControllerRegistry = {
 const root = document.documentElement;
 // The motion module downloads alongside the controllers, and starts once they are ready: tabs
 // and panels must have their final height before ScrollTrigger measures the page.
-const motion = root.classList.contains('motion-ok') ? import('./motion/index.ts') : undefined;
+// A failed download is kept as a value, reported by startMotion (no unhandled rejection).
+const motion = root.classList.contains('motion-ok')
+  ? import('./motion/index.ts').then(
+      (module) => ({ module }),
+      (error: unknown) => ({ error }),
+    )
+  : undefined;
 
 async function startMotion(): Promise<void> {
   if (motion === undefined) return;
+  const loaded = await motion;
   try {
-    (await motion).startMotion();
+    if ('error' in loaded) throw loaded.error;
+    loaded.module.startMotion();
   } catch (error) {
     console.error('Motion failed to start', error);
     // Show everything the motion module would have revealed.

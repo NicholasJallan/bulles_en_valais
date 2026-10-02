@@ -25,12 +25,19 @@ function samePageTarget(event: MouseEvent): { hash: string; target: HTMLElement 
   const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
   if (!(link instanceof HTMLAnchorElement) || link.classList.contains('skip-link'))
     return undefined;
+  if (link.target !== '' || link.hasAttribute('download')) return undefined;
   const url = new URL(link.href);
   const here = window.location;
   if (url.origin !== here.origin || url.pathname !== here.pathname || url.hash.length < 2) {
     return undefined;
   }
-  const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+  let id: string;
+  try {
+    id = decodeURIComponent(url.hash.slice(1));
+  } catch {
+    return undefined; // malformed escape: let the browser handle the link
+  }
+  const target = document.getElementById(id);
   return target === null ? undefined : { hash: url.hash, target };
 }
 
