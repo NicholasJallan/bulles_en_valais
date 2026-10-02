@@ -10,12 +10,12 @@
 - [x] **S03** — Contenus & i18n typés FR/EN — 01.10.2026 (Gate 2 validée)
 - [x] **S04** — Visuels : retouches, IA, logo, favicons, OG — 01.10.2026 (Gate 3 validée)
 - [x] **S05** — Page statique complète — 01.10.2026
-- [ ] **S06** — Moteur de mouvement
+- [x] **S06** — Moteur de mouvement — 02.10.2026
 - [ ] **S07** — Hero « Surface » en WebGL + immersion
 - [ ] **S08** — Cursus, échelle de profondeur, interludes, bulles
 - [ ] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône)
 - [ ] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp
-- [ ] **S11** — Consentement, analytics, SEO, CSP
+- [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
 - [ ] **S12** — Préproduction & recette — 🛑 Gate 4
 - [ ] **S13** — Mise en production, suivi, nettoyage
 
@@ -67,6 +67,9 @@
 | 2026-10-01 | D33 | Interlude B : **image actuelle** (`hirondelle.png`) avec le seul filigrane ✦ retiré, agrandie ×2 (`interludes/light.jpg`) ; les deux nouvelles générations écartées | Nicholas (Gate 3) |
 | 2026-10-01 | D34 | Interlude A : recadrages 16:9 et 4:5 **sans la signature**, crédit « © Nicholas Jallan » en légende ; version actuelle de 1707 px gardée (pas d'original plus grand pour l'instant) | Nicholas (Gate 3) |
 | 2026-10-01 | D35 | Logo : **bleu nuit sur blanc ou blanc sur noir** uniquement (aucune variante multicolore ; icônes bleu sur blanc) et **jamais animé** : E15 sans le logo, E7 jamais sur le logo | Nicholas (Gate 3) |
+| 2026-10-02 | D36 | I-06 et I-07 non fournis : Consent Mode **avancé**, conversions Ads désactivées (libellés `null`), GA4 non configuré en double (`GA4_ID = null`) en attendant l'assistant de balises | repli du brief S11 |
+| 2026-10-02 | D37 | Sur ordinateur, la grille (`.wrap`) garde un couloir de chaque côté pour le HUD (`--hud-inline-size`) : le profondimètre ne recouvre jamais le contenu | S06 (constat sur les captures) |
+| 2026-10-02 | D38 | Risques acceptés de la CSP finale (revue S11) : `www.google.com` en `script-src` (exigé par le guide Google pour Ads) et jokers `*.google.*` en `img-src` / `connect-src` ; à resserrer en S13 d'après les requêtes réellement vues en production | S11 (revue de sécurité) |
 
 ## Mutations du plan
 
@@ -114,6 +117,17 @@
 | 2026-10-01 | S05 | ajouter | `app.ts` pose `html[data-controllers="ready"]` quand les contrôleurs ont démarré (tests E2E, et S06) et retire `html.js` si l'un d'eux échoue (retour à la page sans JS) ; bouton d'envoi désactivé jusqu'au démarrage de `contact-form.ts` | un clic avant le contrôleur postait le formulaire en natif ; revue de code |
 | 2026-10-01 | S05 | modifier | Bandeau de navigation posé sur le hero (`position: absolute`), non collant ; S06 décidera du comportement au défilement (ScrollTrigger) | aucun écouteur `scroll` en S05 |
 | 2026-10-01 | S05 | corriger | Lighthouse lancé par `npx lighthouse@12` avec le Chromium de Playwright (MCP `chrome-devtools` absent de la session) ; revue de code et revue d'accessibilité fusionnées en une passe modérée (Sonnet, D30), en complément d'axe et de Lighthouse | environnement, économie de tokens demandée par Nicholas |
+| 2026-10-02 | S06 ∥ S11 | paralléliser | S11 menée dans un worktree (`.claude/worktrees/s11`, branche `refonte/s11`) par un agent, fusionnée après S06 ; port Playwright paramétrable (`PW_PORT`) pour lancer deux suites côte à côte | demande de Nicholas |
+| 2026-10-02 | S06 | déplacer | Colle DOM/GSAP du mouvement dans `src/scripts/motion/` (gsap, reduced-motion, lenis, split, reveal, magnetic, depth, nav, index) et non dans `src/lib/motion/` : elle n'est pas testable sous Vitest (`node`) et ferait tomber le seuil de couverture ; la logique pure reste dans `src/lib/` (`depth/resolve-depth`, `temperature`, `profile`, `ascent`, `motion/magnetic`) ; `02-architecture` §2 et brief S06 mis à jour | couverture ≥ 80 % sur `src/lib` |
+| 2026-10-02 | S06 | remplacer | `ImageReveal` : attribut `data-reveal="image"` sur le `<picture>` (prop `reveal` d'`ArtPicture`, `pictureAttributes` de `<Picture>`) au lieu d'un composant enveloppe ; pas de couleur dominante (fond du panneau du ton) | le `clip-path` doit porter sur l'image même |
+| 2026-10-02 | S06 | préciser | Colonne d'eau (E4) : les sections gardent leur fond opaque, la colonne fixe n'est visible qu'à travers les thermoclines (6 bandes) ; une couche par ton en `autoAlpha` (les couches à 0 ne sont pas peintes). Sans module de mouvement, la thermocline est un dégradé statique | « aucun texte courant sur un dégradé » |
+| 2026-10-02 | S06 | préciser | HUD : contrôleur essentiel (aussi sous mouvement réduit et en Mode calme, suivi par IntersectionObserver, profondeur de début de section), affiné par ScrollTrigger quand le module de mouvement tourne ; sonde qui va du haut de la page à son bas (premières et dernières profondeurs atteintes) ; sections masquées (échelle, comparatif) avec des profondeurs interpolées entre leurs voisines (`HUD_PROFILE`) ; profil de plongée en `popover` natif ; libellé `hud.entry` ajouté (FR/EN) | E3, cas limites du brief |
+| 2026-10-02 | S06 | corriger | Tâche 7 : trace de performance par un script Playwright (Chromium, molette, `longtask` + images) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
+| 2026-10-02 | S06 | conserver | Mode calme : la bascule existante de S05 (classe + rechargement) suffit ; vérifiée par un test E2E (page complète sans `motion-ok`) | tâche 6 |
+| 2026-10-02 | S11 | modifier | CSP finale vérifiée sur le guide Google du 18.09.2026 : hôtes exacts en `script-src`, `*.google.ch` et `*.google.fr`, sans `td.doubleclick.net` ni `*.analytics.google.com` (couvert), `geolocation=()` ; `02-architecture` §14 mis à jour | guide Google à la date de la session |
+| 2026-10-02 | S11 | reporter | `report-uri` et `csp-report.php` reportés en S13 (brief S13 mis à jour) | optionnel ; nécessite une `location` nginx et une extension de `check:dist` |
+| 2026-10-02 | S11 | ajouter | `consent-default.js` relit `cc_cookie` ; projet Playwright `csp` sur `serve-with-csp.mjs` (2ᵉ `webServer`, port `PW_PORT + 10`) ; alternates du sitemap par `serialize` depuis `routes.ts` (`localePath` déplacé dans `routes.ts`) ; `02-architecture` §12, §13 et §15 mis à jour | revenir sur la page sans attendre la librairie ; tester sous la CSP ; pages légales sans alternates |
+| 2026-10-02 | S11 | modifier | Revue de sécurité faite à la fusion (Sonnet, une passe, D30) : l'agent du worktree ne pouvait pas lancer de sous-agent | parallélisation |
 
 ## Mesures
 
@@ -124,6 +138,9 @@
 | 2026-10-01 | S02 : tokens, polices, styleguide (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko (GSAP des démos, styleguide seulement) | 3,2 Ko (accueil) · 9,3 Ko (styleguide) | polices préchargées : 122 Ko, 3 fichiers (paire A) | n.m. |
 | 2026-10-01 | S02 + S03 fusionnées, après la Gate 1 (`check:budgets`) | n.m. | n.m. | n.m. | 1,3 / 36,4 Ko | 3,2 Ko (accueil) · 7,5 Ko (styleguide) | polices préchargées : 72 Ko, 3 fichiers (paire B) | n.m. |
 | 2026-10-01 | S05 : page statique, Lighthouse mobile **local** (simulé, `astro preview`) | 2,2 s | 0 | 0 ms | 1,5 / 41,7 Ko | 11,2 Ko (accueil) | 249 Ko (`/`) ; hero AVIF 75 Ko (960 px), 118–168 Ko (1600–1920 px) | 99/100/100/100 (FR et EN) |
+| 2026-10-02 | S06 seule (`check:budgets`) ; scroll à la molette, Chromium 1440 px, CPU ×1 et ×4 : 0 tâche longue, images p50/p95 16,7 ms ; CLS chargement + scroll complet < 0,05 (test E2E) | n.m. | < 0,05 | n.m. | 1,7 / 70,1 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
+| 2026-10-02 | S11 seule (`check:budgets`) | n.m. | n.m. | n.m. | 3,0 / 53,9 Ko | 11,3 Ko (accueil) | n.m. | n.m. |
+| 2026-10-02 | S06 + S11 fusionnées (`check:budgets`) | n.m. | n.m. | n.m. | 3,2 / 82,0 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
 
 ## Journal
 
@@ -415,3 +432,34 @@
   - logo en `--c-ink` (bleu nuit de la palette) sur clair et en blanc sur la photo ; si Nicholas tient au `#141646` exact de D35, l'ajouter comme token ;
   - Nicholas : relecture de la page (prévisualisation sur le Pi possible, D31 : il faudrait alors publier `index.html`, ce que la procédure interdit ; une page de prévisualisation `noindex` à part serait à prévoir).
 - **Retour arrière** : `git revert` des commits S05 ; aucun impact sur le site en ligne.
+
+### S06 — 2026-10-02 (moteur de mouvement)
+- **Fait** :
+  - logique pure en TDD : `lib/depth/resolve-depth.ts` (`probeLine`, `resolveDepth` : haut et bas de page, trous entre sections, sections courtes ou vides, sections masquées), `temperature.ts` (I-05 : 21 → 8 °C, thermocline 10–15 m), `profile.ts` (`fillHiddenDepths`, géométrie du U, point actif), `ascent.ts`, `lib/motion/magnetic.ts`, `formatDecimal` ; `HUD_PROFILE` dans `data/sections.ts`, écrit par `Section.astro` sur chaque section ;
+  - module de mouvement `scripts/motion/` (import dynamique sous `motion-ok`, démarré après les contrôleurs) : GSAP + ScrollTrigger + SplitText + CustomEase (`buoyant`, `surface`, `drift`, `sink`), `gsap.matchMedia` relié à `motion-ok`, Lenis (pointeur fin ; ancres par Lenis avec focus sur le titre et URL mise à jour ; arrêt pendant les `<dialog>` modaux ; préférences cookies en défilement natif), révélations `lines` (E5, découpe annulée après l'animation), `fade`, `image` (E6, ligne d'eau en `clip-path` + dézoom 1,08 → 1), `stagger`, aimantation ≤ 6 px des boutons « lampe » avec évènements `bv:lamp` (accroche des bulles de S08) ;
+  - HUD (E3) : `DepthGauge` (bord droit sur ordinateur avec couloir réservé, pastille en bas à gauche sur téléphone, `data-hud-gauge`), profondeur à 1 décimale, température, durée mm:ss, chiffres en `aria-hidden` ; `DiveProfile` en `popover` (tracé en U, point actif, 13 vrais liens dont Bons cadeaux) ; `setMode('normal'|'hidden'|'safety-stop')` (compte à rebours `PALIER 5 m · 03:00` prêt pour S10), masqué dans l'échelle et le comparatif, `▲ LENT` derrière un drapeau (désactivé) ;
+  - colonne d'eau et 6 thermoclines (E4), miroitement en `transform` ;
+  - navigation vivante (E16) : fixe, rentrée à la descente, verre dépoli après le hero, section active (`aria-current`, aussi dans le profil), menu mobile « plongée » avec la profondeur de chaque lien, révélé ligne à ligne ; E17 (lueur existante + aimantation) ; E18 (`@view-transition`, `view-transition-name` sur la nav et le HUD, coupé sans `motion-ok`).
+- **Vérifications** : `npm run build` (+ `check:dist`) ; `astro check` 0/0/0 ; Vitest 490 tests (après fusion) ; Playwright 201 réussis, 24 sautés (tous projets, `csp` compris) ; nouveaux tests `tests/e2e/motion.spec.ts` (HUD ≈ 32–40 m sur `#specialties`, HUD masqué dans l'échelle, profil de plongée, ancre `#faq` avec Lenis et focus, CLS < 0,05 au chargement et sur un scroll complet, mouvement réduit sans Lenis ni contenu masqué, Mode calme complet, garde-fou de `boot.js` avec le module retenu 5 s) ; trace : 0 tâche longue, 60 i/s (CPU ×1 et ×4) ; budgets : JS initial 3,2 Ko, total 82,0 Ko, CSS 12,9 Ko.
+- **Constats** : Lenis retire déjà le `scroll-padding` de la page dans `scrollTo` (le décalage était compté deux fois) ; Lenis arrêté bloque la molette tout seul, d'où l'abandon de `overflow: clip` de sa feuille (il bloquait aussi les sauts d'ancre) ; une classe transmise à un composant enfant ne reçoit pas les styles à portée du parent (le tracé du profil s'affichait en grand dans la pastille mobile) ; sur WebKit, `goto` attendait le module retenu au-delà des 3 s du garde-fou (test passé en `waitUntil: 'commit'`).
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30) : approuvée, 0 CRITICAL, 0 HIGH ; 3 MEDIUM corrigés (`clip-path` résiduel si une révélation est interrompue, hash mal formé, rejet non géré du module), 3 LOW corrigés (liens `_blank` / `download`, rectangle de l'aimantation remesuré, déclencheurs des révélations tués après usage) ; 1 LOW laissé : après un saut par-dessus plusieurs thermoclines, la dernière bande mise à jour fixe les couches (invisible hors d'une thermocline, à revoir si un défaut apparaît).
+- **Commits** : `fc4d1ab`, `e8a17d0`, `463261c`, `75907b8`, `9bffed3`, puis ce journal.
+- **Points ouverts** :
+  - S07 : E15 (le HUD « s'allume » à 0,0 m) et E2 (le titre du hero n'est pas découpé en S06) ; idle → WebGL après `load` dans `scripts/motion/index.ts` ;
+  - S08 : `setMode('hidden')` déjà automatique dans l'échelle ; épinglage desktop dans `whileMotion` (`desktop`) ; bulles sur `bv:lamp` ;
+  - S10 : `setMode('safety-stop')` au palier FAQ ; Mode calme sans rechargement possible (`whileMotion` sait tout défaire) ;
+  - Firefox (D21) et Safari réel non vérifiés à la main ; les transitions de vue E18 seulement là où elles existent.
+- **Retour arrière** : `git revert` des commits S06 ; la page statique de S05 reste fonctionnelle.
+
+### S11 — 2026-10-02 (consentement, mesure, SEO, CSP ; en parallèle de S06, worktree `refonte/s11`)
+- **Fait** : `consent-default.js` (défauts refusés ou relus dans `cc_cookie`, `ads_data_redaction`, balise Google en production seulement, `bvLoadGoogleTag()`), bandeau vanilla-cookieconsent 3.1.0 (contrôleur `consent`, textes FR/EN, styles chargés à la demande, ton `deep`, « Gérer les cookies » branché, `html[data-consent-open]` masque le HUD et WhatsApp), `events.ts` et `consent-mode.ts` (TDD), conversions formulaire, WhatsApp et téléphone ; tableau des cookies et signaux sans cookie dans Confidentialité (FR/EN) ; OG, Twitter, `theme-color`, JSON-LD `@graph` (TDD, accueil), `robots.txt`, `llms.txt`, alternates `hreflang` de toutes les pages du sitemap ; `ops/nginx/security-headers.conf`, `serve-with-csp.mjs`, projet Playwright `csp`.
+- **Repli I-06 / I-07** (non fournis, D36) : mode avancé, libellés de conversion `null` (aucune conversion Ads), `GA4_ID = null` en attendant l'assistant de balises.
+- **Vérifications** (worktree) : build + `check:dist` ; `astro check` 0/0/0 ; 448 tests Vitest (99,5 % des lignes) ; E2E 144 réussis, 20 sautés ; a11y 28/28 ; `csp` 0 violation (essai de mutation : un script inline injecté est détecté) ; aucun script inline dans `dist/` ; budgets : JS initial 3,0 Ko, total 53,9 Ko, CSS 11,3 Ko. Après fusion avec S06 : voir l'entrée S06.
+- **Constats** : la librairie se cache aux robots (`navigator.webdriver`), les tests se présentent comme un visiteur ; Astro liait le CSS d'un module chargé dynamiquement sur toutes les pages (+5,5 Ko gzip bloquants), d'où le chargement par `?url` ; l'option `i18n` du sitemap n'apparie que des chemins identiques ; axe mesurait le contraste pendant la transition d'ouverture du bandeau.
+- **Revue** (`security-reviewer`, Sonnet, une passe, à la fusion) : 0 CRITICAL, 0 HIGH. MEDIUM : mode avancé = pings sans cookie avant consentement (choix I-07 de Nicholas, D36) ; `www.google.com` en `script-src` (risque accepté, D38). LOW corrigés : serveur de test `serve-with-csp.mjs` (barres obliques initiales, fichier manquant) ; LOW laissés pour S13 : jokers `*.google.*`, `preload` HSTS (repris du site en ligne), COOP/CORP, `ads_data_redaction` (sans effet une fois `ad_storage` accordé).
+- **Commits** : `08eb4f6`, `2dfac40`, `767961d`, `2a8bc37`, `30fc50b`, `e57e1dd`, `3542d62`, `3501ed6`, `33d6b79`, fusion, `dbc9dd2`.
+- **Points ouverts** :
+  - I-06 : libellés de conversion Ads, puis vérifier dans l'assistant de balises si GA4 est déjà une destination de la balise ; sinon `GA4_ID = 'G-QG5ZCVY1Z7'` ;
+  - I-07 : si Nicholas choisit le mode basique, changer `MODE` et retirer la phrase sur les signaux anonymes dans Confidentialité (FR/EN) ;
+  - S13 : relever en production les cookies réellement déposés (noms et durées du tableau) et vérifier l'effacement automatique de `_ga` sur `.bullesenvalais.ch` ; aucune violation CSP en production avant et après consentement ; `include` du fichier d'en-têtes dans chaque `location` qui a ses propres `add_header` ; trancher `report-uri` ; resserrer les jokers Google (D38).
+- **Retour arrière** : `git revert` des commits S11 ; rien n'est appliqué en production.

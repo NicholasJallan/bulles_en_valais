@@ -54,9 +54,9 @@ src/
 ├── components/<feature>/  one folder per section; page/HomePage.astro assembles the page for a locale
 ├── i18n/                  types.ts · dictionary.ts · fr.ts · en.ts · legal/ · index.ts · routes.ts (+ tests)
 ├── data/                  courses · specialties · places · credentials · contact · gifts · sections (+ tests)
-├── lib/                   pure logic, tested with Vitest (TDD): color/, motion/, css/, format, typography
+├── lib/                   pure logic, tested with Vitest (TDD): color/, motion/, depth/, css/, format, typography
 ├── test/                  content-checks.ts: generic checks shared by the dictionary and data tests
-├── scripts/app.ts         single client entry point
+├── scripts/app.ts         single client entry point; scripts/motion/ = motion module (DOM glue, not covered)
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
 public/                    copied as is: api/contact.php, js/boot.js, js/consent-default.js, robots.txt, llms.txt
@@ -79,6 +79,9 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 - `public/js/boot.js`: synchronous, first script of `<head>`. Adds `js`, and `motion-ok` unless reduced motion or calm mode is asked (removed after 3 s if the motion module has not added `motion-ready`).
 - `src/scripts/app.ts`: the only module of the page. Elements declare their controllers with `data-controller="name"` (several names separated by spaces); the `CONTROLLERS` registry maps each name to a dynamic `import()` of a module exporting `init(element)`, which returns a cleanup function (`src/lib/controllers.ts`).
 - Once every controller has started, `app.ts` sets `html[data-controllers="ready"]` (the E2E tests wait for it: `tests/e2e/ready.ts`); if one fails, it removes `html.js` so the page falls back to its no-JS version. Elements shown only with or without JavaScript use `.js-only` / `.no-js-only` (`utilities.css`).
+- **Motion module** (`src/scripts/motion/index.ts`, S06): `app.ts` imports it dynamically under `html.motion-ok` and starts it once the controllers are ready; it adds `motion-ready`. `gsap.matchMedia` (`reduced-motion.ts`) undoes everything if reduced motion is asked meanwhile. Lenis on fine pointers only (same-page links scroll through it and focus their section's heading; modal `<dialog>`s stop it; scrollable panels need `data-lenis-prevent`). Reveals: `data-reveal="lines|fade|image|stagger"`, hidden by `motion.css` under `html.motion-ok` until marked `data-revealed`. Lamp buttons (`.button-primary`) emit `bv:lamp` (hover, press) for the bubbles.
+- **HUD** (`components/hud/hud.ts`, essential controller): coarse depth from an IntersectionObserver, precise readings from `scripts/motion/depth.ts`; `setMode('normal'|'hidden'|'safety-stop')` for S08/S10; emits `bv:section` (the nav marks its links `aria-current`). Depths of every section, hidden ones included, come from `HUD_PROFILE` (`data/sections.ts`). On desktop the `.wrap` keeps a lane for the HUD (`utilities.css`).
+- **Water** (`components/water/`): sections paint their own tone; the fixed water column only shows through the thermoclines (no text on a gradient).
 - Shared UI: `ui/Section.astro` (anchor, tone, HUD depths from `sections.ts`; it forwards the parent's `data-astro-cid-*`, otherwise the parent's scoped styles miss it), `ui/TabList.astro` + `ui/tabs.ts` (APG tabs, panels stacked without JS), `ui/ArtPicture.astro` (one crop per media query).
 
 ### Rules that are easy to break

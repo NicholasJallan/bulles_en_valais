@@ -42,8 +42,8 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   ├── components/
 │   │   ├── page/HomePage.astro        # assemble les sections pour une locale
 │   │   ├── nav/        Nav · MobileMenu · LanguageSwitch · nav.ts
-│   │   ├── hud/        DepthGauge · DiveProfile · hud.ts
-│   │   ├── water/      WaterColumn · Thermocline · water.ts
+│   │   ├── hud/        DepthGauge · DiveProfile · ProfileLine · hud.ts · events.ts · profile-geometry.ts
+│   │   ├── water/      WaterColumn · Thermocline · water.ts (couches vues à travers les thermoclines)
 │   │   ├── hero/       Hero · hero.ts
 │   │   ├── manifesto/  Manifesto
 │   │   ├── instructor/ Instructor
@@ -60,13 +60,14 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── whatsapp/   WhatsAppDialog · whatsapp.ts
 │   │   ├── consent/    consent.ts
 │   │   ├── footer/     Footer · calm-mode.ts
-│   │   └── ui/         Button · Eyebrow · SectionHeader · SplitHeading · ImageReveal · RichText · Icon
+│   │   └── ui/         Button · Eyebrow · SectionHeader · ArtPicture (prop `reveal`) · RichText · Icon
 │   ├── scripts/app.ts                 # point d'entrée unique, orchestre l'initialisation (§7)
+│   ├── scripts/motion/  index · gsap · reduced-motion · lenis · reveal · split · magnetic · depth · nav (DOM, hors couverture)
 │   ├── i18n/  types.ts · dictionary.ts · fr.ts · en.ts · legal/{fr,en}.ts · index.ts · routes.ts (+ tests)
 │   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
 │   ├── lib/
-│   │   ├── motion/  gsap.ts · eases.ts · tokens.ts · lenis.ts · reduced-motion.ts · reveal.ts · split.ts · magnetic.ts
-│   │   ├── depth/   resolve-depth.ts · temperature.ts · ladder-scale.ts (+ tests)
+│   │   ├── motion/  eases.ts · tokens.ts · waterline.ts · magnetic.ts (logique pure, + tests)
+│   │   ├── depth/   resolve-depth.ts · temperature.ts · profile.ts · ascent.ts · ladder-scale.ts (+ tests)
 │   │   ├── bubbles/ boyle.ts (+ test) · emitter.ts
 │   │   ├── webgl/   capability.ts (+ test) · surface.ts · shaders/{surface.vert,surface.frag,noise.glsl}
 │   │   ├── color/   palette.ts · contrast.ts (+ test)
@@ -184,7 +185,7 @@ export interface Course {
 
 - Un dossier par section (§2). Une section = un `.astro` sémantique (`<section aria-labelledby>`, un `h2`, des `h3`) avec `data-tone`, `data-depth-start`, `data-depth-end` et son `id` d'ancre.
 - **Amélioration progressive** : sans JS, tout le contenu est lisible et utilisable. Les onglets s'affichent en panneaux empilés, la FAQ fonctionne grâce à `<details>`, le formulaire se soumet (le JS ajoute validation, états et envoi JSON), le lien WhatsApp ouvre `wa.me`.
-- `ui/ImageReveal.astro` : enveloppe `<Picture>` (AVIF + WebP), couleur dominante en fond, `data-reveal="image"`.
+- Révélation E6 : `data-reveal="image"` posé sur le `<picture>` (prop `reveal` d'`ArtPicture`, `pictureAttributes` de `<Picture>`), et non un composant enveloppe : le `clip-path` doit porter sur l'image elle-même (S06).
 - `ui/SplitHeading.astro` : rend un `Emphasis` en `h2`/`h3` avec `data-reveal="lines"`.
 
 ## 7. Scripts et cycle de vie
