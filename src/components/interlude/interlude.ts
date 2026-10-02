@@ -40,7 +40,9 @@ function trail(interlude: HTMLElement, emitter: Emitter): Cleanup {
   interlude.dataset.trail = '';
   const moveX = gsap.quickTo(ring, 'x', { duration: RING_LAG_S, ease: 'surface' });
   const moveY = gsap.quickTo(ring, 'y', { duration: RING_LAG_S, ease: 'surface' });
+  let shown = false;
   const fade = (opacity: number): void => {
+    shown = opacity > 0;
     gsap.to(ring, { opacity, duration: seconds(DURATIONS_MS.fast), overwrite: 'auto' });
   };
   const onEnter = (event: PointerEvent): void => {
@@ -50,6 +52,11 @@ function trail(interlude: HTMLElement, emitter: Emitter): Cleanup {
   };
   const onMove = (event: PointerEvent): void => {
     if (event.pointerType !== 'mouse') return;
+    // Restarted under a still pointer (a resize across 1024 px): no pointerenter came.
+    if (!shown) {
+      onEnter(event);
+      return;
+    }
     moveX(event.clientX);
     moveY(event.clientY);
   };

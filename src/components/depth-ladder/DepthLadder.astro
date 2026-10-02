@@ -181,6 +181,8 @@ const ticks = ladderTicks();
   /* ——— Pinned (ladder.ts, desktop with motion): the header scrolls by, then the stage is
      pinned and the ruler scrolls under a fixed marker. ——— */
   .ladder-section[data-pinned] {
+    /* 0 → 120 m over 2.4 screens, scrolled during a pin of 3 screens (PIN_SCREENS in
+       ladder.ts): the ruler drifts slower than the page, as in water. */
     --track-length: 240svh;
     --rung-offset: 2.5rem;
     --ladder-marker-span: 4;

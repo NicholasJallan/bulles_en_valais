@@ -34,6 +34,17 @@ const FIELD = { pxPerMetre: 40, speed: 64 };
 const MAX_PIXEL_RATIO = 2;
 const SPRITE_SIZE = 64;
 const TRAIL_INTERVAL_MS = 90;
+/** The bubble, in foam: body transparent at the centre and thicker at the rim, then a highlight. */
+const SPRITE = {
+  body: [
+    [0, 0],
+    [0.75, 0.08],
+    [1, 0.35],
+  ],
+  rimAlpha: 0.7,
+  rimWidth: 2.5,
+  highlightAlpha: 0.9,
+} as const;
 const TRAIL_DISTANCE_PX = 14;
 
 /** A bubble drawn once (radial gradient, rim and highlight), then scaled: no gradient per frame. */
@@ -47,24 +58,23 @@ function drawSprite(colour: string): HTMLCanvasElement {
   const r = c - 1;
   context.fillStyle = colour;
   context.strokeStyle = colour;
-  const body = context.createRadialGradient(c, c, r * 0.2, c, c, r);
-  body.addColorStop(0, 'rgb(255 255 255 / 0)');
-  body.addColorStop(0.75, 'rgb(255 255 255 / 0.08)');
-  body.addColorStop(1, 'rgb(255 255 255 / 0.35)');
-  context.globalAlpha = 1;
   context.beginPath();
   context.arc(c, c, r, 0, Math.PI * 2);
   context.fill();
+  // Keeps the foam colour, with the alpha of the gradient.
+  const body = context.createRadialGradient(c, c, r * 0.2, c, c, r);
+  for (const [offset, alpha] of SPRITE.body) body.addColorStop(offset, `rgb(0 0 0 / ${alpha})`);
   context.globalCompositeOperation = 'destination-in';
   context.fillStyle = body;
   context.fill();
   context.globalCompositeOperation = 'source-over';
-  context.globalAlpha = 0.7;
-  context.lineWidth = 2.5;
+  context.globalAlpha = SPRITE.rimAlpha;
+  context.lineWidth = SPRITE.rimWidth;
   context.beginPath();
-  context.arc(c, c, r - 1.5, 0, Math.PI * 2);
+  context.arc(c, c, r - SPRITE.rimWidth / 2, 0, Math.PI * 2);
   context.stroke();
-  context.globalAlpha = 0.9;
+  context.globalAlpha = SPRITE.highlightAlpha;
+  context.fillStyle = colour;
   context.beginPath();
   context.ellipse(c - r * 0.38, c - r * 0.4, r * 0.22, r * 0.15, -Math.PI / 4, 0, Math.PI * 2);
   context.fill();
@@ -122,8 +132,14 @@ export function createEmitter(): Emitter {
     running = false;
     gsap.ticker.remove(tick);
   };
+  // Resized once per frame at most: each fit reallocates the canvas.
+  let resizeFrame = 0;
   const onResize = (): void => {
-    if (stage !== undefined) fit(stage);
+    if (resizeFrame !== 0) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      if (stage !== undefined) fit(stage);
+    });
   };
 
   const burst: Emitter['burst'] = (x, y, count, depth) => {
@@ -164,6 +180,7 @@ export function createEmitter(): Emitter {
     destroy() {
       document.removeEventListener(BUBBLES_EVENT, onRequest);
       window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(resizeFrame);
       gsap.ticker.remove(tick);
       running = false;
       for (const bubble of pool) bubble.alive = false;

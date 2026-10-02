@@ -14,6 +14,8 @@ const LINE_START_PERCENT = 120;
 
 /** A headline split by an entrance still running: undone before the next one (quick switches). */
 const splits = new WeakMap<HTMLElement, SplitText>();
+/** The entrance still running in a panel: finished at once before the next one starts. */
+const entrances = new WeakMap<HTMLElement, gsap.core.Timeline>();
 
 /** The inset of `tab` inside `list`, as a clip-path the indicator can tween to. */
 function insetOf(list: HTMLElement, tab: HTMLElement): string {
@@ -38,8 +40,10 @@ function slideIndicator(list: HTMLElement): Cleanup {
     const tab = selectedTab();
     if (tab !== null) gsap.set(indicator, { clipPath: insetOf(list, tab) });
   };
+  // The tabs too: a web font swap changes their width, not always the list's.
   const observer = new ResizeObserver(place);
   observer.observe(list);
+  for (const tab of list.querySelectorAll('[role="tab"]')) observer.observe(tab);
   place();
   const onTabs = (event: Event): void => {
     const { tab } = (event as CustomEvent<TabsDetail>).detail;
@@ -63,8 +67,9 @@ function slideIndicator(list: HTMLElement): Cleanup {
 
 /** The new panel settles; its headline rises line by line and its prices follow one another. */
 function enterPanel(panel: HTMLElement): void {
-  gsap.killTweensOf(panel);
-  const timeline = gsap.timeline();
+  entrances.get(panel)?.progress(1).kill();
+  const timeline = gsap.timeline({ onComplete: () => entrances.delete(panel) });
+  entrances.set(panel, timeline);
   timeline.fromTo(
     panel,
     { opacity: 0, y: PANEL_RISE_PX },
@@ -90,7 +95,7 @@ function enterPanel(panel: HTMLElement): void {
         stagger: seconds(STAGGER_MS.line),
         onComplete: () => {
           split.revert();
-          splits.delete(headline);
+          if (splits.get(headline) === split) splits.delete(headline);
         },
       },
       0,
