@@ -59,7 +59,8 @@ src/
 ├── scripts/app.ts         single client entry point
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
-public/                    copied as is: api/contact.php, js/boot.js
+public/                    copied as is: api/contact.php, js/boot.js, js/consent-default.js, robots.txt, llms.txt
+ops/nginx/                 security-headers.conf: final CSP and headers (S11), applied by nginx in S13
 scripts/                   check-budgets.mjs · check-dist.mjs (+ lib/, tested)
 tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contact endpoint)
 ```
@@ -82,7 +83,7 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 
 ### Rules that are easy to break
 
-- **No inline script** (the target CSP forbids them): `is:inline` only on a `<script src>` pointing to a file of `public/` (boot.js) and on JSON-LD. `vite.build.assetsInlineLimit: 0` stops Astro from inlining small scripts and Vite from producing `data:` URIs. `check:dist` fails the build on an inline script, an inline event handler, a `javascript:` URL, or a script or stylesheet of another origin (everything is self-hosted).
+- **No inline script** (the target CSP forbids them): `is:inline` only on a `<script src>` pointing to a file of `public/` (boot.js, consent-default.js) and on JSON-LD. `npx playwright test --project=csp` runs a full visit under the headers of `ops/nginx/security-headers.conf` and fails on any CSP violation. `vite.build.assetsInlineLimit: 0` stops Astro from inlining small scripts and Vite from producing `data:` URIs. `check:dist` fails the build on an inline script, an inline event handler, a `javascript:` URL, or a script or stylesheet of another origin (everything is self-hosted).
 - **Astro 7**: the Rust compiler no longer fixes HTML (close every tag, no block inside `<p>`); `compressHTML: 'jsx'` removes whitespace that contains a line break between elements, so keep a wanted space on the same line (`{a} <em>{b}</em>`) or write `{' '}`.
 - No design value hard-coded: colors, spacing, radii, durations and easings come from `src/styles/tokens.css` (provisional values until S02).
 - Animate only `transform`, `opacity`, `clip-path` (and `filter` sparingly); no `scroll` listener to animate.
