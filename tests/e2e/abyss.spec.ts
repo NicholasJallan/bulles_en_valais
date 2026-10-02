@@ -158,4 +158,20 @@ test.describe('specialties and places with reduced motion', () => {
     expect(offset).toBe('none');
     await expectNoOverflow(page);
   });
+
+  test('static places: the header and the map above the sites, never under them', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/');
+    const box = async (selector: string) => {
+      const found = await page.locator(selector).boundingBox();
+      if (!found) throw new Error(`${selector} is not rendered`);
+      return found;
+    };
+    const intro = await box('#places .places-intro');
+    const map = await box('#places .places-map');
+    const list = await box('#places .places-list');
+    expect(intro.y + intro.height).toBeLessThanOrEqual(list.y);
+    expect(map.y + map.height).toBeLessThanOrEqual(list.y);
+  });
 });

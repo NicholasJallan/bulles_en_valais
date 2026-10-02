@@ -103,15 +103,19 @@ const t = getDictionary(locale).places;
       align-items: start;
     }
 
+    /* Rows given again: without the template, the named areas above all fell into one row. */
     .places-intro {
+      grid-row: 1;
       grid-column: 1 / span 5;
     }
 
     .places-map {
+      grid-row: 1;
       grid-column: 7 / -1;
     }
 
     .places-list {
+      grid-row: 2;
       grid-column: 1 / -1;
       grid-template-columns: repeat(3, 1fr);
     }
