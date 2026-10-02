@@ -2,6 +2,7 @@
 // html.motion-ok is set, never in the initial bundle. It checks motion-ok again (boot.js
 // withdraws it after 3 s if this module has not started), then sets motion-ready.
 import { pinLadder } from '@/components/depth-ladder/ladder.ts';
+import { tiltGiftCard } from '@/components/gifts/gift-card.ts';
 import { startHero } from '@/components/hero/hero.ts';
 import { startInterludes } from '@/components/interlude/interlude.ts';
 import { pinPlaces } from '@/components/places/places.ts';
@@ -43,6 +44,7 @@ export function startMotion(): Cleanup | undefined {
       pinLadder({ desktop }),
       pinPlaces(),
       startTorch(),
+      fine ? tiltGiftCard() : noop,
       startHero({ fine }),
       () => bubbles.destroy(),
     ];

@@ -187,14 +187,18 @@ function validateOnLeave(context: FormContext, target: EventTarget | null): void
   setFieldError(context.form, field, error && context.messages.errors[error]);
 }
 
-/** Links such as « Offer a gift voucher » choose the interest before reaching the form. */
+/**
+ * Links such as « Offer a gift voucher » choose the interest, then their anchor scrolls to the
+ * form (natively, or through Lenis) and the keyboard starts on its first field.
+ */
 function prefill(context: FormContext, target: EventTarget | null): void {
   const link = target instanceof Element ? target.closest('[data-prefill-interest]') : null;
   const value = link?.getAttribute('data-prefill-interest');
   const select = control(context.form, 'interest') as HTMLSelectElement;
-  if (value && Array.from(select.options).some((option) => option.value === value)) {
-    select.value = value;
-  }
+  if (!value || !Array.from(select.options).some((option) => option.value === value)) return;
+  select.value = value;
+  // After the jump and Lenis' own focus on the target: the scroll is theirs, the focus ours.
+  setTimeout(() => control(context.form, 'name').focus({ preventScroll: true }));
 }
 
 function contextOf(element: HTMLElement): FormContext {

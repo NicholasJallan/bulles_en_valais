@@ -33,6 +33,9 @@
   --c-deco-emerald: oklch(74% 0.035 95);
   --c-deco-deep: oklch(70% 0.03 190);
   --c-deco-abyss: oklch(62% 0.015 235);
+  --c-iris-aqua: oklch(88% 0.08 195);
+  --c-iris-violet: oklch(84% 0.09 310);
+  --c-iris-gold: oklch(91% 0.09 95);
 
   /* Type (Gate 1: pairing B). The Fonts API defines --font-instrument-serif and --font-switzer. */
   --font-display: var(--font-instrument-serif, Georgia, serif);
@@ -120,6 +123,10 @@
   --ease-surface: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-drift: cubic-bezier(0.45, 0, 0.55, 1);
   --ease-sink: cubic-bezier(0.55, 0, 0.75, 0.2);
+  /* Behind the modal dialogs (review, WhatsApp): the page sinks into the abyss. */
+  --backdrop-scrim: color-mix(in oklch, var(--c-abyss) 45%, transparent);
+  /* Depth of field of the objects that tilt (the gift voucher, E11). */
+  --perspective-object: 800px;
 }
 
 /* Tones: each section sets its background and text colours with data-tone. */

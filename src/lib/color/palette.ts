@@ -38,6 +38,10 @@ export const COLORS = {
   'deco-emerald': oklch(74, 0.035, 95),
   'deco-deep': oklch(70, 0.03, 190),
   'deco-abyss': oklch(62, 0.015, 235),
+  // Iridescent sheen of the gift voucher (E11): light, decorative, never behind text.
+  'iris-aqua': oklch(88, 0.08, 195),
+  'iris-violet': oklch(84, 0.09, 310),
+  'iris-gold': oklch(91, 0.09, 95),
 } as const satisfies Record<string, Oklch>;
 
 export type ColorName = keyof typeof COLORS;
