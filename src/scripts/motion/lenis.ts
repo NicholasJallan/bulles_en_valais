@@ -65,12 +65,17 @@ export function startLenis(): Cleanup {
     prevent: (node) => node.closest('#cc-main') !== null,
   });
   lenis.on('scroll', ScrollTrigger.update);
+  // A pin changes the height of the page without resizing <html>: WebKit's ResizeObserver does
+  // not report it, and Lenis would keep its old limit (an anchor below the pin landed short).
+  const resize = (): void => lenis.resize();
+  ScrollTrigger.addEventListener('refresh', resize);
   const raf = (time: number): void => lenis.raf(time * 1000);
   gsap.ticker.add(raf);
   gsap.ticker.lagSmoothing(0);
   const cleanups = [pauseWithDialogs(lenis), handleAnchors(lenis)];
   return () => {
     for (const cleanup of cleanups) cleanup();
+    ScrollTrigger.removeEventListener('refresh', resize);
     gsap.ticker.remove(raf);
     gsap.ticker.lagSmoothing(...DEFAULT_LAG_SMOOTHING);
     lenis.destroy();
