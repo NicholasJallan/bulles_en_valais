@@ -1,9 +1,12 @@
 // Previous and next buttons of the testimonials rail. On their own: one card per press, disabled
 // when the first or the last card is fully in view (IntersectionObserver, no scroll listener); the
-// scrolling stays native (scroll-snap, touch, keyboard). While the motion module pins the rail
-// (testimonials.ts, D45), it takes the buttons over: they scroll the page, and it tells which ends
-// are reached.
+// scrolling stays native (scroll-snap, touch, keyboard). The longest reviews are cut short by the
+// CSS from the first paint (no empty band under the cards, nothing moves later) and open whole in
+// a dialog (reviews.ts). While the
+// motion module pins the rail (testimonials.ts, D45), it takes the buttons over: they scroll the
+// page, and it tells which ends are reached; it also cuts the reviews to its own measure.
 import type { Cleanup } from '@/lib/controllers.ts';
+import { openReviews } from './reviews.ts';
 
 const FULLY_VISIBLE = 0.98;
 
@@ -35,6 +38,14 @@ function setDisabled(
     else other.focus();
   }
   button.disabled = disabled;
+}
+
+/** Static rail: the long reviews keep their « read the full review » button (CSS cuts them). */
+function showLongReviewButtons(rail: HTMLElement): void {
+  for (const card of rail.children) {
+    const more = card.querySelector<HTMLButtonElement>('[data-review-open]');
+    if (more) more.hidden = !card.classList.contains('testimonial-long');
+  }
 }
 
 export function init(element: HTMLElement): Cleanup {
@@ -76,6 +87,7 @@ export function init(element: HTMLElement): Cleanup {
 
   const release = () => {
     drive = undefined;
+    showLongReviewButtons(rail);
     rail.setAttribute('tabindex', '0');
     previous.disabled = false;
     next.disabled = false;
@@ -101,7 +113,10 @@ export function init(element: HTMLElement): Cleanup {
   previous.addEventListener('click', onPrevious);
   next.addEventListener('click', onNext);
   observe();
+  const section = element.closest<HTMLElement>('section') ?? element;
+  const closeReviews = openReviews(section);
   return () => {
+    closeReviews();
     current = undefined;
     drive = undefined;
     rail.setAttribute('tabindex', '0');

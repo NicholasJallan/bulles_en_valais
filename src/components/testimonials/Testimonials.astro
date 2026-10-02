@@ -21,7 +21,8 @@ const { locale } = Astro.props;
 const dictionary = getDictionary(locale);
 const t = dictionary.testimonials;
 const showLanguageNote = t.items.some((item) => item.lang !== locale || item.translated);
-/** Past this length a review gets a wider card when pinned, rather than a taller one. */
+/** Past this length a review gets a wider card when pinned, rather than a taller one, and is cut
+ * short in the static rail. */
 const LONG_REVIEW_CHARS = 600;
 const isLong = (text: readonly string[]) => text.join('').length > LONG_REVIEW_CHARS;
 ---
@@ -70,8 +71,14 @@ const isLong = (text: readonly string[]) => text.join('').length > LONG_REVIEW_C
                     <p>{paragraph}</p>
                   ))}
                 </blockquote>
-                {/* Shown by testimonials.ts when the pinned rail cuts the review short. */}
-                <button class="testimonial-more" type="button" hidden data-review-open>
+                {/* Long reviews are cut short from the start (static rail); pinned, reviews.ts shows
+                    it on the reviews taller than the window. */}
+                <button
+                  class="testimonial-more js-only"
+                  type="button"
+                  hidden={!isLong(item.text)}
+                  data-review-open
+                >
                   {t.readMore}
                   <span class="visually-hidden"> · {item.author}</span>
                 </button>
@@ -337,11 +344,17 @@ const isLong = (text: readonly string[]) => text.join('').length > LONG_REVIEW_C
     }
   }
 
-  /* Cut short to the height of the window (testimonials.ts sets the height), the rest in the
-     dialog. */
-  .testimonials[data-pinned] .testimonial[data-clamped] blockquote {
+  /* Cut short, the rest in the dialog: pinned, to the height of the window (reviews.ts sets it);
+     in the static rail, the long reviews to a fixed height from the first paint (with
+     JavaScript: without it there is no dialog, the review stays whole). */
+  .testimonial[data-clamped] blockquote,
+  :global(html.js) .testimonials:not([data-pinned]) .testimonial-long blockquote {
     overflow: hidden;
     mask-image: linear-gradient(var(--fg) 70%, transparent);
+  }
+
+  :global(html.js) .testimonials:not([data-pinned]) .testimonial-long blockquote {
+    max-block-size: 16rem;
   }
 
   .testimonial-more {

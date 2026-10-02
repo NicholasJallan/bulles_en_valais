@@ -125,6 +125,40 @@ test.describe('testimonials without motion', () => {
     await page.locator('[data-rail-next]').click();
     await expect.poll(() => rail.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
     await expect(previous).toBeEnabled();
-    await expect(page.locator('#testimonials [data-review-open]:visible')).toHaveCount(0);
+  });
+
+  test('cutting the reviews does not move a page opened on the FAQ', async ({ page }) => {
+    await gotoReady(page, '/#faq');
+    await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(() => page.evaluate(() => document.getElementById('faq')?.getBoundingClientRect().top))
+      .toBeGreaterThan(-10);
+    const top = await page.evaluate(
+      () => document.getElementById('faq')?.getBoundingClientRect().top,
+    );
+    expect(top).toBeLessThan(150);
+  });
+
+  test('the long reviews are cut short from the start, and open whole', async ({ page }) => {
+    await gotoReady(page, '/');
+    const quotes = page.locator('[data-rail] > .testimonial-long blockquote');
+    expect(await quotes.count()).toBeGreaterThan(0);
+    for (const quote of await quotes.all()) {
+      const { height, rem } = await quote.evaluate((element) => ({
+        height: element.getBoundingClientRect().height,
+        rem: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+      }));
+      expect(height).toBeLessThanOrEqual(16 * rem + 1);
+    }
+    const more = page.locator('#testimonials [data-review-open]:visible');
+    expect(await more.count()).toBeGreaterThan(0);
+    const button = more.first();
+    await button.focus();
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('blockquote')).toHaveCount(1);
+    await page.keyboard.press('Escape');
+    await expect(button).toBeFocused();
   });
 });
