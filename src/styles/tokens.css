@@ -88,7 +88,8 @@
   /* Masthead logo: its box in the bar, how much larger it shows over the hero, and the halo that
      keeps its fine lettering readable against a bright sky. */
   --logo-masthead: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
-  --logo-hero-scale: 2.2;
+  --logo-hero-scale: 3.2;
+  --logo-ratio: calc(1825 / 2256); /* width / height of logo.svg */
   --logo-halo: color-mix(in oklch, var(--c-abyss) 55%, transparent);
 
   /* Radii: sharp for controls, soft for cards and images, round for bubbles and pills. */

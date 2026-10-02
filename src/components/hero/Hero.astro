@@ -181,6 +181,38 @@ const teaching = CREDENTIALS.filter((credential) =>
     justify-items: start;
   }
 
+  /* Wide screens: the text stands beside the enlarged logo instead of below it, so the lead and
+     its button stay on the first screen and the lead stays the LCP (D41). */
+  @media (width >= 64rem) {
+    .hero {
+      padding-block-start: calc(var(--space-section) + var(--space-xl));
+    }
+
+    /* The eyebrow now sits higher, on the mountains: the dark water rises with it. */
+    .hero-scrim {
+      background:
+        linear-gradient(
+          to top,
+          oklch(14% 0.03 245 / 0.92) 0%,
+          oklch(14% 0.03 245 / 0.78) 38%,
+          oklch(14% 0.03 245 / 0.45) 72%,
+          oklch(14% 0.03 245 / 0) 92%
+        ),
+        radial-gradient(
+          ellipse 32rem 24rem at 0 0,
+          oklch(14% 0.03 245 / 0.45),
+          oklch(14% 0.03 245 / 0) 70%
+        ),
+        linear-gradient(to bottom, oklch(14% 0.03 245 / 0.55), oklch(14% 0.03 245 / 0) 22%);
+    }
+
+    .hero-content {
+      padding-inline-start: calc(
+        var(--logo-masthead) * var(--logo-hero-scale) * var(--logo-ratio) + var(--space-l)
+      );
+    }
+  }
+
   .hero-title {
     max-inline-size: 11ch;
     margin-block: var(--space-2xs) 0;
