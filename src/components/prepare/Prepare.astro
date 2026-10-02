@@ -9,7 +9,10 @@ import { markerDepth } from '@/data/sections.ts';
 import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
 
-/** Gear and insurance; `#gear` and `#insurance` keep the historical anchors working. */
+/**
+ * Gear and insurance; `#gear` and `#insurance` keep the historical anchors working. With motion,
+ * the photo rises behind its water line and the cards settle one after the other (E6).
+ */
 interface Props {
   locale: Locale;
 }
@@ -42,9 +45,10 @@ const t = dictionary.prepare;
           widths={[400, 600, 800]}
           sizes="(width >= 64rem) 30vw, 100vw"
           class="prepare-photo"
+          pictureAttributes={{ 'data-reveal': 'image' }}
         />
       </div>
-      <ul class="bare-list prepare-items">
+      <ul class="bare-list prepare-items" data-reveal="stagger">
         {t.gear.items.map((item) => (
           <li class="prepare-item">
             <h4>{item.title}</h4>
@@ -63,7 +67,7 @@ const t = dictionary.prepare;
         </h3>
         <p>{t.insurance.lead}</p>
       </div>
-      <ul class="bare-list prepare-items">
+      <ul class="bare-list prepare-items" data-reveal="stagger">
         {t.insurance.items.map((item) => (
           <li class="prepare-item">
             <p class="prepare-badge">{item.badge}</p>
@@ -98,13 +102,18 @@ const t = dictionary.prepare;
     font-size: var(--step-3);
   }
 
+  /* The <picture> carries the water line of the reveal (E6): a block of the photo's size. */
+  .prepare-block-head :global(picture) {
+    display: block;
+    max-inline-size: 24rem;
+    margin-block-start: var(--space-m);
+  }
+
   .prepare-block :global(.prepare-photo) {
     inline-size: 100%;
-    max-inline-size: 24rem;
     block-size: auto;
     aspect-ratio: 1;
     object-fit: cover;
-    margin-block-start: var(--space-m);
     border-radius: var(--radius-soft);
     box-shadow: var(--shadow-drift);
   }
