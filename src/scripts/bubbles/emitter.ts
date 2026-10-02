@@ -3,6 +3,7 @@
 // while some are rising. Started by the motion module: no bubble without motion.
 import { gsap } from '@/scripts/motion/gsap.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
+import { BUBBLES_EVENT, type BubblesDetail } from '@/lib/bubbles/events.ts';
 import {
   createPool,
   MAX_RADIUS,
@@ -10,16 +11,6 @@ import {
   stepBubbles,
   type Bubble,
 } from '@/lib/bubbles/pool.ts';
-
-/** Any script may ask for bubbles (the form success in S10) without importing the emitter. */
-export const BUBBLES_EVENT = 'bv:bubbles';
-
-export interface BubblesDetail {
-  readonly x: number;
-  readonly y: number;
-  readonly count: number;
-  readonly depth?: number;
-}
 
 export interface Emitter {
   /** Releases `count` bubbles around (x, y), in viewport pixels, from `depth` metres. */

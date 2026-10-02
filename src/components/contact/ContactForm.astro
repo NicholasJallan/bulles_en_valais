@@ -14,8 +14,8 @@ import { LIMITS } from '@/lib/form/validate.ts';
 
 /**
  * The contact form (contact-form.ts validates it and sends JSON to /api/contact). Without
- * JavaScript it cannot be sent (contact.php only accepts JSON until S10): a notice points to the
- * direct channels.
+ * JavaScript it cannot be sent (contact.php only accepts JSON, a choice of S10): a notice points to
+ * the direct channels.
  */
 interface Props {
   locale: Locale;
@@ -36,6 +36,9 @@ const messages = JSON.stringify({
   sending: t.sending,
   submit: t.submit,
   mail: t.mail,
+  errorDelivery: t.errorDelivery,
+  errorRateLimit: t.errorRateLimit,
+  errorBusy: t.errorBusy,
   whatsappDefault: dictionary.whatsapp.defaultMessage,
 });
 ---
@@ -129,7 +132,7 @@ const messages = JSON.stringify({
   </div>
 
   <div class="form-result form-failure" tabindex="-1" hidden data-failure>
-    <p>{t.errorDelivery}</p>
+    <p data-failure-message>{t.errorDelivery}</p>
     <div class="form-alternatives">
       <Button href={`mailto:${EMAIL}`} icon="mail" data-mailto>
         {t.sendByEmail}

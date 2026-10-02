@@ -1,7 +1,9 @@
 // Contact form: validation when leaving a field and on submit (same rules as contact.php), errors
-// per field (aria-invalid, aria-describedby) with a focused summary, JSON sending, then success or
-// alternatives. A failure never opens mailto: by itself: the visitor chooses a channel.
+// per field (aria-invalid, aria-describedby) with a focused summary, JSON sending, then success (a
+// burst of bubbles with motion) or alternatives. A failure never opens mailto: by itself: the
+// visitor chooses a channel.
 import { whatsappUrl } from '@/data/contact.ts';
+import { BUBBLES_EVENT, type BubblesDetail } from '@/lib/bubbles/events.ts';
 import { trackLead } from '@/lib/analytics/events.ts';
 import type { Locale } from '@/i18n/types.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
@@ -21,12 +23,23 @@ interface Messages {
   readonly sending: string;
   readonly submit: string;
   readonly mail: MailLabels;
+  readonly errorDelivery: string;
+  readonly errorRateLimit: string;
+  readonly errorBusy: string;
   readonly whatsappDefault: string;
 }
 
 const CHECKED: readonly CheckedField[] = ['name', 'email', 'phone', 'message'];
 /** MIN_ELAPSED_MS of contact.php. */
 const MIN_ELAPSED_MS = 3000;
+/** What the visitor reads when the message did not leave. */
+const FAILURE_TEXTS = {
+  'rate-limited': 'errorRateLimit',
+  busy: 'errorBusy',
+  failure: 'errorDelivery',
+} as const satisfies Record<string, keyof Messages>;
+/** The burst of a sent message (E7). */
+const SUCCESS_BUBBLES = 28;
 
 type Control = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
@@ -116,8 +129,14 @@ function showRefused(context: FormContext, fields: readonly CheckedField[]): voi
 }
 
 /** The other ways to reach Nicholas, prepared with the message: links, never opened for him. */
-function showFailure(context: FormContext, fields: ContactFields, focus: boolean): void {
+function showFailure(
+  context: FormContext,
+  fields: ContactFields,
+  focus: boolean,
+  text: string = context.messages.errorDelivery,
+): void {
   const { messages, failure } = context;
+  part<HTMLElement>(failure, '[data-failure-message]').textContent = text;
   const interest = control(context.form, 'interest') as HTMLSelectElement;
   const interestLabel = interest.selectedOptions[0]?.textContent?.trim() ?? fields.interest;
   const email = context.element.dataset.email ?? '';
@@ -140,6 +159,17 @@ function setSending(context: FormContext, sending: boolean): void {
   context.status.textContent = sending ? context.messages.sending : '';
 }
 
+/** A burst of bubbles rises from the button (the motion module draws them, or nothing does). */
+function releaseBubbles(from: HTMLElement): void {
+  const box = from.getBoundingClientRect();
+  const detail: BubblesDetail = {
+    x: box.left + box.width / 2,
+    y: box.top + box.height / 2,
+    count: SUCCESS_BUBBLES,
+  };
+  document.dispatchEvent(new CustomEvent(BUBBLES_EVENT, { detail }));
+}
+
 async function submitForm(context: FormContext): Promise<void> {
   const { form } = context;
   const fields = readFields(form);
@@ -160,6 +190,7 @@ async function submitForm(context: FormContext): Promise<void> {
   const outcome = await sendContact(payload);
   setSending(context, false);
   if (outcome.kind === 'success') {
+    releaseBubbles(context.submit);
     form.hidden = true;
     context.success.hidden = false;
     context.success.focus();
@@ -169,7 +200,7 @@ async function submitForm(context: FormContext): Promise<void> {
     showRefused(context, outcome.fields);
     showFailure(context, fields, false);
   } else {
-    showFailure(context, fields, true);
+    showFailure(context, fields, true, context.messages[FAILURE_TEXTS[outcome.kind]]);
   }
 }
 

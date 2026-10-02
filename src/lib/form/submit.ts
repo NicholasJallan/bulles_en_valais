@@ -26,6 +26,10 @@ export interface SubmitContext {
 export type SubmitOutcome =
   | { readonly kind: 'success' }
   | { readonly kind: 'invalid'; readonly fields: readonly CheckedField[] }
+  /** nginx limits each address to a few messages a minute (429). */
+  | { readonly kind: 'rate-limited' }
+  /** contact.php reached its daily limit of e-mails (503 busy). */
+  | { readonly kind: 'busy' }
   | { readonly kind: 'failure' };
 
 export interface MailLabels {
@@ -64,6 +68,8 @@ async function readJson(response: Response): Promise<Record<string, unknown> | u
 
 function outcomeOf(status: number, body: Record<string, unknown> | undefined): SubmitOutcome {
   if (status === 200 && body?.ok === true) return { kind: 'success' };
+  if (status === 429) return { kind: 'rate-limited' };
+  if (status === 503 && body?.error === 'busy') return { kind: 'busy' };
   const refused = Array.isArray(body?.fields) ? body.fields.filter(isCheckedField) : [];
   if (status === 400 && body?.error === 'validation' && refused.length > 0) {
     return { kind: 'invalid', fields: refused };

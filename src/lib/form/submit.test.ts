@@ -72,10 +72,19 @@ describe('sendContact', () => {
     ['a 400 without fields', 400, { ok: false, error: 'json' }],
     ['a validation error without known fields', 400, { ok: false, error: 'validation' }],
     ['a delivery error', 500, { ok: false, error: 'delivery' }],
-    ['the rate limit', 429, '<html>'],
     ['a 200 that is not ok', 200, { ok: false }],
+    ['a 503 that is not the daily limit', 503, '<html>'],
   ])('fails on %s', async (_name, status, body) => {
     expect(await sendContact(PAYLOAD, respond(status, body))).toEqual({ kind: 'failure' });
+  });
+
+  it('tells apart the rate limit of nginx (429, an HTML page)', async () => {
+    expect(await sendContact(PAYLOAD, respond(429, '<html>'))).toEqual({ kind: 'rate-limited' });
+  });
+
+  it('tells apart the daily limit of contact.php (503 busy)', async () => {
+    const fetcher = respond(503, { ok: false, error: 'busy' });
+    expect(await sendContact(PAYLOAD, fetcher)).toEqual({ kind: 'busy' });
   });
 
   it('fails when the network does', async () => {

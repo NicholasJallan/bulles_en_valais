@@ -536,6 +536,10 @@ export const en: Dictionary = {
       errorSummary: 'Please check:',
       errorDelivery: 'Sending failed. Please try again, or write to me directly:',
       sendByEmail: 'Send my message by email',
+      errorRateLimit:
+        'Too many messages in a short time. Try again in a minute, or write to me directly:',
+      errorBusy:
+        'The form has had a lot of messages today and is taking a break. Your message is ready, write to me directly:',
       sendByWhatsApp: 'Write on WhatsApp',
       fieldNames: {
         name: 'your name',

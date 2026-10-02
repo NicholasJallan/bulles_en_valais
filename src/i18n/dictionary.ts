@@ -336,6 +336,10 @@ export interface ContactFormText {
   readonly sendAnother: string;
   readonly errorSummary: string;
   readonly errorDelivery: string;
+  /** Too many messages from the same address in a minute (nginx, 429). */
+  readonly errorRateLimit: string;
+  /** The daily limit of e-mails is reached (contact.php, 503 busy). */
+  readonly errorBusy: string;
   readonly sendByEmail: string;
   readonly sendByWhatsApp: string;
   readonly fieldNames: {

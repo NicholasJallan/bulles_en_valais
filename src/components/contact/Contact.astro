@@ -10,7 +10,11 @@ import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
 import ContactForm from './ContactForm.astro';
 
-/** Back at the surface: the direct channels first, then the form. */
+/**
+ * Back at the surface (E14): under a Snell's window — the disc of sky seen from below the surface,
+ * soft light behind the title — the direct channels first, then the form. With motion, snell.ts
+ * opens the window as the section comes up, and its shimmer drifts with the scroll.
+ */
 interface Props {
   locale: Locale;
 }
@@ -38,6 +42,11 @@ const channels = [
 ---
 
 <Section id="contact" tone="surface" class="contact">
+  <div class="snell" aria-hidden="true" data-snell>
+    <div class="snell-disc" data-snell-disc>
+      <div class="snell-shimmer" data-snell-shimmer></div>
+    </div>
+  </div>
   <div class="wrap contact-inner">
     <SectionHeader
       id="contact-title"
@@ -84,6 +93,64 @@ const channels = [
 </Section>
 
 <style>
+  .contact {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  /* Snell's window: a disc of light above the title, brighter than the water around it. */
+  .snell {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -1;
+    --snell-size: min(150vw, 72rem);
+    display: grid;
+    justify-items: center;
+    pointer-events: none;
+    /* No hard edge where the section starts: the light fades in from the water above. */
+    mask-image: linear-gradient(transparent, var(--fg) var(--space-section));
+  }
+
+  @media (width >= 64rem) {
+    .snell {
+      justify-items: start;
+    }
+
+    .snell-disc {
+      margin-inline-start: calc(28% - var(--snell-size) / 2);
+    }
+  }
+
+  .snell-disc {
+    position: relative;
+    inline-size: var(--snell-size);
+    aspect-ratio: 1;
+    margin-block-start: calc(-0.42 * var(--snell-size));
+    border-radius: var(--radius-round);
+    /* Seen from below, the window is ringed by darker water (the light beyond 48.6° is
+       reflected back down). */
+    background: radial-gradient(
+      closest-side,
+      var(--c-surface-raised) 0 50%,
+      color-mix(in oklch, var(--c-surface-raised) 60%, transparent) 62%,
+      color-mix(in oklch, var(--c-lagoon) 70%, transparent) 74%,
+      color-mix(in oklch, var(--c-lagoon) 30%, transparent) 86%,
+      transparent
+    );
+    overflow: hidden;
+  }
+
+  /* The surface ripples in the window: the shimmer of the thermoclines, inside the disc only. */
+  .snell-shimmer {
+    position: absolute;
+    inset: -20%;
+    background-image: url('@/assets/textures/shimmer.svg');
+    background-size: 40rem 14rem;
+    opacity: 0.12;
+    mask-image: radial-gradient(closest-side, var(--fg) 30%, transparent 70%);
+  }
+
   .contact-inner {
     display: grid;
     gap: var(--space-2xl);
@@ -141,10 +208,29 @@ const channels = [
     overflow-wrap: anywhere;
   }
 
-  /* Hover lights the value like the lamp (colour only, nothing moves in the layout). */
+  .contact-channel :global(.contact-channel-icon) {
+    transition: transform var(--dur-fast) var(--ease-buoyant);
+  }
+
+  /* Hover lights the value like the lamp, and the icon rises towards the surface (transform
+     only: nothing moves in the layout). */
   @media (hover: hover) {
     .contact-channel:hover .contact-channel-value {
       color: var(--action-text);
+    }
+
+    .contact-channel:hover :global(.contact-channel-icon) {
+      transform: translateY(-3px) scale(1.12);
+    }
+  }
+
+  .contact-channel:focus-visible :global(.contact-channel-icon) {
+    transform: translateY(-3px) scale(1.12);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-channel :global(.contact-channel-icon) {
+      transition: none;
     }
   }
 

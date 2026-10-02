@@ -533,6 +533,10 @@ export const fr: Dictionary = {
       sendAnother: 'Envoyer un autre message',
       errorSummary: 'Merci de vérifier :',
       errorDelivery: "Erreur d'envoi. Merci de réessayer, ou de m'écrire directement :",
+      errorRateLimit:
+        "Trop d'envois en peu de temps. Réessayez dans une minute, ou écrivez-moi directement :",
+      errorBusy:
+        "Le formulaire a reçu beaucoup de messages aujourd'hui et fait une pause. Votre message est prêt, écrivez-moi directement :",
       sendByEmail: 'Envoyer mon message par e-mail',
       sendByWhatsApp: 'Écrire sur WhatsApp',
       fieldNames: {
