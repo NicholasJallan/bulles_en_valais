@@ -20,7 +20,8 @@ done
 [ -n "$choice" ] || die "$usage"
 link="$(link_for "$target")"
 
-releases="$(remote 'ls -1 "$1/releases" | grep -E "^[0-9]{8}-[0-9]{6}$" | sort' "$BASE")"
+releases="$(remote 'ls -1 "$1/releases" | grep -E "^[0-9]{8}-[0-9]{6}$" | sort || true' "$BASE")"
+[ -n "$releases" ] || die "no release on $REMOTE"
 in_use="$(linked_release "$link")"
 if [ "$choice" = --list ]; then
   printf '%s\n' "$releases" | sed "s/^$in_use\$/& <- $link/"
@@ -37,11 +38,11 @@ else
 fi
 [ "$wanted" != "$in_use" ] || die "$link already points to $wanted"
 
+step "Smoke test of releases/$wanted, before the switch"
+smoke_files "releases/$wanted"
+
 step "Switch $link: ${in_use:-nothing} -> $wanted"
 switch_link "$link" "$wanted"
-
-step "Smoke test"
-smoke_files "$link"
 if [ "$target" = production ]; then
   status="$(curl -sS -o /dev/null -w '%{http_code}' "$PRODUCTION_URL")" || die "curl $PRODUCTION_URL failed"
   echo "$PRODUCTION_URL answered $status"

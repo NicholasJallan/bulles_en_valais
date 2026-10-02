@@ -1,10 +1,12 @@
 // Serves dist/ on 127.0.0.1 with the security headers of ops/nginx/security-headers.conf (minus
 // what needs HTTPS), for the `csp` Playwright project: the site must run under its final CSP
-// without a single violation. Usage: node scripts/serve-with-csp.mjs --port 4341
+// without a single violation. Text is gzipped, as the final nginx block will (S13): the closest
+// local stand-in for production when measuring. Usage: node scripts/serve-with-csp.mjs --port 4341
 import { createReadStream, readFileSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import { createGzip } from 'node:zlib';
 import { localHeaders, parseAddHeaders } from './lib/nginx-headers.mjs';
 import { staticTarget } from './lib/static-path.mjs';
 
@@ -33,15 +35,29 @@ const TYPES = {
 const isDirectory = (path) => statSync(path, { throwIfNoEntry: false })?.isDirectory() ?? false;
 const isFile = (path) => statSync(path, { throwIfNoEntry: false })?.isFile() ?? false;
 
-function send(response, status, file) {
+const COMPRESSED = new Set([
+  '.html',
+  '.js',
+  '.css',
+  '.json',
+  '.webmanifest',
+  '.xml',
+  '.txt',
+  '.svg',
+]);
+
+function send(request, response, status, file) {
+  const gzip =
+    COMPRESSED.has(extname(file)) && /\bgzip\b/.test(request.headers['accept-encoding'] ?? '');
   response.writeHead(status, {
     ...Object.fromEntries(HEADERS),
     'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
     'Cache-Control': 'no-store',
+    Vary: 'Accept-Encoding',
+    ...(gzip ? { 'Content-Encoding': 'gzip' } : {}),
   });
-  createReadStream(file)
-    .on('error', () => response.destroy())
-    .pipe(response);
+  const body = createReadStream(file).on('error', () => response.destroy());
+  (gzip ? body.pipe(createGzip()) : body).pipe(response);
 }
 
 const { values } = parseArgs({ options: { port: { type: 'string', default: '4341' } } });
@@ -57,8 +73,8 @@ createServer((request, response) => {
   if ('redirect' in target) {
     response.writeHead(301, { ...Object.fromEntries(HEADERS), Location: target.redirect }).end();
   } else if ('file' in target && isFile(target.file)) {
-    send(response, 200, target.file);
+    send(request, response, 200, target.file);
   } else {
-    send(response, 404, resolve(ROOT, '404.html'));
+    send(request, response, 404, resolve(ROOT, '404.html'));
   }
 }).listen(Number(values.port), '127.0.0.1');

@@ -1,6 +1,6 @@
 # Shared by ops/deploy.sh and ops/rollback.sh (sourced, not run).
 # Layout on the Pi (plans/refonte-la-descente/02-architecture.md §16):
-#   /var/www/bullesenvalais/releases/<YYYYMMDD-HHMMSS>/   one build of dist/ each
+#   /var/www/bullesenvalais/releases/<YYYYMMDD-HHMMSS>/   one build of dist/ each (UTC, root:root)
 #   /var/www/bullesenvalais/current -> releases/…        served by the dive block (from S13)
 #   /var/www/bullesenvalais/staging -> releases/…        pre-production
 #   /var/www/bullesenvalais/shared/                       mail-config.php, state/ (contact quota)
@@ -61,9 +61,9 @@ switch_link() {
   ' "$BASE" "$link" "$release"
 }
 
-# Files every release must hold, and a PHP 7.4 syntax check of the endpoint.
+# Files every release must hold, and a PHP 7.4 syntax check of the endpoint. $1: a path under
+# the base (releases/<name>, or a link name).
 smoke_files() {
-  local link="$1"
   remote '
     dir="$1/$2"
     for file in index.html en/index.html 404.html robots.txt sitemap-index.xml api/contact.php; do
@@ -73,15 +73,15 @@ smoke_files() {
     sudo -u www-data test -r "$dir/index.html" || { echo "www-data cannot read the release" >&2; exit 1; }
     sudo -u www-data php7.4 -l "$dir/api/contact.php" >/dev/null
     echo "files ok, contact.php passes php7.4 -l"
-  ' "$BASE" "$link"
+  ' "$BASE" "$1"
 }
 
 # Production only: the site answers, and tells whether it already serves this release
 # (before the S13 switch, nginx still serves the old docroot).
 smoke_http() {
   local release_index="$1" status served
-  status="$(curl -sS -o /dev/null -w '%{http_code}' "$PRODUCTION_URL")" || die "curl $PRODUCTION_URL failed"
-  [ "$status" = '200' ] || die "$PRODUCTION_URL answered $status (rollback: ops/rollback.sh previous)"
+  status="$(curl -sS -o /dev/null -w '%{http_code}' "$PRODUCTION_URL")" || return 1
+  [ "$status" = '200' ] || { echo "$PRODUCTION_URL answered $status" >&2; return 1; }
   served="$(curl -sS --compressed "$PRODUCTION_URL")"
   if [ "$served" = "$(cat "$release_index")" ]; then
     echo "$PRODUCTION_URL serves this release"
