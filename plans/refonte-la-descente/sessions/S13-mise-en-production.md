@@ -23,7 +23,7 @@ La préproduction est validée. On bascule `dive.bullesenvalais.ch` sur la nouve
 ## Tâches
 
 1. **Sauvegardes** : copie datée de la configuration nginx ; vérifier que `/var/www/html/dive` (ancien site) est intact. Il sert de retour arrière pendant au moins 2 semaines.
-2. **Nettoyage avant build** : supprimer `src/pages/styleguide.astro` (et ses composants de démo) puis `legacy/` ; vérifier que `dist/` ne contient plus de `styleguide` ; tests verts ; commit `chore: remove styleguide and legacy site`.
+2. **Nettoyage avant build** : supprimer `src/pages/styleguide.astro` (et ses composants de démo), `scripts/preview-pi.mjs` avec `scripts/lib/preview-page.*` et le script `preview:pi` (ils visent l'ancien docroot, D42 ; une prévisualisation future passera par `ops/deploy.sh staging`), puis `legacy/` ; vérifier que `dist/` ne contient plus de `styleguide` ; tests verts ; commit `chore: remove styleguide and legacy site`.
 3. **Release de production** : `ops/deploy.sh production` → `releases/<horodatage>/` et symlink `current`. La release n'est pas encore servie : nginx pointe toujours vers l'ancien docroot.
 4. **nginx `dive`** (feu vert de Nicholas juste avant) :
    - `root /var/www/bullesenvalais/current;` ;

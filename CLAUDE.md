@@ -24,6 +24,7 @@ npm run test:e2e        # Playwright: builds, then tests the preview server (tes
 npm run test:visual     # Playwright screenshots (tests/visual, from S07: hero without WebGL)
 npm run test:a11y       # axe (tests/a11y, from S05)
 npm run format          # Prettier (format:check to verify)
+npm run preview:pi      # publishes dist/ on the Pi under /preview/ (dry run; -- --apply to send): see below
 npm run check:budgets   # gzip budgets of dist/: initial JS ≤ 90 KB per page, total JS ≤ 150 KB, CSS ≤ 30 KB
 npm run check:dist      # run by every build: no inline JavaScript nor resource of another origin, no hidden,
                         # secret or stray PHP file (api/contact.php only, and present)
@@ -115,20 +116,17 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Always bind to `127.0.0.1`: the server serves the whole working tree as plain text, including gitignored files, to anyone on the network otherwise. Binding is not enough against DNS rebinding (the server ignores the `Host` header), so keep no secrets in the working tree.
 
-### Preview on the Pi (styleguide, D31)
+### Preview on the Pi (D31, D42)
 
-When Nicholas reviews from a distance, the styleguide is published next to the live site, without touching it: only `_astro/`, `js/` and `styleguide/` of `dist/` go to the docroot (they do not exist in the old site), `noindex`, linked from nowhere. Dry run first; `-rlt` (not `-a`, which would give the docroot the owner and mode of the Mac); the scoped `--delete` only removes stale files of those three folders; `chown` only them:
+Nicholas reviews from his phone: every session that changes what he sees publishes the redesign next to the live site, without touching it, and gives him the URLs. `scripts/preview-pi.mjs` stages `_astro/`, `js/`, `styleguide/` and every page of `dist/` under `preview/` (links kept inside `/preview/`, `noindex, nofollow`, Google tag disabled in the staged `consent-default.js`), then rsyncs only those four folders (`-rlt`, scoped `--delete`) and `chown`s them. Allowed at every session for this command only (D42):
 
 ```bash
 npm run build
-rsync -rltv -n --delete --omit-dir-times --rsync-path="sudo rsync" \
-  --include='/_astro/***' --include='/js/***' --include='/styleguide/***' --exclude='*' \
-  dist/ pi@bullesenvalais.ch:/var/www/html/dive/
-# then the same command without -n, and:
-ssh pi@bullesenvalais.ch "sudo chown -R www-data:www-data /var/www/html/dive/_astro /var/www/html/dive/js /var/www/html/dive/styleguide"
+npm run preview:pi              # dry run: check that only _astro/, js/, styleguide/, preview/ appear
+npm run preview:pi -- --apply   # sends, then chown
 ```
 
-URL: `https://dive.bullesenvalais.ch/styleguide/`. Never send `index.html`, `en/` or `api/` this way: they would replace the live site.
+URLs: `https://dive.bullesenvalais.ch/preview/`, `/preview/en/`, `/styleguide/`. It runs under the CSP of the old site, and its form posts to the live `contact.php` (a real e-mail). Never send `index.html`, `en/` or `api/` of `dist/` to the docroot: they would replace the live site. Retired in S13.
 
 ### Deploy to Raspberry Pi
 

@@ -27,7 +27,7 @@ Le site est complet sur la branche. Il faut préparer le serveur pour des **dép
 3. **Scripts** : `ops/deploy.sh [staging|production] [--dry-run]` et `ops/rollback.sh [previous|<horodatage>]`, conformes à `02-architecture.md` §16 (nouveau dossier par release, `chown`, symlink atomique, requête de fumée, 5 releases conservées). `shellcheck` si disponible.
 4. **Préproduction** (I-11) :
    - **option A** (recommandée) : `next.bullesenvalais.ch` → enregistrement DNS (par Nicholas), server block copié de `dive` avec `root /var/www/bullesenvalais/staging`, `auth_basic` (fichier créé avec `openssl passwd -apr1`), `X-Robots-Tag: noindex`, en-têtes de `ops/nginx/security-headers.conf`, PHP avec `$realpath_root`, `try_files … =404`, `error_page 404` ; certificat via `sudo certbot --nginx -d next.bullesenvalais.ch` ; `sudo nginx -t && sudo systemctl reload nginx` ;
-   - **option B** : prévisualisation sur le réseau local (`npm run preview -- --host`) et tests sur appareils du même Wi-Fi.
+   - **option B** : la prévisualisation sur le Pi (`npm run preview:pi -- --apply`, `https://dive.bullesenvalais.ch/preview/`, D42), déjà en place depuis S09 : sans mot de passe ni en-têtes finaux (elle tourne sous la CSP de l'ancien site), sans `contact.php` à jour ni 404 propre ; elle suffit pour la recette visuelle et sur appareils, pas pour celle du serveur.
    Déployer : `ops/deploy.sh staging`.
 
    > 🔁 Point de sortie possible.

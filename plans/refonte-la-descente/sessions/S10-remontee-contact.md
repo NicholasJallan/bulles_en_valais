@@ -58,6 +58,8 @@ php tests/php/contact_test.php && bash tests/php/run_integration.sh
 npm run check:budgets
 ```
 
+**Prévisualisation** (D42) : `npm run preview:pi`, puis `npm run preview:pi -- --apply` ; à juger sur `https://dive.bullesenvalais.ch/preview/` et `/preview/en/`. Attention : la page publiée poste son formulaire vers le `contact.php` **en ligne** (version S00), qui envoie un vrai e-mail ; tant que le `contact.php` de S10 n'est pas déployé (S13), un champ ou une règle ajoutée en S10 peut y être refusée : le dire à Nicholas avant qu'il teste l'envoi.
+
 ## Critères de sortie
 
 - Remontée complète et cohérente jusqu'à la surface ; formulaire robuste et accessible ; bons cadeaux fonctionnels de bout en bout (jusqu'au formulaire).
