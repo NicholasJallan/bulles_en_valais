@@ -41,7 +41,7 @@ const offers = GIFT_OFFERS.map((offer) => {
     <div class="gifts-details">
       <div>
         <h3 class="gifts-subtitle">{t.offersTitle}</h3>
-        <ul class="bare-list gifts-offers">
+        <ul class="bare-list gifts-offers" data-reveal="stagger">
           {offers.map((offer) => (
             <li>
               <h4>{offer.title}</h4>

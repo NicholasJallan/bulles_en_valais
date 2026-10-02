@@ -9,17 +9,35 @@ const CONTROLLERS: ControllerRegistry = {
   'contact-form': () => import('@/components/contact/contact-form.ts'),
   whatsapp: () => import('@/components/whatsapp/whatsapp.ts'),
   'calm-mode': () => import('@/components/footer/calm-mode.ts'),
+  hud: () => import('@/components/hud/hud.ts'),
   // Styleguide only (S02): removed with it in S13.
   'styleguide-switch': () => import('@/components/styleguide/switch.ts'),
   'styleguide-motion': () => import('@/components/styleguide/motion.ts'),
 };
 
+const root = document.documentElement;
+// The motion module downloads alongside the controllers, and starts once they are ready: tabs
+// and panels must have their final height before ScrollTrigger measures the page.
+const motion = root.classList.contains('motion-ok') ? import('./motion/index.ts') : undefined;
+
+async function startMotion(): Promise<void> {
+  if (motion === undefined) return;
+  try {
+    (await motion).startMotion();
+  } catch (error) {
+    console.error('Motion failed to start', error);
+    // Show everything the motion module would have revealed.
+    root.classList.remove('motion-ok', 'motion-ready');
+  }
+}
+
 void mountControllers(document, CONTROLLERS, (error, name) => {
   console.error(`Controller "${name}" failed to start`, error);
   // A controller that does not start must not leave a half-enhanced page (tabs hiding their
   // panels, a disabled submit): fall back to the page as served without JavaScript.
-  document.documentElement.classList.remove('js');
-}).then(() => {
-  // Lets the end-to-end tests (and later the motion module) wait for the controllers.
-  document.documentElement.dataset.controllers = 'ready';
+  root.classList.remove('js');
+}).then(async () => {
+  // Lets the end-to-end tests wait for the controllers.
+  root.dataset.controllers = 'ready';
+  await startMotion();
 });

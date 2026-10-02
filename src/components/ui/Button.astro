@@ -80,8 +80,12 @@ const classes = ['button', `button-${variant}`, className];
     text-decoration: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    /* Only composited properties move: this press, and the opacity of the glow below. */
-    transition: transform var(--dur-instant) var(--ease-surface);
+    /* Only composited properties move: the press, the magnetic pull (E17, motion module) and
+       the opacity of the glow below. */
+    translate: var(--magnet-x, 0) var(--magnet-y, 0);
+    transition:
+      transform var(--dur-instant) var(--ease-surface),
+      translate var(--dur-fast) var(--ease-surface);
   }
 
   /* The glow lives on its own layer: lighting up only animates its opacity. */

@@ -80,6 +80,7 @@
   --grid-columns: 12;
   --grid-gap: clamp(1rem, 0.7143rem + 1.4286vw, 2rem);
   --tap-min: 2.75rem;
+  --hud-inline-size: 6.5rem;
 
   /* Radii: sharp for controls, soft for cards and images, round for bubbles and pills. */
   --radius-sharp: 2px;

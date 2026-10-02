@@ -45,6 +45,7 @@ export const en: Dictionary = {
     diveProfile: 'Dive profile',
     openProfile: 'Show the dive profile',
     closeProfile: 'Close the dive profile',
+    entry: 'Water entry',
     note: 'Imaginary depth: it follows your reading of the page.',
   },
   hero: {

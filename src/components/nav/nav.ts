@@ -1,21 +1,30 @@
 // Mobile menu: a modal <dialog> (the browser traps the focus and closes it on Escape). Closing it
 // gives the focus back to the menu button, unless a link of the page was followed: the focus then
 // moves to the heading of the section reached, so that the keyboard carries on from there.
+// The links of the section being read are marked (aria-current), from the HUD's section events.
+import { SECTION_EVENT, type SectionDetail } from '@/components/hud/events.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
-
-function focusSection(id: string): void {
-  const section = document.getElementById(id);
-  const heading = section?.querySelector<HTMLElement>('h1, h2') ?? section;
-  if (heading === null || heading === undefined) return;
-  if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
-  heading.focus({ preventScroll: true });
-}
+import { focusSection } from '@/scripts/focus-section.ts';
 
 function goToAnchor(hash: string): void {
-  const id = decodeURIComponent(hash.slice(1));
-  if (window.location.hash === hash) document.getElementById(id)?.scrollIntoView();
+  const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+  if (window.location.hash === hash) target?.scrollIntoView();
   else window.location.hash = hash;
-  focusSection(id);
+  if (target !== null) focusSection(target);
+}
+
+function markCurrentSection(element: HTMLElement): Cleanup {
+  const links = Array.from(element.querySelectorAll<HTMLAnchorElement>('a[href*="#"]'));
+  const onSection = (event: Event): void => {
+    const { id } = (event as CustomEvent<SectionDetail>).detail;
+    for (const link of links) {
+      if (link.hash === `#${id}` && !link.classList.contains('brand')) {
+        link.setAttribute('aria-current', 'true');
+      } else link.removeAttribute('aria-current');
+    }
+  };
+  document.addEventListener(SECTION_EVENT, onSection);
+  return () => document.removeEventListener(SECTION_EVENT, onSection);
 }
 
 /** Hash of a link to a section of the current page, or `undefined` for any other link. */
@@ -56,7 +65,9 @@ export function init(element: HTMLElement): Cleanup {
   opener.addEventListener('click', open);
   dialog.addEventListener('click', onClick);
   dialog.addEventListener('close', onClose);
+  const unmark = markCurrentSection(element);
   return () => {
+    unmark();
     opener.removeEventListener('click', open);
     dialog.removeEventListener('click', onClick);
     dialog.removeEventListener('close', onClose);

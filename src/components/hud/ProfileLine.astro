@@ -1,0 +1,57 @@
+---
+import { HUD_PROFILE } from '@/data/sections.ts';
+import { PROFILE_BOX, PROFILE_GEOMETRY } from './profile-geometry.ts';
+
+/** The U of the dive, a dot per waypoint that has a link, and the active dot moved by hud.ts. */
+interface Props {
+  class?: string;
+  /** Anchors that get a waypoint dot (the sections listed in the dive profile). */
+  marked?: readonly string[];
+}
+
+const { class: className, marked = [] } = Astro.props;
+const { waypoints, path } = PROFILE_GEOMETRY;
+const dots = waypoints.filter((_, index) => marked.includes(HUD_PROFILE[index]?.id ?? ''));
+---
+
+<svg
+  class:list={['profile-line', className]}
+  viewBox={`0 0 ${PROFILE_BOX.width} ${PROFILE_BOX.height}`}
+  aria-hidden="true"
+  focusable="false"
+>
+  <path class="profile-path" d={path} />
+  {dots.map(({ x, y }) => (
+    <circle class="profile-waypoint" cx={x} cy={y} r="1.75" />
+  ))}
+  <circle
+    class="profile-dot"
+    r="3.5"
+    data-hud-dot
+    transform={`translate(${waypoints[0]?.x ?? 0} ${waypoints[0]?.y ?? 0})`}
+  />
+</svg>
+
+<style>
+  .profile-line {
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+    fill: none;
+  }
+
+  .profile-path {
+    stroke: var(--fg-soft);
+    stroke-width: 1.25;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .profile-waypoint {
+    fill: var(--fg-soft);
+  }
+
+  .profile-dot {
+    fill: var(--action);
+  }
+</style>

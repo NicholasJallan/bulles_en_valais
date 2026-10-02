@@ -7,6 +7,7 @@ import Faq from '@/components/faq/Faq.astro';
 import Footer from '@/components/footer/Footer.astro';
 import Gifts from '@/components/gifts/Gifts.astro';
 import Hero from '@/components/hero/Hero.astro';
+import DepthGauge from '@/components/hud/DepthGauge.astro';
 import Instructor from '@/components/instructor/Instructor.astro';
 import Interlude from '@/components/interlude/Interlude.astro';
 import Manifesto from '@/components/manifesto/Manifesto.astro';
@@ -15,6 +16,8 @@ import Places from '@/components/places/Places.astro';
 import Prepare from '@/components/prepare/Prepare.astro';
 import Specialties from '@/components/specialties/Specialties.astro';
 import Testimonials from '@/components/testimonials/Testimonials.astro';
+import Thermocline from '@/components/water/Thermocline.astro';
+import WaterColumn from '@/components/water/WaterColumn.astro';
 import WhatsAppDialog from '@/components/whatsapp/WhatsAppDialog.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getDictionary } from '@/i18n/index.ts';
@@ -30,24 +33,32 @@ const t = getDictionary(locale);
 ---
 
 <BaseLayout locale={locale} route="home" title={t.meta.title} description={t.meta.description}>
+  <WaterColumn />
   <Nav locale={locale} />
   <main id="content">
     <Hero locale={locale} />
     <Manifesto locale={locale} />
     <Instructor locale={locale} />
+    <Thermocline from="surface" to="lagoon" />
     <Courses locale={locale} />
     <Interlude locale={locale} variant="descent" />
     <DepthLadder locale={locale} />
+    <Thermocline from="deep" to="abyss" />
     <CompareTable locale={locale} />
     <Interlude locale={locale} variant="light" />
     <Specialties locale={locale} />
+    <Thermocline from="abyss" to="deep" />
     <Places locale={locale} />
+    <Thermocline from="deep" to="emerald" />
     <Prepare locale={locale} />
+    <Thermocline from="emerald" to="lagoon" />
     <Gifts locale={locale} />
+    <Thermocline from="lagoon" to="surface" />
     <Testimonials locale={locale} />
     <Faq locale={locale} />
     <Contact locale={locale} />
   </main>
   <Footer locale={locale} />
+  <DepthGauge locale={locale} />
   <WhatsAppDialog locale={locale} />
 </BaseLayout>

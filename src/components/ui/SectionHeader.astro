@@ -20,10 +20,14 @@ const Heading = level === 2 ? 'h2' : 'h3';
 
 <header class:list={['section-header', className]}>
   <Eyebrow depth={depth} label={eyebrow} />
-  <Heading id={id} class="section-title">
+  <Heading id={id} class="section-title" data-reveal="lines">
     <EmphasisText value={title} />
   </Heading>
-  {lead && <p class="lead">{lead}</p>}
+  {lead && (
+    <p class="lead" data-reveal="fade">
+      {lead}
+    </p>
+  )}
 </header>
 
 <style>

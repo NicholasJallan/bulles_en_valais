@@ -40,6 +40,7 @@ const credentials = CREDENTIALS.map((credential) => ({
         sizes="(width >= 64rem) 36vw, (width >= 48rem) 70vw, 100vw"
         alt={t.portraitAlt}
         class="instructor-portrait"
+        reveal
       />
     </div>
     <div class="instructor-body">
@@ -47,7 +48,7 @@ const credentials = CREDENTIALS.map((credential) => ({
         <p>{paragraph}</p>
       ))}
       <h3 class="instructor-credentials-title">{t.credentialsTitle}</h3>
-      <dl class="credentials">
+      <dl class="credentials" data-reveal="stagger">
         {credentials.map((credential) => (
           <div class="credential">
             <dt>{credential.issuer}</dt>

@@ -102,6 +102,8 @@ export interface Dictionary {
     readonly diveProfile: string;
     readonly openProfile: string;
     readonly closeProfile: string;
+    /** First waypoint of the dive profile: the hero, at the surface. */
+    readonly entry: string;
     /** The depths are narrative: they follow the reading, not a real scale. */
     readonly note: string;
   };

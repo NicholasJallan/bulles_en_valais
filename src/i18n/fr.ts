@@ -46,6 +46,7 @@ export const fr: Dictionary = {
     diveProfile: 'Profil de plongée',
     openProfile: 'Afficher le profil de plongée',
     closeProfile: 'Fermer le profil de plongée',
+    entry: "Mise à l'eau",
     note: 'Profondeur imaginaire : elle suit votre lecture de la page.',
   },
   hero: {

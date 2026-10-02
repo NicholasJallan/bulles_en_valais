@@ -14,6 +14,14 @@
   margin-inline: auto;
 }
 
+/* Desktop: the depth gauge (E3) holds the right edge; the page keeps a lane for it on both
+   sides. Set with the first paint (html.js comes from boot.js): nothing shifts later. */
+@media (width >= 64rem) {
+  html.js:has(.hud) .wrap {
+    inline-size: min(100% - 2 * (var(--hud-inline-size) + 2 * var(--space-s)), var(--page-max));
+  }
+}
+
 /* Vertical rhythm of a section: sections breathe more than their content. */
 .section {
   padding-block: var(--space-section);

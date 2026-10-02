@@ -21,9 +21,20 @@ interface Props {
   class?: string;
   /** Class of the <img>. */
   imgClass?: string;
+  /** « Water line » reveal (E6) when it comes into view, with the motion module. */
+  reveal?: boolean;
 }
 
-const { sources, fallback, sizes, alt, loading = 'lazy', class: className, imgClass } = Astro.props;
+const {
+  sources,
+  fallback,
+  sizes,
+  alt,
+  loading = 'lazy',
+  class: className,
+  imgClass,
+  reveal = false,
+} = Astro.props;
 const FORMATS = ['avif', 'webp'] as const;
 
 const sourceSets = await Promise.all(
@@ -37,7 +48,7 @@ const sourceSets = await Promise.all(
 const img = await getImage({ src: fallback.src, widths: fallback.widths, format: 'jpg' });
 ---
 
-<picture class={className}>
+<picture class={className} data-reveal={reveal ? 'image' : undefined}>
   {sourceSets.map((source) => (
     <source media={source.media} type={source.type} srcset={source.srcset} sizes={sizes} />
   ))}

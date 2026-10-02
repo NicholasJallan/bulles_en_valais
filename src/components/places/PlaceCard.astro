@@ -28,6 +28,7 @@ if (photo === undefined) throw new Error(`Missing photo ${place.photo.file}`);
     widths={[400, 600, 800, 1200]}
     sizes="(width >= 64rem) 30vw, (width >= 40rem) 60vw, 100vw"
     class="place-photo"
+    pictureAttributes={{ 'data-reveal': 'image' }}
   />
   <div class="place-text">
     <h3 class="place-name">{localize(place.name, locale)}</h3>

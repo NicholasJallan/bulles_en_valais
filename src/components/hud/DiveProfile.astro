@@ -1,0 +1,159 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { markerDepth, type SectionId } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { formatDepthMarker } from '@/lib/format.ts';
+import ProfileLine from './ProfileLine.astro';
+
+/**
+ * The dive profile (E3): opened from the gauge, a popover with the U of the dive and real links
+ * to every section that has a depth marker, Bons cadeaux included (D28).
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const stops: ReadonlyArray<{ id: SectionId; label: string }> = [
+  { id: 'top', label: t.hud.entry },
+  { id: 'manifesto', label: t.manifesto.eyebrow },
+  { id: 'about', label: t.instructor.eyebrow },
+  { id: 'agencies', label: t.courses.eyebrow },
+  { id: 'depth', label: t.depthLadder.eyebrow },
+  { id: 'compare', label: t.compare.eyebrow },
+  { id: 'specialties', label: t.specialties.eyebrow },
+  { id: 'places', label: t.places.eyebrow },
+  { id: 'prepare', label: t.prepare.eyebrow },
+  { id: 'gifts', label: t.gifts.eyebrow },
+  { id: 'testimonials', label: t.testimonials.eyebrow },
+  { id: 'faq', label: t.faq.eyebrow },
+  { id: 'contact', label: t.contact.eyebrow },
+];
+---
+
+<div id="dive-profile" class="dive-profile" popover data-tone="deep" data-lenis-prevent>
+  <nav class="dive-profile-inner" aria-labelledby="dive-profile-title">
+    <header class="dive-profile-head">
+      <p id="dive-profile-title" class="dive-profile-title">
+        {t.hud.diveProfile}
+      </p>
+      <button
+        class="dive-profile-close"
+        type="button"
+        popovertarget="dive-profile"
+        popovertargetaction="hide"
+      >
+        <Icon name="close" />
+        <span class="visually-hidden">{t.hud.closeProfile}</span>
+      </button>
+    </header>
+    <ProfileLine class="dive-profile-line" marked={stops.map((stop) => stop.id)} />
+    <ol class="bare-list dive-profile-stops">
+      {stops.map((stop) => (
+        <li>
+          <a href={`#${stop.id}`} data-profile-link>
+            <span class="stop-depth">{formatDepthMarker(markerDepth(stop.id))}</span>
+            <span>{stop.label}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <p class="fine dive-profile-note">{t.hud.note}</p>
+  </nav>
+</div>
+
+<style>
+  .dive-profile {
+    position: fixed;
+    inset: auto 0 0 0;
+    inline-size: 100%;
+    max-inline-size: none;
+    max-block-size: 85dvh;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft) var(--radius-soft) 0 0;
+    box-shadow: var(--shadow-depth);
+  }
+
+  @media (width >= 64rem) {
+    .dive-profile {
+      inset: 50% calc(var(--hud-inline-size) + 2 * var(--space-s)) auto auto;
+      inline-size: 21rem;
+      max-block-size: 90dvh;
+      border-radius: var(--radius-soft);
+      translate: 0 -50%;
+    }
+  }
+
+  .dive-profile-inner {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m) var(--space-m) max(var(--space-m), env(safe-area-inset-bottom));
+  }
+
+  .dive-profile-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
+  .dive-profile-title {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+  }
+
+  .dive-profile-close {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-round);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .dive-profile-stops {
+    display: grid;
+  }
+
+  .dive-profile-stops a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+    min-block-size: var(--tap-min);
+    padding-block: var(--space-3xs);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .dive-profile-stops a:hover {
+      color: var(--action-text);
+    }
+  }
+
+  .dive-profile-stops a[aria-current='true'] {
+    color: var(--action-text);
+  }
+
+  .stop-depth {
+    min-inline-size: 3.2em;
+    font-family: var(--font-hud);
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-soft);
+  }
+
+  .dive-profile-note {
+    color: var(--fg-soft);
+  }
+</style>

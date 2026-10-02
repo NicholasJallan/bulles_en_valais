@@ -1,0 +1,211 @@
+---
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { formatDecimal, formatDuration, formatTemperature } from '@/lib/format.ts';
+import { temperatureAt } from '@/lib/depth/temperature.ts';
+import DiveProfile from './DiveProfile.astro';
+import ProfileLine from './ProfileLine.astro';
+
+/**
+ * The depth gauge (E3): right edge on desktop, a pill at the bottom left on phones. The figures
+ * change all the time, so they are hidden from screen readers; the button opens the dive profile.
+ * JavaScript only: without it the figures would never move.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).hud;
+---
+
+<aside
+  class="hud js-only"
+  aria-label={t.gauge}
+  data-controller="hud"
+  data-hud-gauge
+  data-mode="normal"
+  data-locale={locale}
+  data-label-safety-stop={t.safetyStop}
+  data-label-slow-ascent={t.slowAscent}
+  data-tone="deep"
+>
+  <button class="hud-gauge" type="button" popovertarget="dive-profile">
+    <span class="visually-hidden">{t.openProfile}</span>
+    <span class="hud-readout" aria-hidden="true">
+      <span class="hud-label hud-wide">{t.depth}</span>
+      <span class="hud-depth">
+        <span class="hud-digits" data-hud-depth>
+          {formatDecimal(0, locale)}
+        </span>
+        <span class="hud-unit">m</span>
+      </span>
+      <span class="hud-sep"></span>
+      <span class="hud-row">
+        <span class="hud-label hud-wide">{t.temperature}</span>
+        <span data-hud-temperature>{formatTemperature(temperatureAt(0), locale)}</span>
+      </span>
+      <span class="hud-row hud-wide">
+        <span class="hud-label">{t.diveTime}</span>
+        <span data-hud-time>{formatDuration(0)}</span>
+      </span>
+      <span class="hud-alarm" data-hud-alarm hidden>
+        <span data-hud-alarm-text></span>
+      </span>
+      <span class="hud-profile hud-wide">
+        <ProfileLine />
+      </span>
+    </span>
+  </button>
+</aside>
+<DiveProfile locale={locale} />
+
+<style>
+  .hud {
+    position: fixed;
+    inset-block-end: max(var(--space-s), env(safe-area-inset-bottom));
+    inset-inline-start: max(var(--space-s), env(safe-area-inset-left));
+    z-index: var(--z-hud);
+    background: none;
+    color: var(--fg);
+    view-transition-name: hud;
+    transition:
+      opacity var(--dur-base) var(--ease-surface),
+      visibility 0s linear;
+  }
+
+  .hud[data-mode='hidden'] {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-base) var(--ease-surface),
+      visibility 0s linear var(--dur-base);
+  }
+
+  .hud-gauge {
+    display: block;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-round);
+    background-color: color-mix(in oklch, var(--bg-panel) 90%, transparent);
+    box-shadow: var(--shadow-drift);
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .hud-readout {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    min-block-size: var(--tap-min);
+    padding: 0.4em 1em;
+    font-family: var(--font-hud);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .hud-depth {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2em;
+    font-weight: 600;
+  }
+
+  .hud-unit,
+  .hud-label {
+    color: var(--fg-soft);
+  }
+
+  .hud-label {
+    font-family: var(--font-sans);
+    font-size: var(--step--2);
+  }
+
+  .hud-sep {
+    inline-size: 1px;
+    block-size: 1em;
+    background-color: var(--line);
+  }
+
+  .hud-wide {
+    display: none;
+  }
+
+  .hud-alarm {
+    padding: 0.15em 0.5em;
+    border: 1px solid var(--alert);
+    border-radius: var(--radius-sharp);
+    color: var(--alert);
+    font-weight: 600;
+  }
+
+  .hud-alarm[hidden] {
+    display: none;
+  }
+
+  /* Desktop: a slim dive computer on the right edge, its profile line under the figures. */
+  @media (width >= 64rem) {
+    .hud {
+      inset-block: 50% auto;
+      inset-inline: auto max(var(--space-s), env(safe-area-inset-right));
+      translate: 0 -50%;
+    }
+
+    .hud-gauge {
+      inline-size: var(--hud-inline-size);
+      border-radius: var(--radius-soft);
+    }
+
+    .hud-readout {
+      display: grid;
+      gap: var(--space-3xs);
+      padding: var(--space-xs);
+      white-space: normal;
+    }
+
+    .hud-wide {
+      display: revert;
+    }
+
+    .hud-row {
+      display: grid;
+    }
+
+    .hud-digits {
+      font-size: var(--step-2);
+      font-weight: 500;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+    }
+
+    .hud-sep {
+      inline-size: 100%;
+      block-size: 1px;
+    }
+
+    .hud-profile {
+      display: block;
+      margin-block-start: var(--space-3xs);
+    }
+  }
+
+  @media (hover: hover) {
+    .hud-gauge:hover {
+      border-color: var(--action);
+    }
+  }
+
+  .hud[data-alarm='ascent'] .hud-alarm {
+    animation: hud-blink var(--dur-base) var(--ease-drift) 2;
+  }
+
+  @keyframes hud-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
