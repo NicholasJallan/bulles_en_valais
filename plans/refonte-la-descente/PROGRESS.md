@@ -71,6 +71,7 @@
 | 2026-10-02 | D37 | Sur ordinateur, la grille (`.wrap`) garde un couloir de chaque côté pour le HUD (`--hud-inline-size`) : le profondimètre ne recouvre jamais le contenu | S06 (constat sur les captures) |
 | 2026-10-02 | D38 | Risques acceptés de la CSP finale (revue S11) : `www.google.com` en `script-src` (exigé par le guide Google pour Ads) et jokers `*.google.*` en `img-src` / `connect-src` ; à resserrer en S13 d'après les requêtes réellement vues en production | S11 (revue de sécurité) |
 | 2026-10-02 | D39 | I-07 : Consent Mode **avancé** confirmé (`MODE = 'advanced'` dans `consent-default.js`, phrase sur les signaux sans cookie gardée dans Confidentialité) ; le MEDIUM de la revue S11 est donc un choix assumé | Nicholas (après S11) |
+| 2026-10-02 | D40 | I-06 : identifiants `AW-10798308119` et `G-QG5ZCVY1Z7` confirmés ; **aucune campagne payante**, simple suivi de l'activité ; GA4 est déjà une destination de la balise (lu dans le `gtag.js` public), donc `GA4_ID` reste `null` ; conversions Ads, événements clés GA4 et resserrement de la CSP sortis du chemin critique vers le plan dédié `plans/mesure-google/`, à lancer après S13 | Nicholas (après S11) |
 
 ## Mutations du plan
 
@@ -129,6 +130,7 @@
 | 2026-10-02 | S11 | reporter | `report-uri` et `csp-report.php` reportés en S13 (brief S13 mis à jour) | optionnel ; nécessite une `location` nginx et une extension de `check:dist` |
 | 2026-10-02 | S11 | ajouter | `consent-default.js` relit `cc_cookie` ; projet Playwright `csp` sur `serve-with-csp.mjs` (2ᵉ `webServer`, port `PW_PORT + 10`) ; alternates du sitemap par `serialize` depuis `routes.ts` (`localePath` déplacé dans `routes.ts`) ; `02-architecture` §12, §13 et §15 mis à jour | revenir sur la page sans attendre la librairie ; tester sous la CSP ; pages légales sans alternates |
 | 2026-10-02 | S11 | modifier | Revue de sécurité faite à la fusion (Sonnet, une passe, D30) : l'agent du worktree ne pouvait pas lancer de sous-agent | parallélisation |
+| 2026-10-02 | S11 → hors refonte | extraire | Paramétrage Google (GA4, conversions Ads, CSP resserrée) déplacé dans `plans/mesure-google/README.md` (phases A à D, après S13) ; plus de prérequis I-06 pour S12 et S13 | D40 |
 
 ## Mesures
 

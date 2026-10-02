@@ -67,3 +67,5 @@ curl -s https://dive.bullesenvalais.ch/robots.txt | head -3
 ## 🔁 Fin du plan
 
 Consigner dans `PROGRESS.md` le bilan (mesures avant/après, écarts, idées pour la suite : allemand, vidéo, journal de plongées).
+
+Suite proposée à Nicholas une fois le site en ligne : **`plans/mesure-google/README.md`**, phase A (GA4 reçoit des données, tableau des cookies relevé en production), puis B à D quand il le décide (D40).
