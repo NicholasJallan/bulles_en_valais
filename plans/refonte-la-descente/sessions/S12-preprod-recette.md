@@ -30,6 +30,8 @@ Le site est complet sur la branche. Il faut préparer le serveur pour des **dép
    - **option B** : la prévisualisation sur le Pi (`npm run preview:pi -- --apply`, `https://dive.bullesenvalais.ch/preview/`, D42), déjà en place depuis S09 : sans mot de passe ni en-têtes finaux (elle tourne sous la CSP de l'ancien site), sans `contact.php` à jour ni 404 propre ; elle suffit pour la recette visuelle et sur appareils, pas pour celle du serveur.
    Déployer : `ops/deploy.sh staging`.
 
+   > 02.10.2026 : **option B retenue** par Nicholas (voir `PROGRESS.md`, Mutations) ; `staging` déployé sur le Pi, servi par aucun bloc nginx ; recette serveur en S13.
+
    > 🔁 Point de sortie possible.
 5. **Recette automatique** :
    - `npm test`, `npm run coverage` (≥ 80 %), tests PHP (unitaires et intégration) ;
