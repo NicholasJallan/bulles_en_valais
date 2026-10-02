@@ -1,0 +1,178 @@
+// The testimonials in motion (E12, D45): on every screen, the stage is pinned and the vertical
+// scroll slides the header, the quotes and the invitation by (pinned-track.ts, as in Places). The
+// previous and next buttons scroll the page to the quote before or after, a bar shows the progress,
+// and the large quote marks drift a little against the rail. A review taller than the window is cut
+// short, with a button that opens it whole in a dialog (its full text stays in the page for screen
+// readers). A screen too short for any quote (a phone held sideways) keeps the native rail.
+import type { Cleanup } from '@/lib/controllers.ts';
+import { stepIndex } from '@/lib/motion/track.ts';
+import { gsap } from '@/scripts/motion/gsap.ts';
+import { pinTrack, type PinnedTrack, type TrackParts } from '@/scripts/motion/pinned-track.ts';
+import { takeOverRail, type Direction } from './rail.ts';
+
+/** Drift of the quote marks across the window, in px each way. */
+const MARK_DRIFT_PX = 24;
+/** Progress within which an end of the rail counts as reached. */
+const EDGE = 0.005;
+/** Below this height of window the rail is not pinned. */
+const MIN_ROOM_PX = 260;
+/** A review cut short keeps at least this much of its text. */
+const MIN_QUOTE_PX = 96;
+
+function findParts(): TrackParts | undefined {
+  const section = document.getElementById('testimonials');
+  const stage = section?.querySelector<HTMLElement>('[data-rail-stage]');
+  const window_ = section?.querySelector<HTMLElement>('[data-rail-window]');
+  const track = section?.querySelector<HTMLElement>('[data-rail-track]');
+  if (!section || !stage || !window_ || !track) return undefined;
+  const panels = Array.from(section.querySelectorAll<HTMLElement>('[data-rail-panel]'));
+  return { section, stage, window: window_, track, panels };
+}
+
+/** Laid out pinned, is the window tall enough for a quote? */
+function hasRoom(parts: TrackParts): boolean {
+  parts.section.dataset.pinned = '';
+  const room = parts.window.clientHeight;
+  delete parts.section.dataset.pinned;
+  return room >= MIN_ROOM_PX;
+}
+
+interface Review {
+  readonly card: HTMLElement;
+  readonly quote: HTMLElement;
+  readonly more: HTMLButtonElement;
+}
+
+function findReviews(parts: TrackParts): Review[] {
+  return parts.panels.flatMap((card) => {
+    const quote = card.querySelector<HTMLElement>('blockquote');
+    const more = card.querySelector<HTMLButtonElement>('[data-review-open]');
+    return quote && more ? [{ card, quote, more }] : [];
+  });
+}
+
+function unclamp({ card, quote, more }: Review): void {
+  delete card.dataset.clamped;
+  quote.style.removeProperty('max-block-size');
+  more.hidden = true;
+}
+
+/** Cuts short the reviews taller than the window (measured pinned, on every refresh). */
+function clampReviews(parts: TrackParts, reviews: readonly Review[]): void {
+  const rail = parts.track.querySelector<HTMLElement>('[data-rail]');
+  const inset = rail === null ? 0 : Number.parseFloat(getComputedStyle(rail).paddingBlockStart);
+  const room = parts.window.clientHeight - (inset || 0);
+  for (const review of reviews) {
+    unclamp(review);
+    if (review.card.offsetHeight <= room) continue;
+    review.card.dataset.clamped = '';
+    review.more.hidden = false;
+    const excess = review.card.offsetHeight - room;
+    const height = Math.max(MIN_QUOTE_PX, review.quote.offsetHeight - excess);
+    review.quote.style.maxBlockSize = `${height}px`;
+  }
+}
+
+/** « Read the full review »: the whole review in a modal dialog; the focus comes back after. */
+function openReviews(section: HTMLElement): Cleanup {
+  const dialog = section.querySelector<HTMLDialogElement>('[data-review-dialog]');
+  const title = dialog?.querySelector<HTMLElement>('[data-review-title]');
+  const body = dialog?.querySelector<HTMLElement>('[data-review-body]');
+  if (!dialog || !title || !body) return () => undefined;
+  let opener: HTMLElement | null = null;
+  const onOpen = (event: MouseEvent): void => {
+    const button =
+      event.target instanceof Element ? event.target.closest('[data-review-open]') : null;
+    const figure = button?.closest('figure');
+    if (!(button instanceof HTMLElement) || !figure) return;
+    title.textContent = figure.querySelector('.testimonial-author')?.textContent ?? '';
+    body.replaceChildren(figure.cloneNode(true));
+    opener = button;
+    dialog.showModal();
+  };
+  const onDialogClick = (event: MouseEvent): void => {
+    // A click on the backdrop lands on the dialog itself, outside its box.
+    const box = dialog.getBoundingClientRect();
+    const outside =
+      event.clientX < box.left ||
+      event.clientX > box.right ||
+      event.clientY < box.top ||
+      event.clientY > box.bottom;
+    const onBackdrop = event.target === dialog && outside;
+    const onClose = event.target instanceof Element && event.target.closest('[data-review-close]');
+    if (onBackdrop || onClose) dialog.close();
+  };
+  const onClose = (): void => {
+    body.replaceChildren();
+    opener?.focus();
+    opener = null;
+  };
+  section.addEventListener('click', onOpen);
+  dialog.addEventListener('click', onDialogClick);
+  dialog.addEventListener('close', onClose);
+  return () => {
+    section.removeEventListener('click', onOpen);
+    dialog.removeEventListener('click', onDialogClick);
+    dialog.removeEventListener('close', onClose);
+    if (dialog.open) dialog.close();
+  };
+}
+
+function driftMarks(parts: TrackParts, track: PinnedTrack): Cleanup {
+  const context = gsap.context(() => {
+    for (const mark of parts.track.querySelectorAll<HTMLElement>('[data-rail-mark]')) {
+      gsap.fromTo(
+        mark,
+        { x: MARK_DRIFT_PX },
+        {
+          x: -MARK_DRIFT_PX,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: mark.parentElement ?? mark,
+            containerAnimation: track.tween,
+            start: 'left right',
+            end: 'right left',
+            scrub: true,
+          },
+        },
+      );
+    }
+  });
+  return () => context.revert();
+}
+
+export function pinTestimonials(): Cleanup {
+  const parts = findParts();
+  if (parts === undefined || parts.panels.length === 0 || !hasRoom(parts)) {
+    return () => undefined;
+  }
+  const reviews = findReviews(parts);
+  const bar = parts.section.querySelector<HTMLElement>('[data-rail-progress]');
+  let track: PinnedTrack | undefined;
+  const step = (direction: Direction): void => {
+    if (track === undefined) return;
+    const index = stepIndex(track.centres(), track.scrollProgress(), direction);
+    const centre = track.centres()[index];
+    // An instant jump: the scrub glides the track there (Lenis follows a native scroll).
+    if (centre !== undefined) {
+      window.scrollTo({ top: track.scrollTopAt(centre), behavior: 'instant' });
+    }
+  };
+  const takeover = takeOverRail(step);
+  track = pinTrack(parts, {
+    onMeasure: () => clampReviews(parts, reviews),
+    onProgress(progress) {
+      if (bar !== null) bar.style.transform = `scaleX(${progress})`;
+      takeover?.setEdges(progress <= EDGE, progress >= 1 - EDGE);
+    },
+  });
+  const cleanups = [driftMarks(parts, track), openReviews(parts.section)];
+
+  return () => {
+    for (const cleanup of cleanups) cleanup();
+    for (const review of reviews) unclamp(review);
+    track?.kill();
+    takeover?.release();
+    bar?.style.removeProperty('transform');
+  };
+}

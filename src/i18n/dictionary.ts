@@ -225,6 +225,8 @@ export interface Dictionary {
     readonly cta: string;
     readonly previous: string;
     readonly next: string;
+    /** Opens a review cut short by the pinned rail of a small screen (E12). */
+    readonly readMore: string;
     /**
      * Shown when the testimonials are not in the language of the page: « Reviews written in
      * French » for the originals, « Translated from French » for translations (I-09).

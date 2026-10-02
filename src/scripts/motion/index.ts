@@ -7,6 +7,7 @@ import { startHero } from '@/components/hero/hero.ts';
 import { startInterludes } from '@/components/interlude/interlude.ts';
 import { pinPlaces } from '@/components/places/places.ts';
 import { startTorch } from '@/components/specialties/torch.ts';
+import { pinTestimonials } from '@/components/testimonials/testimonials.ts';
 import { animateTabs } from '@/components/ui/tabs-motion.ts';
 import { trackWater } from '@/components/water/water.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
@@ -43,6 +44,7 @@ export function startMotion(): Cleanup | undefined {
       startInterludes({ fine, bubbles }),
       pinLadder({ desktop }),
       pinPlaces(),
+      pinTestimonials(),
       startTorch(),
       fine ? tiltGiftCard() : noop,
       startHero({ fine }),

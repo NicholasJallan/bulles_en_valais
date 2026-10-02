@@ -372,6 +372,7 @@ export const fr: Dictionary = {
     cta: 'Laisser un avis Google',
     previous: 'Témoignage précédent',
     next: 'Témoignage suivant',
+    readMore: "Lire l'avis en entier",
     source: 'Avis publiés sur Google',
     languageNote: 'Avis rédigés en français',
     items: [

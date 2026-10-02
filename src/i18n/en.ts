@@ -374,6 +374,7 @@ export const en: Dictionary = {
     cta: 'Leave a Google review',
     previous: 'Previous testimonial',
     next: 'Next testimonial',
+    readMore: 'Read the full review',
     source: 'Reviews published on Google',
     languageNote: 'Translated from French',
     items: [
