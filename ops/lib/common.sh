@@ -10,6 +10,8 @@ BASE='/var/www/bullesenvalais'
 PRODUCTION_URL='https://dive.bullesenvalais.ch/'
 KEEP_RELEASES=5
 RELEASE_PATTERN='^[0-9]{8}-[0-9]{6}$'
+# One multiplexed connection per run: the Pi refuses bursts of new ssh connections.
+SSH_OPTIONS=(-o BatchMode=yes -o ControlMaster=auto -o "ControlPath=$HOME/.ssh/bev-%C" -o ControlPersist=60)
 
 die() {
   printf 'error: %s\n' "$*" >&2
@@ -38,7 +40,7 @@ remote() {
   local script="$1"
   shift
   # ssh joins its arguments into one command line for the remote shell: quote each one.
-  ssh -o BatchMode=yes "$REMOTE" "bash -s -- $(printf '%q ' "$@")" <<<"set -euo pipefail
+  ssh "${SSH_OPTIONS[@]}" "$REMOTE" "bash -s -- $(printf '%q ' "$@")" <<<"set -euo pipefail
 $script"
 }
 
