@@ -16,7 +16,7 @@
 - [x] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône) — 02.10.2026
 - [x] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp — 02.10.2026
 - [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
-- [ ] **S12** — Préproduction & recette — 🛑 Gate 4
+- [x] **S12** — Préproduction & recette — 02.10.2026 (Gate 4 validée)
 - [ ] **S13** — Mise en production, suivi, nettoyage
 
 ## Gates
@@ -26,7 +26,7 @@
 | 1 | Palette, typographie, sensation du mouvement (styleguide) | ✅ | 2026-10-01 | Appariement **B** (Instrument Serif + Switzer) ; palette gardée, lagon moins « bleu clair » et descente moins verte ; tempo normal ; HUD en Switzer tabulaire (D25). Jugée sur `https://dive.bullesenvalais.ch/styleguide/` (D31) |
 | 2 | Textes FR/EN (`CONTENT-REVIEW.md`) | ✅ | 2026-10-01 | Tout accepté, questions posées dans la session ; TDI Deco à CHF 250, témoignages traduits, fiche Google, « le Léman », deux « Alexandre F. » séparés, confidentialité sans rubrique États-Unis ni délai de réponse |
 | 3 | Visuels (hero, retouches, IA, logo animé) | ✅ | 2026-10-01 | Hero A (Rosel) avec **seuls les fils électriques retirés** ; interlude B : image actuelle sans filigrane ; recadrages, lieux, masque d'eau et images de partage acceptés ; logo bleu sur blanc ou blanc sur noir, **jamais animé** (D32–D35). Jugée sur les planches envoyées dans la session |
-| 4 | Recette complète en préproduction | ⬜ | | |
+| 4 | Recette complète en préproduction | ✅ | 2026-10-02 | Fluidité, hero, HUD, échelle, lampe, Lieux, carte cadeau, rail, palier, liens : ok ; retouches demandées et faites (logos agrandis, Mode calme dans la barre et le menu, e-mail et vide des Témoignages, crédit de l'Hirondelle) ; VoiceOver non testé (expliqué) ; **mise en ligne dès que S13 est prête** (« le site a peu de trafic »). Jugée sur `https://dive.bullesenvalais.ch/preview/` (option B) |
 
 ## Décisions
 
@@ -81,6 +81,8 @@
 | 2026-10-02 | D47 | **Pas d'envoi sans JavaScript** : l'avis (WhatsApp, téléphone, e-mail) est gardé ; `contact.php` n'accepte que du JSON | Nicholas (S10) |
 | 2026-10-02 | D48 | Risques acceptés de la revue de sécurité S10 (MEDIUM) : une seule adresse IP à la limite nginx (5/min) épuise le plafond en 10 min — les visiteurs ont alors les alternatives, message prêt ; un envoi échoué (SMTP) consomme quand même une place. À revoir en S13 (compteur par IP ou alerte) d'après le journal `contact: daily limit reached` | S10 (revue de sécurité) |
 | 2026-10-02 | D49 | **Hero (E1) : les ondes vivent sur le lac, pas sur l'écran.** Caméra de la photo calée (Pixel 8 Pro, 24 mm éq.) sur l'orthophoto SWISSIMAGE : rive est, 46.12718 N 7.06000 E (le repère de Nicholas), cap 279°, 1,45 m au-dessus de l'eau, rive opposée à 140–220 m ; chaque pixel d'eau est ramené à son point du lac en mètres, anneaux du pointeur (12 cm, dispersion) et rides de vent (vent du nord-ouest, rafales) calculés sur le plan d'eau puis vus en perspective ; reflet déplacé ×2 la pente, fond vu par réfraction, Fresnel ; détails plus fins que le pixel → flou (pas de scintillement) | Nicholas (« on génère des ondes comme si on voyait l'eau du dessus ») |
+| 2026-10-02 | D50 | **Interlude B = l'épave de l'Hirondelle, dans le Léman** : photo nettoyée (filigrane retiré), pas un visuel généré ; légende « L'Hirondelle, dans le Léman » / « The Hirondelle, in Lake Geneva », plus aucune mention IA (légende, alt, pied de page, Mentions légales) | Nicholas (Gate 4) |
+| 2026-10-02 | D51 | **Mode calme toujours accessible** : interrupteur dans la barre sur ordinateur (« Calme », nom accessible « Mode calme »), dans le menu sur téléphone, en plus du pied de page ; logos agrandis (barre, carte cadeau) ; de 64 à 80 rem la barre prend le couloir du HUD pour tenir sur une ligne | Nicholas (Gate 4) |
 
 ## Mutations du plan
 
@@ -645,3 +647,6 @@
   - S13 (recette serveur, option B) : en-têtes finaux, 404, gzip des types texte (`gzip_types`), cache, `site.webmanifest`, envoi réel par le **nouveau** `contact.php` (un envoi depuis `/preview/` passe encore par celui de S00), Lighthouse en production ; garder le webroot de certbot quand l'ancien docroot partira ; TLS 1.0/1.1 du bloc `http` (concerne tous les sites du Pi : à proposer à Nicholas) ;
   - Safari réel, iOS et Android : à juger par Nicholas (Gate 4) ; coût GPU du hero sur téléphone moyen de gamme (D49).
 - **Retour arrière** : supprimer `/var/www/bullesenvalais` (rien ne le sert) ; `git revert` des commits S12.
+- **Gate 4** (réponses de Nicholas) : 1, 2 et 6 ok ; 3 logos agrandis ; 4 VoiceOver expliqué (lecteur d'écran d'Apple), facultatif ; 5 Mode calme dans la barre et le menu (D51) ; 7 « arrange au mieux » ; 8 mise en ligne dès que possible. En cours de route : interlude B = l'Hirondelle, sans mention IA (D50).
+- **Retouches** (un commit chacune, tests de non-régression) : `81e7e3b` (Hirondelle), `220db55` (Mode calme + logos ; test « barre sur une ligne » de 1024 à 1279 px, FR et EN, RED sans le correctif), `b85790e` (e-mail coupé avant « @ »), `324a491` (avis longs coupés en CSS dès le premier rendu dans le rail statique, dialogue dans `reviews.ts` ; une première version qui mesurait les cartes décalait de 300 px une page ouverte sur `#faq` : test ajouté), `177aa48` (références visuelles revues). Vitest 610, Playwright 324 réussis, 53 sautés, 0 échec ; préproduction republiée (sans erreur console, ordinateur et Pixel 7) ; `staging` → `releases/20261002-133432` (`177aa48`). Pas de nouvelle revue de code (changements d'interface couverts par les tests, D30).
+

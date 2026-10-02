@@ -21,7 +21,7 @@
 | 3 | **Cursus** — 3 écoles, tarifs | `agencies` | 8 → 15 | lagon | 16 °C | E5, onglets fluides | S08 |
 | 4 | **Interlude A** « Descendre » (`bde.jpg`) | `interlude-descent` | 15 → 18 | image | 10 °C | E7, parallaxe, citation | S08 |
 | 5 | **Échelle de profondeur** + comparatif | `depth`, `compare` | règle locale 0 → 120 (HUD global masqué) | profond → abysse | — | E9 | S08 |
-| 6 | **Interlude B** « Lumière » (hirondelle régénérée) | `interlude-light` | 40 | image | 8 °C | E7, citation | S08 |
+| 6 | **Interlude B** « Lumière » (l'Hirondelle, épave du Léman ; D50) | `interlude-light` | 40 | image | 8 °C | E7, citation | S08 |
 | 7 | **Spécialités** | `specialties` | 40 → 32 | abysse | 8 °C | E8 | S09 |
 | 8 | **Lieux** — parcours du Rhône | `places` | 32 → 22 | profond | 8 °C | E10 | S09 |
 | 9 | **Avant de s'immerger** — matériel + assurances | `prepare` (+ `gear`, `insurance`) | 22 → 15 | émeraude | 9 °C | E6 | S10 |
@@ -239,7 +239,7 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 | `nicholas.jpg` (2243×2243) | Nicholas (recycleur, étanche rouge) avec une élève en surface | Instructeur | Recadrages desktop (4:5) et mobile |
 | `gears.jpg` (800×800) | Matériel sur un bateau | Avant de s'immerger | — |
 | `bde.jpg` (1707×1280, © Nicholas) | Plongeur et requins-marteaux en bleu profond | Interlude A | Recadrage 16:9 et portrait |
-| `hirondelle.png` (1365×768, IA) | Épave, plongeurs recycleur, lampes rouges | Interlude B | **Régénérer** sans filigrane (≥ 2560 px), crédit IA |
+| `hirondelle.png` (1365×768) | L'épave de l'Hirondelle (Léman), plongeurs recycleur, lampes rouges | Interlude B | Filigrane retiré, agrandie (D33) ; photo nettoyée, légende « L'Hirondelle, dans le Léman », sans mention IA (D50) |
 | `logo.png` (32×32) | Logo | Remplacé | 📥 **logo vectoriel** → SVG animable, favicons |
 
 ### Règles
