@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS = [
     'https://dive.bulleenvalais.com',
 ];
 const ALLOWED_INTERESTS = [
-    'baptism', 'sdi-owd', 'sdi-aowd', 'sdi-rescue', 'tdi', 'padi-owd', 'padi-aowd',
+    'baptism', 'sdi-owd', 'sdi-aowd', 'sdi-rescue', 'sdi-dm', 'tdi', 'padi-owd', 'padi-aowd',
     'padi-rescue', 'padi-dm', 'ffessm', 'specialty', 'refresher', 'gift', 'other',
 ];
 const ALLOWED_LOCALES = ['fr', 'en', 'de'];

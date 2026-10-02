@@ -20,6 +20,8 @@ const LEGACY_PRICES: Readonly<Record<string, number>> = {
   'sdi-owsd': 690,
   'sdi-aad': 450,
   'sdi-rescue': 890,
+  // SDI Divemaster: added on 2026-10-02, CHF 100 below the PADI one like the rest of the path.
+  'sdi-dm': 990,
   // TDI Advanced Nitrox: CHF 250 before I-10 c; Decompression Procedures stays at CHF 250.
   'tdi-advanced-nitrox': 290,
   'tdi-deco': 250,
@@ -103,6 +105,7 @@ describe('cursusCourses', () => {
       'sdi-owsd',
       'sdi-aad',
       'sdi-rescue',
+      'sdi-dm',
       'tdi-advanced-nitrox',
       'tdi-deco',
     ]);

@@ -134,11 +134,14 @@ test('after a shorter specialties tab, the places still pin at the top of the sc
       (stage) => (stage.parentElement as HTMLElement).getBoundingClientRect().top + window.scrollY,
     );
   await page.evaluate((y) => window.scrollTo(0, y + 200), top);
+  // Within a pixel: WebKit pins at -0.5 px when the page above has a fractional height.
   await expect
     .poll(() =>
-      page.locator('[data-places-stage]').evaluate((stage) => stage.getBoundingClientRect().top),
+      page
+        .locator('[data-places-stage]')
+        .evaluate((stage) => Math.abs(stage.getBoundingClientRect().top)),
     )
-    .toBeCloseTo(0, 0);
+    .toBeLessThanOrEqual(1);
 });
 
 test.describe('specialties and places with reduced motion', () => {

@@ -93,9 +93,10 @@ export const en: Dictionary = {
         sub: 'Recreational & technical',
         headline: { before: 'From try-dive to trimix,', em: 'one single system.' },
         description:
-          'SDI is one of the founding agencies behind the RSTC standards that govern recreational diving worldwide — the same standards behind any international certification. Your prerogatives are interchangeable with any RSTC card, including for travel. Where SDI extends further is through TDI: Trimix, rebreather, deep diving, cavern — the most complete technical path, without ever changing agency or instructor.',
+          'SDI is one of the founding agencies behind the RSTC standards that govern recreational diving worldwide — the same standards behind any international certification. Your prerogatives are interchangeable with any RSTC card, including for travel. The recreational path follows the same progression as PADI, up to Divemaster, the first professional level. Where SDI extends further is through TDI: Trimix, rebreather, deep diving, cavern — the most complete technical path, without ever changing agency or instructor.',
         highlights: [
           'One single system, from try-dive to full technical diving',
+          'Recreational progression: Open Water → Advanced → Rescue → Divemaster',
           'TDI technical path: advanced Nitrox, decompression, Trimix, rebreather',
           'Prerogatives recognised the same as any international RSTC certification',
           'Tailored support, simple cross-over from another certification',
@@ -107,7 +108,7 @@ export const en: Dictionary = {
         sub: 'Recreational · International',
         headline: { before: 'The best-known name', em: 'in recreational diving.' },
         description:
-          'PADI is the brand the general public recognises most — a real advantage if you mostly dive on organised trips or if your future dive buddies are used to it. Underneath, the training follows the same RSTC standards as SDI: same content, same prerogatives. A PADI card is recognised in 180+ countries.',
+          'PADI is the brand the general public recognises most — a real advantage if you mostly dive on organised trips or if your future dive buddies are used to it. Underneath, the training follows the same RSTC standards as SDI: same content, same prerogatives, same progression up to Divemaster. A PADI card is recognised in 180+ countries.',
         highlights: [
           'The certification most widely recognised by the general public',
           'Multilingual e-learning, available anytime',

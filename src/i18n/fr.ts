@@ -95,9 +95,10 @@ export const fr: Dictionary = {
         sub: 'Récréative & technique',
         headline: { before: 'Du baptême au trimix,', em: 'un seul système.' },
         description:
-          "SDI est l'un des organismes fondateurs des standards RSTC qui régissent la plongée loisir dans le monde entier — les mêmes que n'importe quelle certification internationale. Vos prérogatives sont interchangeables avec n'importe quelle carte RSTC, y compris pour voyager. Là où SDI va plus loin, c'est via TDI : Trimix, recycleur, plongée profonde, caverne — la filière technique la plus complète, sans jamais changer d'organisme ni d'instructeur.",
+          "SDI est l'un des organismes fondateurs des standards RSTC qui régissent la plongée loisir dans le monde entier — les mêmes que n'importe quelle certification internationale. Vos prérogatives sont interchangeables avec n'importe quelle carte RSTC, y compris pour voyager. Le cursus loisir suit la même progression que PADI, jusqu'au Divemaster, premier niveau professionnel. Là où SDI va plus loin, c'est via TDI : Trimix, recycleur, plongée profonde, caverne — la filière technique la plus complète, sans jamais changer d'organisme ni d'instructeur.",
         highlights: [
           'Un seul système, du baptême à la plongée technique complète',
+          'Progression loisir : Open Water → Advanced → Rescue → Divemaster',
           'Filière TDI : Nitrox avancé, décompression, Trimix, recycleur',
           "Prérogatives reconnues comme n'importe quelle certification RSTC internationale",
           'Accompagnement sur mesure, cross-over simple depuis une autre certification',
@@ -109,7 +110,7 @@ export const fr: Dictionary = {
         sub: 'Récréative · Internationale',
         headline: { before: 'Le nom le plus connu', em: 'de la plongée loisir.' },
         description:
-          "PADI est la marque la plus reconnue du grand public — un vrai argument si vous plongez surtout en voyage organisé ou si vos futurs binômes de palanquée en ont l'habitude. Sur le fond, la formation suit les mêmes standards RSTC que SDI : même contenu, mêmes prérogatives. Une carte PADI est reconnue dans plus de 180 pays.",
+          "PADI est la marque la plus reconnue du grand public — un vrai argument si vous plongez surtout en voyage organisé ou si vos futurs binômes de palanquée en ont l'habitude. Sur le fond, la formation suit les mêmes standards RSTC que SDI : même contenu, mêmes prérogatives, même progression jusqu'au Divemaster. Une carte PADI est reconnue dans plus de 180 pays.",
         highlights: [
           'La certification la plus reconnue par le grand public',
           'E-learning multilingue, accessible en continu',

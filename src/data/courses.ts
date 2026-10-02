@@ -70,6 +70,16 @@ const SDI_TDI_COURSES = [
     formInterest: 'sdi-rescue',
   },
   {
+    id: 'sdi-dm',
+    agency: 'sdi-tdi',
+    group: 'core',
+    name: same('Divemaster'),
+    meta: { fr: '30 séances · avec votre équipement', en: '30 sessions · your own gear' },
+    price: chf(990),
+    cursus: 'row',
+    formInterest: 'sdi-dm',
+  },
+  {
     id: 'tdi-advanced-nitrox',
     agency: 'sdi-tdi',
     group: 'tech',
