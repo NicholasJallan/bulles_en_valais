@@ -19,7 +19,9 @@ const t = getDictionary(locale);
 <div class="gift-card-scene" data-gift-card>
   <div class="gift-card" aria-hidden="true">
     <div class="gift-card-main">
-      <Logo class="gift-card-logo" focusable="false" />
+      <div class="gift-card-emblem">
+        <Logo class="gift-card-logo" focusable="false" />
+      </div>
       <p class="gift-card-label">{t.gifts.card.label}</p>
       <p class="gift-card-brand">Bulles en Valais</p>
     </div>
@@ -47,22 +49,33 @@ const t = getDictionary(locale);
     color: var(--c-ink);
     box-shadow: var(--shadow-depth);
     transform: rotate(-3deg);
+    container-type: inline-size;
   }
 
   .gift-card-main {
     display: grid;
-    grid-template-rows: 1fr auto auto;
-    padding: var(--space-m);
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    /* On a phone's small card, tighter padding and label leave the emblem more room. */
+    padding: min(var(--space-m), 5cqi);
+  }
+
+  /* The emblem fills the room left by the texts and follows the card's size; the SVG centres
+     itself in that box (preserveAspectRatio). */
+  .gift-card-emblem {
+    position: relative;
+    max-block-size: 12rem;
   }
 
   .gift-card :global(.gift-card-logo) {
-    inline-size: auto;
-    block-size: clamp(4.75rem, 3.25rem + 5.5vw, 7.5rem);
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
   }
 
   .gift-card-label {
     font-family: var(--font-display);
-    font-size: var(--step-4);
+    font-size: min(var(--step-4), 10cqi);
     line-height: 1;
   }
 

@@ -158,9 +158,19 @@ const links = [
     margin-inline-end: auto;
   }
 
+  /* Larger over the hero, back to its box in the glass bar: scale only, so the bar keeps its
+     height (--nav-block-size, measured by nav.ts, places the pinned tracks). */
   .brand :global(.brand-logo) {
+    --hero-logo-scale: 1.6;
     inline-size: auto;
     block-size: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
+    scale: var(--hero-logo-scale);
+    transform-origin: left top;
+    transition: scale var(--dur-base) var(--ease-surface);
+  }
+
+  .site-header:global(.is-glass) .brand :global(.brand-logo) {
+    scale: 1;
   }
 
   .nav-links {
