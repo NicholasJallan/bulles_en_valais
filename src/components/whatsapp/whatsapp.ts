@@ -1,5 +1,6 @@
-// WhatsApp dialog: opened by any [data-whatsapp-open] link, it builds the wa.me link from the
-// message being written; the focus goes back to the opener when it closes (Escape included).
+// WhatsApp dialog: opened by any [data-whatsapp-open] link, the focus in the message; it builds
+// the wa.me link from the message being written; the focus goes back to the opener when it closes
+// (Escape included). Lenis stops while it is open (lenis.ts).
 import { whatsappUrl } from '@/data/contact.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
 
@@ -23,6 +24,8 @@ export function init(element: HTMLElement): Cleanup {
     event.preventDefault();
     opener = link;
     dialog.showModal();
+    // Straight to writing: the close button would otherwise take the first focus.
+    message.focus();
   };
   const onInput = () => {
     send.href = whatsappUrl(message.value.trim() || defaultMessage);

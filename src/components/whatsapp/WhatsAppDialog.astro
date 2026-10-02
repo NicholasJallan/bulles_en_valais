@@ -23,7 +23,12 @@ const href = whatsappUrl(t.defaultMessage);
     <Icon name="message" />
     <span class="visually-hidden">{t.open}</span>
   </a>
-  <dialog class="whatsapp-dialog" aria-labelledby="whatsapp-title" data-tone="surface">
+  <dialog
+    class="whatsapp-dialog"
+    aria-labelledby="whatsapp-title"
+    data-tone="surface"
+    data-lenis-prevent
+  >
     <div class="whatsapp-head">
       <div>
         <h2 id="whatsapp-title" class="whatsapp-title">
