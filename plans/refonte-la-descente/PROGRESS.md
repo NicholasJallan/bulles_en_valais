@@ -14,7 +14,7 @@
 - [x] **S07** — Hero « Surface » en WebGL + immersion — 02.10.2026
 - [x] **S08** — Cursus, échelle de profondeur, interludes, bulles — 02.10.2026
 - [x] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône) — 02.10.2026
-- [ ] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp
+- [x] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp — 02.10.2026
 - [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
 - [ ] **S12** — Préproduction & recette — 🛑 Gate 4
 - [ ] **S13** — Mise en production, suivi, nettoyage
@@ -77,6 +77,9 @@
 | 2026-10-02 | D43 | **Échelle de profondeur et parcours du Rhône animés sur téléphone aussi** (épinglés sur une colonne dès que le mouvement est permis ; replis statiques gardés pour le mouvement réduit et le Mode calme) ; **lampe plus lisible comme effet** : cartes atténuées hors du faisceau (`--torch-dim` 0,62, AA testé), opaques et titre réchauffé sous la lampe, faisceau qui déborde sur la photo au-dessus | Nicholas (retours sur la prévisualisation S09) |
 | 2026-10-02 | D44 | Lampe : cartes des Spécialités à **`--torch-dim` 0,25 hors du faisceau, sous le seuil AA, assumé** (« l'effet est très nettement insuffisant » à 0,62) ; plancher testé (titres ≥ 2:1, texte ≥ 1,6:1) ; aucune lampe et contraste complet sans mouvement ; axe exclut ces cartes seulement quand la lampe tourne | Nicholas (après la prévisualisation S09) |
 | 2026-10-02 | D45 | **Défilements horizontaux = piste épinglée pilotée par le scroll vertical, sur tous les écrans, par défaut** (modèle du parcours du Rhône, validé sur PC et téléphone) ; repli `scroll-snap` sans mouvement ; s'applique au rail des Témoignages (S10, E12) et à tout futur carrousel | Nicholas (après la prévisualisation S09) |
+| 2026-10-02 | D46 | **Plafond quotidien de 50 e-mails** dans `contact.php` (quota Gmail) : compteur verrouillé hors docroot (`sys_get_temp_dir()`, fichier ordinaire seulement), `503 busy` au-delà sans envoi, compteur inutilisable → envoi quand même et journalisé ; `elapsed` désormais obligatoire (fin de D13) | Nicholas (S10) |
+| 2026-10-02 | D47 | **Pas d'envoi sans JavaScript** : l'avis (WhatsApp, téléphone, e-mail) est gardé ; `contact.php` n'accepte que du JSON | Nicholas (S10) |
+| 2026-10-02 | D48 | Risques acceptés de la revue de sécurité S10 (MEDIUM) : une seule adresse IP à la limite nginx (5/min) épuise le plafond en 10 min — les visiteurs ont alors les alternatives, message prêt ; un envoi échoué (SMTP) consomme quand même une place. À revoir en S13 (compteur par IP ou alerte) d'après le journal `contact: daily limit reached` | S10 (revue de sécurité) |
 
 ## Mutations du plan
 
@@ -159,6 +162,12 @@
 | 2026-10-02 | S09 | ajouter | `scripts/preview-pi.mjs` + `scripts/lib/preview-page.mjs` (testé) et `npm run preview:pi` ; protocole de session du `README.md` (étape 7 « Prévisualiser », gates, actions sortantes), briefs S10 (formulaire posté au `contact.php` en ligne), S12 (option B = cette prévisualisation) et S13 (retrait du script), `CLAUDE.md` mis à jour | D42 : Nicholas ne pouvait rien juger, rien n'étant publié |
 | 2026-10-02 | S09 | étendre | Retours de Nicholas sur la prévisualisation (D43) : épinglage de l'échelle (S08) et des Lieux sur téléphone, lampe (opacité des cartes, débordement du faisceau) ; `02-architecture` §8, `01-direction-artistique` §7 (E9, E10) et `CLAUDE.md` mis à jour ; `anticipatePin` écarté | D43 |
 | 2026-10-02 | S09 → S10 | modifier | E12 (rail des Témoignages) suit D45 : piste épinglée sur tous les écrans, mécanique de `places.ts` à extraire dans un module partagé ; `01-direction-artistique` §7 (E12 + règle générale) et brief S10 mis à jour | D45 |
+| 2026-10-02 | S10 | extraire | Mécanique des pistes épinglées de `places.ts` dans `src/scripts/motion/pinned-track.ts` (DOM, couvert par les E2E) + `stepIndex` / `scrollAt` testés dans `lib/motion/track.ts` ; Lieux et Témoignages l'utilisent ; `02-architecture` §8 et `CLAUDE.md` mis à jour | D45 |
+| 2026-10-02 | S10 | ajouter | Témoignages épinglés : un avis plus haut que la fenêtre (Stefano T., ≈ 1 000 caractères, sur téléphone) est tronqué en fondu avec « Lire l'avis en entier » (`testimonials.readMore`, FR/EN) qui ouvre un `<dialog>` ; fenêtre < 260 px → rail natif ; en-tête et invitation « Laisser un avis Google » entrent dans la piste comme panneaux ; `01-direction-artistique` §7 (E12) mis à jour | sinon l'épinglage était impossible sur la plupart des téléphones (iPhone 14 : 441 px de fenêtre) |
+| 2026-10-02 | S10 | simplifier | E13 : ouverture fluide par `::details-content` + `interpolate-size` seulement, **ouverture immédiate** ailleurs (pas de repli `grid-template-rows` en JavaScript) ; `01-direction-artistique` §7 mis à jour | tous les navigateurs visés le prennent en charge en 2026 |
+| 2026-10-02 | S10 | ajouter | `lib/bubbles/events.ts` (`bv:bubbles` sans GSAP pour le formulaire), jetons `--c-iris-*` (palette), `--perspective-object`, `--backdrop-scrim` (fond des dialogues, WhatsApp compris) ; `testimonials.readMore`, `contact.form.errorRateLimit` et `errorBusy` (FR/EN) | E11, E7, 429/503 |
+| 2026-10-02 | S10 | reporter | Délai global de 30 s du dialogue SMTP (optionnel, risque faible) non fait ; brief S13 : emplacement du compteur du plafond à vérifier (`PrivateTmp`) | priorités |
+| 2026-10-02 | S10 | modifier | `run_unit_php74.sh` définit `CONTACT_TEST_NO_FILES` : les tests du compteur qui écrivent un fichier sont sautés sur le Pi (rien n'y est écrit) | promesse du script |
 
 ## Mesures
 
@@ -176,6 +185,7 @@
 | 2026-10-02 | S08 (`check:budgets`) ; traversée de l'échelle épinglée à la molette, Chromium 1440 px : 0 tâche longue, images p50/p95 16,7 ms (CPU ×1 et ×4) | n.m. | n.m. | 0 tâche longue | 3,2 / 106,2 Ko | 14,1 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S09 (`check:budgets`) ; traversée des Spécialités et des Lieux à la molette avec le pointeur en mouvement, Chromium 1440 px : 0 tâche longue, images p50/p95 16,7 ms (CPU ×1 et ×4, 3 passes) | n.m. | < 0,05 (test E2E, après correctif) | 0 tâche longue | 3,2 / 108,6 Ko | 14,9 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S09 après D43 (`check:budgets`) ; traversée de l'échelle et des Lieux épinglés sur Pixel 7 émulé, CPU ×4 : 0 tâche longue, images p50/p95 16,7 ms | n.m. | < 0,05 (test E2E) | 0 tâche longue | 3,2 / 108,6 Ko | 15,2 Ko (accueil) | n.m. | n.m. |
+| 2026-10-02 | S10 (`check:budgets`) ; traversée Avant de s'immerger → Contact à la molette, Chromium 1440 px : CPU ×1 0 tâche longue ; CPU ×4 une tâche longue (56–86 ms) au saut initial du script vers `#prepare`, aucune pendant le défilement ; images p50/p95 16,7 ms | n.m. | < 0,05 (test E2E) | voir ci-contre | 3,3 / 111,0 Ko | 16,5 Ko (accueil) | n.m. | n.m. |
 
 ## Journal
 
@@ -574,3 +584,27 @@
   - I-07 : si Nicholas choisit le mode basique, changer `MODE` et retirer la phrase sur les signaux anonymes dans Confidentialité (FR/EN) ;
   - S13 : relever en production les cookies réellement déposés (noms et durées du tableau) et vérifier l'effacement automatique de `_ga` sur `.bullesenvalais.ch` ; aucune violation CSP en production avant et après consentement ; `include` du fichier d'en-têtes dans chaque `location` qui a ses propres `add_header` ; trancher `report-uri` ; resserrer les jokers Google (D38).
 - **Retour arrière** : `git revert` des commits S11 ; rien n'est appliqué en production.
+
+### S10 — 2026-10-02 (remontée : Avant de s'immerger, Bons cadeaux, Témoignages, Palier, Contact, WhatsApp, PHP)
+- **Décisions de Nicholas** (début de session) : plafond de 50 e-mails par jour (D46) ; envoi sans JavaScript non ouvert, avis gardé (D47) ; accord pour `run_unit_php74.sh`.
+- **Fait** :
+  - Avant de s'immerger (E6) : photo du matériel révélée derrière sa ligne d'eau, cartes en cascade ; ancres `#gear` / `#insurance` inchangées ;
+  - Bons cadeaux (E11) : carte au format 1,586:1, reflet irisé (`conic-gradient` + masque de caustiques, `multiply`), inclinaison ≤ 8° au pointeur fin (`quickTo`, perspective 800 px, `lib/motion/tilt.ts` en TDD), pas de gyroscope ; « Offrir un bon cadeau » choisit « Bon cadeau », défile jusqu'au formulaire et met le focus sur « Nom » ;
+  - Témoignages (E12, D45) : module commun `pinned-track.ts` (Lieux refaits dessus), rail épinglé sur tous les écrans (en-tête, 8 avis, invitation Google), boutons qui font défiler la page jusqu'à l'avis suivant ou précédent (`stepIndex`), barre de progression, guillemets en parallaxe légère (`open-quote no-close-quote` : sinon le 2ᵉ niveau ‹ apparaissait), avis trop hauts tronqués + dialogue ; sans mouvement, rail `scroll-snap` et ses boutons (`rail.ts`) ;
+  - Palier (E13) : compte à rebours 3:00 du HUD tant que la FAQ croise le milieu de l'écran, en pause hors de la vue, remise à 3:00 si l'on remonte au-dessus (`lib/depth/safety-stop.ts` en TDD, contrôleur essentiel `safety-stop`) ; réponses qui se déplient (`::details-content`) ;
+  - Contact (E14) : fenêtre de Snell (disque de lumière cerné d'eau plus sombre, miroitement, ouverte par le défilement), icônes des canaux qui montent au survol (`transform`) ; issues du formulaire : gerbe de bulles au succès (`bv:bubbles`), 400 par champ, 429 « réessayez dans une minute », 503 « le formulaire fait une pause », 500/réseau, toujours avec e-mail et WhatsApp, jamais de navigation ;
+  - WhatsApp : focus initial dans le message, `data-lenis-prevent`, fond du dialogue en jeton ;
+  - PHP : `elapsed` obligatoire, plafond quotidien (D46), `gift` déjà dans `ALLOWED_INTERESTS` ; tests unitaires (157), d'intégration (31, compteur isolé `tests/php/.quota-integration`) et sous PHP 7.4 sur le Pi (147, rien d'écrit).
+- **Vérifications** : `npm run build` (+ `check:dist`) ; `astro check` 0 erreur, 0 avertissement (3 indications antérieures) ; Vitest 592 tests (couverture 99,3 % des lignes) ; Playwright complet (e2e, a11y, visuels, `csp`) 300 réussis, 41 sautés, 0 échec ; `format:check` ; budgets : JS initial 3,3 Ko, total 111,0 Ko, CSS 16,5 Ko ; PHP : 157 + 31 + 147 (7.4).
+- **Constats** :
+  - à 441 px de fenêtre (iPhone 14), l'avis de Stefano T. (≈ 760 px de haut) rendait l'épinglage impossible : d'où la troncature + dialogue ;
+  - un test du pré-remplissage échouait sous charge : Lenis met plus de 5 s à glisser de 26 000 px ; seule l'attente du test est allongée ;
+  - la fenêtre de Snell, simple disque clair sur un fond déjà clair, était invisible : c'est l'anneau d'eau plus sombre qui la dessine.
+- **Revues** (D30, une passe, Sonnet) : `code-reviewer` : 1 HIGH corrigé (le dialogue héritait de la hauteur tronquée), MEDIUM corrigés (focus des boutons désactivés, `release()` du rail, image de suivi du focus annulée, nettoyage du dialogue), LOW corrigés (focus du pré-remplissage si le formulaire est masqué, mode du HUD en attente) ; laissés : rotation d'un téléphone sous 260 px après le démarrage (le troncage s'adapte au rafraîchissement), appels redondants de `setEdges`. `security-reviewer` : 0 CRITICAL, 0 HIGH ; 2 MEDIUM acceptés (D48) ; LOW corrigés : compteur refusé s'il a un autre lien physique ou n'est pas un fichier ordinaire, marge de 150 ms sur la garde des 3 s ; LOW laissés : `/tmp` partagé (à vérifier en S13), une ligne de journal par refus au-delà du plafond.
+- **Commits** : `5773728`, `7457cfe`, `79aedae`, `9c8ad62`, `fab0b7e`, `2c01daa`, `728e303`, `d94a5c7`, `5202105`, `168be8d`, puis ce journal.
+- **Prévisualisation** (D42) : publiée sur `https://dive.bullesenvalais.ch/preview/` et `/preview/en/` ; essai à blanc vérifié (seuls `_astro/`, `js/`, `styleguide/`, `preview/`) ; page publiée sans erreur console (ordinateur FR, Pixel 7 EN), Témoignages épinglés sur les deux, un avis tronqué sur téléphone, palier affiché. Le formulaire publié poste vers le `contact.php` **en ligne** (version S00) : un envoi de test part vraiment ; les messages 429/503 et le plafond n'existeront qu'au déploiement de S13.
+- **Points ouverts** :
+  - Nicholas : juger sur `/preview/` le rail des Témoignages (PC et téléphone), la carte cadeau, le palier du HUD, la fenêtre de Snell ;
+  - S13 : emplacement du compteur (`PrivateTmp`), D48 (compteur par IP ou alerte) ; délai global SMTP non fait (optionnel) ;
+  - Safari réel et Firefox (D21) non vérifiés à la main.
+- **Retour arrière** : `git revert` par sous-fonction (carte `79aedae`, témoignages `9c8ad62` puis `7457cfe`, palier `fab0b7e`, contact `2c01daa`, PHP `d94a5c7`) ; sans le module de mouvement, toute la remontée reste complète et statique.

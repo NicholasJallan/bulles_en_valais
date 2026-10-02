@@ -31,6 +31,7 @@ La préproduction est validée. On bascule `dive.bullesenvalais.ch` sur la nouve
    - `try_files $uri $uri/ =404;` et `error_page 404 /404.html;` (fin du repli SPA) ;
    - cache : `/_astro/` 1 an `immutable`, images et polices 30 jours, HTML `no-cache` ; `gzip` pour les types texte ;
    - `include` de `ops/nginx/security-headers.conf` (CSP finale **sans** `unsafe-eval`, **sans** unpkg, **sans** script inline) dans le bloc `server` **et** dans chaque `location` qui pose ses propres `add_header` (nginx ne les hérite pas) ; limite de débit de `/api/contact` conservée ;
+   - formulaire (S10) : vérifier où PHP-FPM écrit le compteur du plafond quotidien (`sys_get_temp_dir()/bulles-contact-quota` ; `PrivateTmp` du service `php7.4-fpm` ?), et le déplacer au besoin dans un dossier à `www-data` seul (ex. `/var/www/bullesenvalais/shared/`) par la constante `QUOTA_FILE` / `quota_path()` ; après la mise en ligne, un envoi réel doit créer le compteur (`AAAA-MM-JJ 1`) ;
    - rapports CSP (reporté de S11) : soit `public/api/csp-report.php` (JSON ≤ 8 Ko, journal hors docroot, sa propre `location` exacte limitée en débit, `check:dist` à étendre), soit pas de `report-uri` du tout ; trancher avec Nicholas ;
    - `sudo nginx -t && sudo systemctl reload nginx`.
 5. **Vérifications immédiates** :
