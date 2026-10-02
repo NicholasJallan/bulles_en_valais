@@ -1,6 +1,5 @@
 # Prettier also skips everything listed in .gitignore.
 .venv/
-legacy/
 plans/
 package-lock.json
 *.md

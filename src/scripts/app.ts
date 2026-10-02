@@ -13,9 +13,6 @@ const CONTROLLERS: ControllerRegistry = {
   'safety-stop': () => import('@/components/faq/safety-stop.ts'),
   // Consent banner and conversion clicks (S11): the library is loaded with the controller.
   consent: () => import('@/components/consent/consent.ts'),
-  // Styleguide only (S02): removed with it in S13.
-  'styleguide-switch': () => import('@/components/styleguide/switch.ts'),
-  'styleguide-motion': () => import('@/components/styleguide/motion.ts'),
 };
 
 const root = document.documentElement;

@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "legacy", "coverage", "playwright-report", "test-results"],
+  "exclude": ["dist", "coverage", "playwright-report", "test-results"],
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]

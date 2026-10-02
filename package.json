@@ -22,8 +22,7 @@
     "check:budgets": "node scripts/check-budgets.mjs",
     "check:dist": "node scripts/check-dist.mjs",
     "serve:csp": "node scripts/serve-with-csp.mjs",
-    "test:csp": "playwright test --project=csp",
-    "preview:pi": "node scripts/preview-pi.mjs"
+    "test:csp": "playwright test --project=csp"
   },
   "dependencies": {
     "astro": "^7.3.5",

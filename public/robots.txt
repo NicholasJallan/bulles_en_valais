@@ -1,4 +1,4 @@
-# Bulles en Valais: every page may be crawled. The styleguide and the 404 page carry noindex.
+# Bulles en Valais: every page may be crawled. The 404 page carries noindex.
 User-agent: *
 Allow: /
 

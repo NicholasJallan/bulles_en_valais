@@ -127,27 +127,7 @@ const classes = ['button', `button-${variant}`, className];
   }
 
   /* Hover states. The ghost keeps --fg on its veil: --action-text there fell under 4.5:1.
-     data-sg-state shows them in the styleguide, on touch screens too. */
-  .button-primary[data-sg-state='hover'] {
-    --glow-opacity: 1;
-  }
-
-  .button-secondary[data-sg-state='hover'] {
-    --button-border: var(--action);
-    --button-fg: var(--action-text);
-    --glow-opacity: 1;
-  }
-
-  .button-ghost[data-sg-state='hover'] {
-    --button-bg: var(--veil-hover);
-  }
-
-  .button-link[data-sg-state='hover'] {
-    text-decoration-thickness: 2px;
-    text-shadow: var(--glow-text);
-  }
-
-  /* A real pointer only (no glow left behind by a tap), never on a disabled button. */
+     A real pointer only (no glow left behind by a tap), never on a disabled button. */
   @media (hover: hover) {
     .button-primary:hover:not(:disabled, [aria-disabled='true']) {
       --glow-opacity: 1;
@@ -169,13 +149,13 @@ const classes = ['button', `button-${variant}`, className];
     }
   }
 
-  .button:is(:focus-visible, [data-sg-state='focus']) {
+  .button:focus-visible {
     outline: var(--focus-width) solid var(--action);
     outline-offset: var(--focus-offset);
     box-shadow: var(--focus-halo);
   }
 
-  .button:is(:active, [data-sg-state='active']):not(:disabled, [aria-disabled='true']) {
+  .button:active:not(:disabled, [aria-disabled='true']) {
     --glow-opacity: 0;
     transform: translateY(1px);
   }

@@ -20,7 +20,7 @@ test('llms.txt links both languages', async ({ request }) => {
 
 test('the sitemap pairs every page with its translation', async ({ request }) => {
   const xml = await (await request.get('/sitemap-0.xml')).text();
-  expect(xml).not.toContain('styleguide');
+  expect(xml).not.toContain('404');
   expect(xml).toContain(
     '<xhtml:link rel="alternate" hreflang="en" href="https://dive.bullesenvalais.ch/en/privacy/"/>',
   );

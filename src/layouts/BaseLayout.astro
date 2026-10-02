@@ -23,7 +23,7 @@ interface PageProps {
 
 /**
  * A localised page has a route (canonical and hreflang). A page outside the routes (the
- * styleguide) has neither, so it must not be indexed: TypeScript refuses it without noindex.
+ * 404 page) has neither, so it must not be indexed: TypeScript refuses it without noindex.
  */
 type Props = PageProps &
   ({ route: RouteId; noindex?: boolean } | { route?: undefined; noindex: true });

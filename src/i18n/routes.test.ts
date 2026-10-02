@@ -46,7 +46,7 @@ describe('findRoute', () => {
   });
 
   it('knows nothing of the other paths', () => {
-    expect(findRoute('/styleguide/')).toBeUndefined();
+    expect(findRoute('/404/')).toBeUndefined();
     expect(findRoute('/en/confidentialite/')).toBeUndefined();
   });
 });
