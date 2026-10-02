@@ -70,6 +70,7 @@
 | 2026-10-02 | D36 | I-06 et I-07 non fournis : Consent Mode **avancé**, conversions Ads désactivées (libellés `null`), GA4 non configuré en double (`GA4_ID = null`) en attendant l'assistant de balises | repli du brief S11 |
 | 2026-10-02 | D37 | Sur ordinateur, la grille (`.wrap`) garde un couloir de chaque côté pour le HUD (`--hud-inline-size`) : le profondimètre ne recouvre jamais le contenu | S06 (constat sur les captures) |
 | 2026-10-02 | D38 | Risques acceptés de la CSP finale (revue S11) : `www.google.com` en `script-src` (exigé par le guide Google pour Ads) et jokers `*.google.*` en `img-src` / `connect-src` ; à resserrer en S13 d'après les requêtes réellement vues en production | S11 (revue de sécurité) |
+| 2026-10-02 | D39 | I-07 : Consent Mode **avancé** confirmé (`MODE = 'advanced'` dans `consent-default.js`, phrase sur les signaux sans cookie gardée dans Confidentialité) ; le MEDIUM de la revue S11 est donc un choix assumé | Nicholas (après S11) |
 
 ## Mutations du plan
 
