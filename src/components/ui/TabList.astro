@@ -37,6 +37,8 @@ const { label, tabs, class: className } = Astro.props;
 
 <style>
   .tab-list {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3xs);
@@ -74,6 +76,19 @@ const { label, tabs, class: className } = Astro.props;
   .tab[aria-selected='true'] {
     background-color: var(--action);
     color: var(--action-ink);
+  }
+
+  /* With the motion module, the light is a layer that slides from tab to tab (tabs-motion.ts). */
+  .tab-list :global(.tab-indicator) {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--action);
+    pointer-events: none;
+  }
+
+  .tab-list[data-indicator] .tab[aria-selected='true'] {
+    background-color: transparent;
   }
 </style>
 

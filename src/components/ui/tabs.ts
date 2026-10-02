@@ -3,6 +3,14 @@
 import type { Cleanup } from '@/lib/controllers.ts';
 import { nextTabIndex } from '@/lib/tabs.ts';
 
+/** Fired on the tabs element when another tab is selected: the hook of the motion module. */
+export const TABS_EVENT = 'bv:tabs';
+
+export interface TabsDetail {
+  readonly tab: HTMLElement;
+  readonly panel: HTMLElement;
+}
+
 export function init(element: HTMLElement): Cleanup {
   const tablist = element.querySelector<HTMLElement>('[role="tablist"]');
   if (tablist === null) throw new Error('tabs: tablist missing');
@@ -17,14 +25,26 @@ export function init(element: HTMLElement): Cleanup {
     return panel;
   });
 
+  let selected = Math.max(
+    0,
+    tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true'),
+  );
   const select = (index: number, focus: boolean) => {
+    const changed = index !== selected;
+    selected = index;
     tabs.forEach((tab, position) => {
-      const selected = position === index;
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      panels[position]?.toggleAttribute('data-active', selected);
+      const isSelected = position === index;
+      tab.setAttribute('aria-selected', String(isSelected));
+      tab.tabIndex = isSelected ? 0 : -1;
+      panels[position]?.toggleAttribute('data-active', isSelected);
     });
     if (focus) tabs[index]?.focus();
+    const tab = tabs[index];
+    const panel = panels[index];
+    if (!changed || tab === undefined || panel === undefined) return;
+    element.dispatchEvent(
+      new CustomEvent<TabsDetail>(TABS_EVENT, { bubbles: true, detail: { tab, panel } }),
+    );
   };
 
   const onClick = (event: MouseEvent) => {

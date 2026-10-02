@@ -22,7 +22,7 @@ const panelId = `agency-${agency}`;
       <span>{t.label}</span>
       <span class="agency-sub">{t.sub}</span>
     </p>
-    <h3 class="agency-headline">
+    <h3 class="agency-headline" data-tab-headline data-reveal={active ? 'lines' : undefined}>
       <EmphasisText value={t.headline} />
     </h3>
     <p>{t.description}</p>

@@ -2,6 +2,7 @@
 // html.motion-ok is set, never in the initial bundle. It checks motion-ok again (boot.js
 // withdraws it after 3 s if this module has not started), then sets motion-ready.
 import { startHero } from '@/components/hero/hero.ts';
+import { animateTabs } from '@/components/ui/tabs-motion.ts';
 import { trackWater } from '@/components/water/water.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
 import { createEmitter } from '@/scripts/bubbles/emitter.ts';
@@ -33,6 +34,7 @@ export function startMotion(): Cleanup | undefined {
       fine ? startLenis() : noop,
       fine ? magnetize() : noop,
       fine ? bubblesOnLamps(bubbles) : noop,
+      animateTabs(),
       startHero({ fine }),
       () => bubbles.destroy(),
     ];
