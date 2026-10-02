@@ -134,8 +134,9 @@ const teaching = CREDENTIALS.filter((credential) =>
     display: none;
   }
 
-  /* Dark water rising from the bottom carries the text; a lighter veil at the top, the masthead,
-     deeper behind the logo so it reads against a bright sky. */
+  /* Dark water rising from the bottom carries the text, light enough for the ripples of the lake
+     to show through it; a lighter veil at the top, the masthead, deeper behind the logo so it
+     reads against a bright sky. */
   .hero-scrim {
     position: absolute;
     inset: 0;
@@ -143,9 +144,9 @@ const teaching = CREDENTIALS.filter((credential) =>
     background:
       linear-gradient(
         to top,
-        oklch(14% 0.03 245 / 0.92) 0%,
-        oklch(14% 0.03 245 / 0.78) 38%,
-        oklch(14% 0.03 245 / 0.2) 72%,
+        oklch(14% 0.03 245 / 0.85) 0%,
+        oklch(14% 0.03 245 / 0.66) 38%,
+        oklch(14% 0.03 245 / 0.15) 72%,
         oklch(14% 0.03 245 / 0) 85%
       ),
       radial-gradient(
@@ -162,10 +163,10 @@ const teaching = CREDENTIALS.filter((credential) =>
       background:
         linear-gradient(
           to top,
-          oklch(14% 0.03 245 / 0.92) 0%,
-          oklch(14% 0.03 245 / 0.8) 60%,
-          oklch(14% 0.03 245 / 0.45) 85%,
-          oklch(14% 0.03 245 / 0.35) 100%
+          oklch(14% 0.03 245 / 0.82) 0%,
+          oklch(14% 0.03 245 / 0.5) 60%,
+          oklch(14% 0.03 245 / 0.32) 85%,
+          oklch(14% 0.03 245 / 0.28) 100%
         ),
         radial-gradient(
           ellipse 20rem 16rem at 0 0,
@@ -188,14 +189,20 @@ const teaching = CREDENTIALS.filter((credential) =>
       padding-block-start: calc(var(--space-section) + var(--space-xl));
     }
 
-    /* The eyebrow now sits higher, on the mountains: the dark water rises with it. */
+    /* The eyebrow now sits higher, on the mountains: the dark water rises with it, deepest behind
+       the text column, so that the lake stays bright on its right and along the shore. */
     .hero-scrim {
       background:
+        radial-gradient(
+          ellipse 58% 75% at 52% 68%,
+          oklch(14% 0.03 245 / 0.62),
+          oklch(14% 0.03 245 / 0) 100%
+        ),
         linear-gradient(
           to top,
-          oklch(14% 0.03 245 / 0.92) 0%,
-          oklch(14% 0.03 245 / 0.78) 38%,
-          oklch(14% 0.03 245 / 0.45) 72%,
+          oklch(14% 0.03 245 / 0.8) 0%,
+          oklch(14% 0.03 245 / 0.42) 30%,
+          oklch(14% 0.03 245 / 0.2) 72%,
           oklch(14% 0.03 245 / 0) 92%
         ),
         radial-gradient(
