@@ -51,6 +51,17 @@ test.describe('descent with motion', () => {
     await expect(page.locator('.hud')).toHaveAttribute('data-mode', 'hidden');
   });
 
+  test('a page opened on an anchor below the ladder lands on it', async ({ page }) => {
+    await gotoReady(page, '/#faq');
+    await expect(page.locator('html')).toHaveClass(/\bmotion-ready\b/);
+    await expect
+      .poll(() => page.evaluate(() => document.getElementById('faq')?.getBoundingClientRect().top))
+      .toBeLessThan(150);
+    expect(
+      await page.evaluate(() => document.getElementById('faq')?.getBoundingClientRect().top),
+    ).toBeGreaterThan(-10);
+  });
+
   test('the courses tabs keep the APG keyboard model under the sliding light', async ({ page }) => {
     await gotoMoving(page);
     const tablist = page.locator('#agencies [role="tablist"]');

@@ -6,9 +6,9 @@ import type { Cleanup } from '@/lib/controllers.ts';
 import { depthAtPosition } from '@/lib/depth/ladder-scale.ts';
 import { formatDecimal } from '@/lib/format.ts';
 import { LOCALES, type Locale } from '@/i18n/types.ts';
-import { gsap } from '@/scripts/motion/gsap.ts';
+import { gsap, ScrollTrigger } from '@/scripts/motion/gsap.ts';
 
-/** Scrolled distance of the pin, in screens. */
+/** Scrolled distance of the pin, in screens (paired with --track-length in DepthLadder.astro). */
 const PIN_SCREENS = 3;
 /** Smoothing of the scrub, in seconds: the ruler drifts behind the wheel like in water. */
 const SCRUB_S = 0.8;
@@ -38,6 +38,15 @@ function lightRungs(timeline: gsap.core.Timeline, rungs: readonly HTMLElement[])
   });
 }
 
+/** The element of the address (a page opened on #faq), to keep in place when the pin adds room. */
+function hashTarget(): HTMLElement | null {
+  try {
+    return document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+  } catch {
+    return null;
+  }
+}
+
 export function pinLadder(): Cleanup {
   const section = document.getElementById('depth');
   const stage = section?.querySelector<HTMLElement>('[data-ladder-stage]');
@@ -54,6 +63,8 @@ export function pinLadder(): Cleanup {
     reading.textContent = text;
   };
 
+  const anchor = hashTarget();
+  const anchorTop = anchor?.getBoundingClientRect().top;
   // The pinned layout first: ScrollTrigger measures the stage as it will be pinned.
   section.dataset.pinned = '';
   const timeline = gsap.timeline({
@@ -77,8 +88,22 @@ export function pinLadder(): Cleanup {
   timeline.to(track, { yPercent: -100, duration: 1 }, 0);
   lightRungs(timeline, rungs);
   write(0);
+  // The browser jumped to the anchor before the pin added three screens above it: follow it once
+  // the pin has taken its room (the first refresh).
+  const followAnchor = (): void => {
+    ScrollTrigger.removeEventListener('refresh', followAnchor);
+    if (anchor === null || anchorTop === undefined) return;
+    window.scrollBy(0, anchor.getBoundingClientRect().top - anchorTop);
+  };
+  if (
+    anchor !== null &&
+    section.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING
+  ) {
+    ScrollTrigger.addEventListener('refresh', followAnchor);
+  }
 
   return () => {
+    ScrollTrigger.removeEventListener('refresh', followAnchor);
     timeline.scrollTrigger?.kill(true);
     timeline.revert();
     delete section.dataset.pinned;
