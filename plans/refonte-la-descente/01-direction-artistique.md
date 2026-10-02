@@ -192,8 +192,10 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 
 **E12 — Rail de témoignages**
 - Quoi : grandes citations typographiques sur un rail horizontal, glisser pour avancer, boutons précédent/suivant, légère parallaxe des guillemets.
-- Comment : `scroll-snap` natif + boutons (accessible par défaut), glisser à la souris en amélioration progressive.
+- Comment (D45) : comme le parcours du Rhône (E10), **sur tous les écrans quand le mouvement est permis**, la section est épinglée et le défilement vertical fait avancer le rail vers la droite, puis la page reprend à la butée ; boutons précédent/suivant gardés (ils font défiler la page jusqu'à la citation), clavier comme pour les Lieux (un élément focalisé hors fenêtre y est amené). Sans mouvement : `scroll-snap` natif + boutons (accessible par défaut).
 - Session : S10.
+
+**Règle générale (D45)** : tout défilement horizontal du site (rail, carrousel, frise) suit ce modèle par défaut : piste épinglée pilotée par le scroll vertical sur tous les écrans, repli `scroll-snap` sans mouvement. Code à factoriser à partir de `components/places/places.ts` (fenêtre en `overflow: hidden` gardée à 0, `containerAnimation` pour ce qui entre dans la fenêtre, `refreshPriority: 1`, pas d'`anticipatePin`).
 
 **E13 — Palier de sécurité (FAQ)**
 - Quoi : accordéon exclusif `<details name="faq">`, ouverture fluide (`interpolate-size: allow-keywords` + `::details-content` là où c'est supporté, sinon astuce `grid-template-rows: 0fr → 1fr`) ; le HUD affiche le compte à rebours du palier tant que la section est visible.

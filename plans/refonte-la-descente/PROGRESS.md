@@ -75,6 +75,8 @@
 | 2026-10-02 | D41 | **Élément LCP = texte du hero**, pas sa photo : Chromium exclut du LCP une image qui couvre tout le viewport (heuristique « fond » ; à 80 % de hauteur, la photo redevient LCP). Critère retenu : le LCP est dans le hero, peint avec la première image (accroche sous le mouvement, titre `h1` sous mouvement réduit), jamais après le module de mouvement ni le WebGL ; la photo reste `eager` + `fetchpriority="high"` et n'est jamais masquée | S07 (constat) |
 | 2026-10-02 | D42 | **Prévisualisation sur le Pi à chaque session** qui change ce qu'on voit : `npm run preview:pi` (essai à blanc) puis `-- --apply` publie toutes les pages de `dist/` sous `/preview/` (liens internes réécrits, `noindex, nofollow`, balise Google neutralisée) avec `_astro/`, `js/` et `styleguide/`, sans toucher à `index.html`, `en/` ni `api/` du site en ligne ; **autorisation permanente** pour cette seule commande ; URL données à Nicholas à la fin de la session. Retirée en S13 | Nicholas (après S09) |
 | 2026-10-02 | D43 | **Échelle de profondeur et parcours du Rhône animés sur téléphone aussi** (épinglés sur une colonne dès que le mouvement est permis ; replis statiques gardés pour le mouvement réduit et le Mode calme) ; **lampe plus lisible comme effet** : cartes atténuées hors du faisceau (`--torch-dim` 0,62, AA testé), opaques et titre réchauffé sous la lampe, faisceau qui déborde sur la photo au-dessus | Nicholas (retours sur la prévisualisation S09) |
+| 2026-10-02 | D44 | Lampe : cartes des Spécialités à **`--torch-dim` 0,25 hors du faisceau, sous le seuil AA, assumé** (« l'effet est très nettement insuffisant » à 0,62) ; plancher testé (titres ≥ 2:1, texte ≥ 1,6:1) ; aucune lampe et contraste complet sans mouvement ; axe exclut ces cartes seulement quand la lampe tourne | Nicholas (après la prévisualisation S09) |
+| 2026-10-02 | D45 | **Défilements horizontaux = piste épinglée pilotée par le scroll vertical, sur tous les écrans, par défaut** (modèle du parcours du Rhône, validé sur PC et téléphone) ; repli `scroll-snap` sans mouvement ; s'applique au rail des Témoignages (S10, E12) et à tout futur carrousel | Nicholas (après la prévisualisation S09) |
 
 ## Mutations du plan
 
@@ -156,6 +158,7 @@
 | 2026-10-02 | S09 | corriger | Trace de performance par un script Playwright (molette + pointeur, `longtask`, images) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
 | 2026-10-02 | S09 | ajouter | `scripts/preview-pi.mjs` + `scripts/lib/preview-page.mjs` (testé) et `npm run preview:pi` ; protocole de session du `README.md` (étape 7 « Prévisualiser », gates, actions sortantes), briefs S10 (formulaire posté au `contact.php` en ligne), S12 (option B = cette prévisualisation) et S13 (retrait du script), `CLAUDE.md` mis à jour | D42 : Nicholas ne pouvait rien juger, rien n'étant publié |
 | 2026-10-02 | S09 | étendre | Retours de Nicholas sur la prévisualisation (D43) : épinglage de l'échelle (S08) et des Lieux sur téléphone, lampe (opacité des cartes, débordement du faisceau) ; `02-architecture` §8, `01-direction-artistique` §7 (E9, E10) et `CLAUDE.md` mis à jour ; `anticipatePin` écarté | D43 |
+| 2026-10-02 | S09 → S10 | modifier | E12 (rail des Témoignages) suit D45 : piste épinglée sur tous les écrans, mécanique de `places.ts` à extraire dans un module partagé ; `01-direction-artistique` §7 (E12 + règle générale) et brief S10 mis à jour | D45 |
 
 ## Mesures
 
@@ -551,8 +554,9 @@
   - référence visuelle du hero mise à jour : depuis `c742989`, le titre découpé garde l'interligne prévu (33 px de moins à 1440 px, comme sans JavaScript) ; les tests visuels échouaient depuis ce commit ;
   - vérifications : Vitest 569, e2e 237 réussis (35 sautés), a11y 28/28, visuels 2/2 (Chromium ; 2 sautés sous WebKit, par construction), budgets JS 108,6 Ko, CSS 15,2 Ko ; pas de nouvelle revue de code (CSS et réglages, couverts par les tests) ;
   - commits : `593143e`, `387fa76`, `31ac3d4`.
+  - second retour (D44, D45) : échelle et parcours du Rhône validés sur téléphone, à garder ainsi ; lampe renforcée (`--torch-dim` 0,25, sous AA assumé) ; règle des défilements horizontaux étendue au plan ; commit de la lampe ci-après.
 - **Points ouverts** :
-  - Nicholas : parcours sur PC validé ; lampe retouchée et animations sur téléphone à juger sur la prévisualisation (`/preview/`) ;
+  - Nicholas : parcours et échelle validés (PC et téléphone) ; lampe renforcée à rejuger sur `/preview/` ;
   - I-03 : températures, visibilité et accès toujours non fournis (rien d'inventé, aucun `TODO` affiché) ;
   - Safari réel et Firefox (D21) non vérifiés à la main ;
   - S10 : rien de nouveau ; la couture de la texture des thermoclines (point ouvert de S08) reste à traiter.

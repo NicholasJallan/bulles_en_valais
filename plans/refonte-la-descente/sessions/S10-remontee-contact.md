@@ -27,7 +27,7 @@ La remontée : de 22 m à la surface. « Avant de s'immerger » (matériel et as
    - `GiftCard` : format 1,586:1, reflet caustique irisé (dégradés CSS + masque), inclinaison ≤ 8° au pointeur (`gsap.quickTo` sur `rotateX` et `rotateY`, perspective 800 px), au gyroscope **non** (évite les demandes de permission) ;
    - offres, « comment ça marche » en 3 étapes et conditions selon I-12 ;
    - CTA « Offrir » : `data-prefill-interest="gift"` → sélectionne « Bon cadeau » dans le formulaire, défile jusqu'au contact et place le focus sur le premier champ.
-3. **Témoignages** (E12) : rail `scroll-snap` + boutons précédent/suivant (état désactivé aux extrémités), indicateur de progression, glisser à la souris en amélioration progressive, parallaxe légère des guillemets ; `lang` corrects ; mentions de traduction (I-09).
+3. **Témoignages** (E12, **D45**) : avec mouvement, sur **tous les écrans**, rail épinglé dont le défilement vertical fait avancer les citations vers la droite, puis la page reprend à la butée — même modèle que le parcours du Rhône validé par Nicholas (`components/places/places.ts` : extraire la mécanique commune, piste + fenêtre `overflow: hidden` gardée à 0 + focus clavier + `refreshPriority: 1`, sans `anticipatePin`, dans un module partagé et testé, puis l'utiliser pour les Lieux et les Témoignages) ; boutons précédent/suivant qui font défiler la page jusqu'à la citation, indicateur de progression, parallaxe légère des guillemets. Sans mouvement : rail `scroll-snap` + boutons (état désactivé aux extrémités, `rail.ts` actuel). `lang` corrects ; mentions de traduction (I-09).
 
    > 🔁 Point de sortie possible.
 4. **Palier de sécurité — FAQ** (E13) : ouverture fluide (`interpolate-size: allow-keywords` et `::details-content` là où c'est supporté, sinon `grid-template-rows: 0fr → 1fr` via une classe) ; `hud.setMode('safety-stop')` tant que la section est visible (compte à rebours depuis 3:00, en pause hors de la vue, remise à zéro douce) ; sur-titre « Palier de sécurité · 5 m · 3 min ».
@@ -46,7 +46,7 @@ La remontée : de 22 m à la surface. « Avant de s'immerger » (matériel et as
    - optionnel (revue S00, risque faible) : délai global d'environ 30 s pour tout le dialogue SMTP, en plus du délai de 10 s par lecture ;
    - `php tests/php/contact_test.php`, `bash tests/php/run_integration.sh` et, avec l'accord de Nicholas, `bash tests/php/run_unit_php74.sh` verts.
 8. **Tests** :
-   - E2E : pré-remplissage cadeau (valeur, défilement, focus) ; formulaire (requêtes simulées 200 → succès avec canvas de bulles en mode mouvement, 400 → erreurs par champ, 429 → message, 500 → alternatives **sans navigation**) ; rail (boutons, clavier) ; FAQ exclusive ; mode palier du HUD ; dialogue WhatsApp (focus, `Esc`, URL générée) ;
+   - E2E : pré-remplissage cadeau (valeur, défilement, focus) ; formulaire (requêtes simulées 200 → succès avec canvas de bulles en mode mouvement, 400 → erreurs par champ, 429 → message, 500 → alternatives **sans navigation**) ; rail (épinglé avec mouvement sur ordinateur et téléphone, boutons, clavier ; `scroll-snap` sans mouvement) ; FAQ exclusive ; mode palier du HUD ; dialogue WhatsApp (focus, `Esc`, URL générée) ;
    - accessibilité : axe sur toute la page ;
    - revue `security-reviewer` du formulaire (client + PHP).
 
