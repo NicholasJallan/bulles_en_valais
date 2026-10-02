@@ -147,7 +147,9 @@ const t = getDictionary(locale).places;
   .places[data-pinned] .places-window {
     grid-area: window;
     display: block;
-    overflow: clip;
+    /* hidden, not clip: axe knows the panels beyond the window are not shown (places.ts keeps
+       its scroll at 0). */
+    overflow: hidden;
     /* The panels fade at the edges of the window instead of being cut. */
     mask-image: linear-gradient(
       to right,

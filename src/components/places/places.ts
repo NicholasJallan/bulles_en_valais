@@ -103,9 +103,17 @@ function deferReveals(parts: Parts, tween: gsap.core.Tween): Cleanup {
   };
 }
 
-/** Keyboard: a link focused in a panel out of view scrolls the page to that panel. */
+/**
+ * Keyboard: a link focused in a panel out of view scrolls the page to that panel. The window
+ * hides its overflow (axe then knows the panels beyond it are hidden): the browser may scroll it
+ * to show a focused link or a match of the find in page, which the track must not add to.
+ */
 function followFocus(parts: Parts, route: Route, trigger: ScrollTrigger): Cleanup {
+  const keepWindowStill = (): void => {
+    if (parts.window.scrollLeft !== 0) parts.window.scrollLeft = 0;
+  };
   const onFocus = (event: FocusEvent): void => {
+    keepWindowStill();
     const panel =
       event.target instanceof Element ? event.target.closest('[data-places-panel]') : null;
     const index = parts.panels.indexOf(panel as HTMLElement);
@@ -115,7 +123,11 @@ function followFocus(parts: Parts, route: Route, trigger: ScrollTrigger): Cleanu
     if (Math.abs(window.scrollY - top) > 1) window.scrollTo({ top, behavior: 'instant' });
   };
   parts.track.addEventListener('focusin', onFocus);
-  return () => parts.track.removeEventListener('focusin', onFocus);
+  parts.window.addEventListener('scroll', keepWindowStill, { passive: true });
+  return () => {
+    parts.track.removeEventListener('focusin', onFocus);
+    parts.window.removeEventListener('scroll', keepWindowStill);
+  };
 }
 
 export function pinPlaces(): Cleanup {
