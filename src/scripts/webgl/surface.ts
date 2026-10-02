@@ -49,6 +49,8 @@ const rgb = (name: ColorName): [number, number, number] => {
 };
 
 const seconds = (): number => performance.now() / 1000;
+/** The water moves slowly: 60 frames per second at most, even on 120 Hz screens. */
+const MIN_FRAME_S = 1 / 62;
 
 function linearTexture(gl: Renderer['gl'], image: HTMLImageElement): Texture {
   return new Texture(gl, {
@@ -62,8 +64,7 @@ function linearTexture(gl: Renderer['gl'], image: HTMLImageElement): Texture {
 
 /** Throws when the context or the program cannot be created: the caller keeps the <img>. */
 export function createSurface(options: SurfaceOptions): Surface {
-  const { canvas, image, mask, focal, mobile, onContextLost } = options;
-  const box = canvas.parentElement ?? canvas;
+  const { canvas, mobile } = options;
   const renderer = new Renderer({
     canvas,
     dpr: surfaceDpr(window.devicePixelRatio, mobile),
@@ -72,6 +73,19 @@ export function createSurface(options: SurfaceOptions): Surface {
     depth: false,
     powerPreference: 'low-power',
   });
+  const { gl } = renderer;
+  try {
+    return mountSurface(options, renderer);
+  } catch (error) {
+    // The context exists already: give it back before the caller keeps the <img>.
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    throw error;
+  }
+}
+
+function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
+  const { canvas, image, mask, focal, onContextLost } = options;
+  const box = canvas.parentElement ?? canvas;
   const { gl } = renderer;
   if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL 2 unavailable');
 
@@ -104,8 +118,10 @@ export function createSurface(options: SurfaceOptions): Surface {
 
   const now = (): number => seconds() - startedAt;
 
+  let lastFrame = -1;
   const render = (): void => {
     const time = now();
+    lastFrame = time;
     ripples = liveRipples(ripples, time);
     writeRipples(ripples, time, ripplesBuffer);
     uniforms.uTime.value = time;
@@ -128,12 +144,16 @@ export function createSurface(options: SurfaceOptions): Surface {
     if (!looping) render();
   };
 
+  const tick = (): void => {
+    if (now() - lastFrame >= MIN_FRAME_S) render();
+  };
+
   const sync = (): void => {
     const run = started && onScreen && document.visibilityState === 'visible';
     if (run === looping) return;
     looping = run;
-    if (run) gsap.ticker.add(render);
-    else gsap.ticker.remove(render);
+    if (run) gsap.ticker.add(tick);
+    else gsap.ticker.remove(tick);
   };
 
   const intersection = new IntersectionObserver((entries) => {

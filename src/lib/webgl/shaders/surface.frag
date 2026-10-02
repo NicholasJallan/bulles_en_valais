@@ -144,7 +144,10 @@ void main() {
   vec2 offset = (breathe + rippleOffset(uv, aspect)) * max(water, under);
 
   vec3 color = texture(uImage, imageUv + offset).rgb;
-  color += uLight * caustics(imageUv * vec2(9.0, 18.0), t * 0.35) * water * near * 0.07;
+  float shallow = water * near;
+  if (shallow > 0.001) {
+    color += uLight * caustics(imageUv * vec2(9.0, 18.0), t * 0.35) * shallow * 0.07;
+  }
 
   if (uImmersion > 0.0) {
     color = mix(color, underwater(uv, imageUv + offset, aspect, t), under);

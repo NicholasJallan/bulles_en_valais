@@ -21,6 +21,7 @@ export interface HeroSurfaceOptions {
   readonly onLost: () => void;
 }
 
+const noop: Cleanup = () => undefined;
 const IDLE_TIMEOUT_MS = 2000;
 const IDLE_FALLBACK_MS = 200;
 const EMIT = { minIntervalMs: 140, minDistancePx: 48 } as const;
@@ -99,8 +100,17 @@ function rippleOnPointer(hero: HTMLElement, surface: Surface): Cleanup {
   };
 }
 
-async function createOver(options: HeroSurfaceOptions, isCancelled: () => boolean) {
-  const { hero, image, maskUrl, fine, onLost } = options;
+interface Created {
+  readonly canvas: HTMLCanvasElement;
+  readonly surface: Surface;
+}
+
+async function createOver(
+  options: HeroSurfaceOptions,
+  isCancelled: () => boolean,
+  onLost: () => void,
+): Promise<Created | undefined> {
+  const { image, maskUrl, fine } = options;
   const [{ createSurface }, mask] = await Promise.all([
     import('@/scripts/webgl/surface.ts'),
     loadImage(maskUrl),
@@ -118,12 +128,9 @@ async function createOver(options: HeroSurfaceOptions, isCancelled: () => boolea
       mask,
       focal: parseObjectPosition(getComputedStyle(image).objectPosition),
       mobile: !fine,
-      onContextLost: () => {
-        canvas.remove();
-        onLost();
-      },
+      onContextLost: onLost,
     });
-    return { canvas, surface, stopRipples: rippleOnPointer(hero, surface) };
+    return { canvas, surface };
   } catch (error) {
     canvas.remove();
     throw error;
@@ -132,26 +139,34 @@ async function createOver(options: HeroSurfaceOptions, isCancelled: () => boolea
 
 export function loadHeroSurface(options: HeroSurfaceOptions): Cleanup {
   let cancelled = false;
-  let release: Cleanup = () => undefined;
+  let release: Cleanup = noop;
   const cancelIdle = whenIdleAfterLoad(() => {
     if (cancelled || !canUseWebGL(readEnvironment(document, navigator))) return;
-    createOver(options, () => cancelled).then(
-      (created) => {
+    const lost = (): void => {
+      release();
+      options.onLost();
+    };
+    createOver(options, () => cancelled, lost)
+      .then((created) => {
         if (created === undefined) return;
-        const { canvas, surface, stopRipples } = created;
-        surface.start();
-        options.onReady(surface);
-        gsap.to(canvas, { opacity: 1, duration: seconds(DURATIONS_MS.slow), ease: 'surface' });
+        const { canvas, surface } = created;
+        const stopRipples = rippleOnPointer(options.hero, surface);
         release = () => {
+          release = noop;
           stopRipples();
           gsap.killTweensOf(canvas);
           surface.destroy();
           canvas.remove();
         };
-      },
-      // The photo stays: the surface is an enhancement. Kept visible for debugging.
-      (error: unknown) => console.warn('Hero surface unavailable', error),
-    );
+        surface.start();
+        options.onReady(surface);
+        gsap.to(canvas, { opacity: 1, duration: seconds(DURATIONS_MS.slow), ease: 'surface' });
+      })
+      .catch((error: unknown) => {
+        // The photo stays: the surface is an enhancement. Kept visible for debugging.
+        release();
+        console.warn('Hero surface unavailable', error);
+      });
   });
   return () => {
     cancelled = true;

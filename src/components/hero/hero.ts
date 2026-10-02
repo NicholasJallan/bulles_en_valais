@@ -24,6 +24,13 @@ const HUD_FLICKER = [0.7, 0.15, 1] as const;
 
 const root = document.documentElement;
 const noop: Cleanup = () => undefined;
+/** The intro plays once per page: a restart of the motion (a breakpoint crossed) skips it. */
+let introPlayed = false;
+
+/** Ends the wait of motion.css: the hero title and the HUD figures show (or start rising). */
+const endIntroWait = (): void => {
+  root.dataset.intro = '';
+};
 
 type Immersion = (progress: number) => void;
 
@@ -77,15 +84,15 @@ function animateTitle(hero: HTMLElement): void {
   const title = hero.querySelector<HTMLElement>('.hero-title');
   if (title === null) return;
   // A page opened lower down (on an anchor) skips the intro.
-  let introduced = hero.getBoundingClientRect().bottom <= 0;
+  if (hero.getBoundingClientRect().bottom <= 0) introPlayed = true;
   SplitText.create(title, {
     type: 'lines',
     mask: 'lines',
     linesClass: 'reveal-line',
     autoSplit: true,
     onSplit(split) {
-      if (!introduced) {
-        introduced = true;
+      if (!introPlayed) {
+        introPlayed = true;
         introduce(split.lines);
       }
       return driftAway(hero, split.masks, hero.querySelector('.hero-lead'));
@@ -97,7 +104,10 @@ export function startHero({ fine }: { readonly fine: boolean }): Cleanup {
   const hero = document.getElementById('top');
   const veil = hero?.querySelector<HTMLElement>('[data-hero-water]');
   const image = hero?.querySelector<HTMLImageElement>('.hero-image');
-  if (hero == null || veil == null || image == null) return noop;
+  if (hero == null || veil == null || image == null) {
+    endIntroWait();
+    return noop;
+  }
 
   const scrim = hero.querySelector<HTMLElement>('.hero-scrim');
   const context = gsap.context(() => undefined);
@@ -124,8 +134,12 @@ export function startHero({ fine }: { readonly fine: boolean }): Cleanup {
   let cancelled = false;
   void fontsSettled().then(() => {
     if (cancelled) return;
-    context.add(() => animateTitle(hero));
-    root.dataset.intro = '';
+    try {
+      context.add(() => animateTitle(hero));
+    } finally {
+      // Even if the split fails, the title must not stay hidden.
+      endIntroWait();
+    }
   });
 
   const stopSurface = WEBGL_SURFACE
@@ -155,6 +169,6 @@ export function startHero({ fine }: { readonly fine: boolean }): Cleanup {
     veil.style.clipPath = '';
     veil.style.opacity = '';
     if (scrim !== null) scrim.style.opacity = '';
-    root.dataset.intro = '';
+    endIntroWait();
   };
 }
