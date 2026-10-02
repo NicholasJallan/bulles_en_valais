@@ -44,3 +44,26 @@ export function nearestIndex(values: readonly number[], at: number): number {
     -1,
   );
 }
+
+/** How close the progress must be to a centre to count as there (the scrub lags behind). */
+const STEP_EPSILON = 0.01;
+
+/**
+ * The panel a previous (-1) or next (1) button goes to: the nearest centre behind or ahead of
+ * the progress, -1 when there is none.
+ */
+export function stepIndex(centres: readonly number[], progress: number, direction: 1 | -1): number {
+  if (direction === 1) return centres.findIndex((centre) => centre > progress + STEP_EPSILON);
+  return centres.findLastIndex((centre) => centre < progress - STEP_EPSILON);
+}
+
+export interface Pin {
+  /** Scroll positions where the pin starts and ends, in px. */
+  readonly start: number;
+  readonly end: number;
+}
+
+/** Scroll position at which a pinned track reaches `progress`. */
+export function scrollAt(pin: Pin, progress: number): number {
+  return Math.round(pin.start + clamp01(progress) * (pin.end - pin.start));
+}

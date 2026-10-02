@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { centredProgress, interpolate, nearestIndex } from './track.ts';
+import { centredProgress, interpolate, nearestIndex, stepIndex, scrollAt } from './track.ts';
 
 describe('centredProgress', () => {
   // A track of panels moved to the left by up to 1000 px under a window 800 px wide.
@@ -60,5 +60,43 @@ describe('nearestIndex', () => {
     expect(nearestIndex([0.1, 0.5, 0.9], 1)).toBe(2);
     expect(nearestIndex([0.2, 0.4], 0.3)).toBe(0);
     expect(nearestIndex([], 0.3)).toBe(-1);
+  });
+});
+
+describe('stepIndex', () => {
+  const centres = [0, 0.25, 0.5, 0.75, 1];
+
+  it('goes to the next centre ahead of the progress', () => {
+    expect(stepIndex(centres, 0, 1)).toBe(1);
+    expect(stepIndex(centres, 0.3, 1)).toBe(2);
+  });
+
+  it('goes back to the last centre behind the progress', () => {
+    expect(stepIndex(centres, 0.3, -1)).toBe(1);
+    expect(stepIndex(centres, 1, -1)).toBe(3);
+  });
+
+  it('skips a centre the progress has nearly reached (the scrub lags a little)', () => {
+    expect(stepIndex(centres, 0.249, 1)).toBe(2);
+    expect(stepIndex(centres, 0.251, -1)).toBe(0);
+  });
+
+  it('is -1 past the ends, or for an empty list', () => {
+    expect(stepIndex(centres, 1, 1)).toBe(-1);
+    expect(stepIndex(centres, 0, -1)).toBe(-1);
+    expect(stepIndex([], 0.5, 1)).toBe(-1);
+  });
+});
+
+describe('scrollAt', () => {
+  it('is the scroll position of a progress between the start and the end of the pin', () => {
+    expect(scrollAt({ start: 1000, end: 3000 }, 0.25)).toBe(1500);
+    expect(scrollAt({ start: 1000, end: 3000 }, 0)).toBe(1000);
+  });
+
+  it('rounds to a whole pixel and keeps the progress within 0 → 1', () => {
+    expect(scrollAt({ start: 0, end: 999 }, 1 / 3)).toBe(333);
+    expect(scrollAt({ start: 100, end: 200 }, 2)).toBe(200);
+    expect(scrollAt({ start: 100, end: 200 }, -1)).toBe(100);
   });
 });
