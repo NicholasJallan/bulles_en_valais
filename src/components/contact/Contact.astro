@@ -144,25 +144,34 @@ const channels = [
     overflow: hidden;
   }
 
-  /* The surface ripples in the window: the shimmer of the thermoclines, inside the disc only. */
-  .snell-shimmer {
+  /* The surface ripples in the window: bands of water-tinted light seen through a noise that
+     tiles without seams (white: it is used as a mask), inside the disc only. */
+  .snell-shimmer,
+  .snell-waves {
     position: absolute;
+    background-color: var(--c-lagoon-ink);
+    mask-image:
+      url('@/assets/textures/ripples.svg'),
+      radial-gradient(closest-side, var(--fg) 35%, transparent 72%);
+    mask-composite: intersect;
+  }
+
+  .snell-shimmer {
     inset: -20%;
-    background-image: url('@/assets/textures/shimmer.svg');
-    background-size: 40rem 14rem;
-    opacity: 0.12;
-    mask-image: radial-gradient(closest-side, var(--fg) 30%, transparent 70%);
+    mask-size:
+      60rem 20rem,
+      100% 100%;
+    opacity: 0.2;
   }
 
   /* A second, wider swell crossing the first one: their interference reads as a moving surface
      (snell.ts keeps it drifting while the section is on screen). */
   .snell-waves {
-    position: absolute;
     inset: -25%;
-    background-image: url('@/assets/textures/shimmer.svg');
-    background-size: 64rem 22rem;
-    opacity: 0.1;
-    mask-image: radial-gradient(closest-side, var(--fg) 25%, transparent 65%);
+    mask-size:
+      90rem 30rem,
+      100% 100%;
+    opacity: 0.3;
   }
 
   .contact-inner {

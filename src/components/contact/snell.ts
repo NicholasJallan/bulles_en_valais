@@ -1,6 +1,6 @@
 // Snell's window in motion (E14): as the contact section comes up, the disc of light opens and
 // brightens, and the ripples inside it drift with the scroll. Once in place, the surface keeps
-// moving gently: a second swell drifts across the first one and the window breathes, as when
+// moving: a second swell drifts across the first one and the rim of the window wobbles, as when
 // looking up from a safety stop. The swell runs only while the section is on screen
 // (transform and opacity only).
 import type { Cleanup } from '@/lib/controllers.ts';
@@ -10,9 +10,11 @@ import { gsap, ScrollTrigger } from '@/scripts/motion/gsap.ts';
 const OPEN_FROM_SCALE = 0.55;
 const SHIMMER_DRIFT_PERCENT = 14;
 /** The swell: slow, a few tides long, never in step with itself. */
-const SWELL_S = seconds(DURATIONS_MS.tide) * 3;
-const WAVES_DRIFT_PERCENT = 6;
-const BREATH_SCALE = 1.025;
+const SWELL_S = seconds(DURATIONS_MS.tide) * 2;
+const WAVES_DRIFT_PERCENT = 12;
+/** The rim of the window wobbles: its two axes swell out of step. */
+const RIM_SCALE = 1.045;
+const RIM_OFFSET = 0.985;
 
 interface Parts {
   readonly section: HTMLElement;
@@ -71,8 +73,19 @@ function swell({ section, swell: breathing, waves }: Parts): void {
       },
       0,
     )
-    .fromTo(waves, { opacity: 0.06 }, { opacity: 0.14, duration: SWELL_S * 0.6, ...loop }, 0)
-    .fromTo(breathing, { scale: 1 }, { scale: BREATH_SCALE, duration: SWELL_S * 0.8, ...loop }, 0);
+    .fromTo(waves, { opacity: 0.2 }, { opacity: 0.42, duration: SWELL_S * 0.45, ...loop }, 0)
+    .fromTo(
+      breathing,
+      { scaleX: RIM_OFFSET },
+      { scaleX: RIM_SCALE, duration: SWELL_S * 0.35, ...loop },
+      0,
+    )
+    .fromTo(
+      breathing,
+      { scaleY: RIM_SCALE },
+      { scaleY: RIM_OFFSET, duration: SWELL_S * 0.5, ...loop },
+      0,
+    );
   ScrollTrigger.create({
     trigger: section,
     start: 'top bottom',
