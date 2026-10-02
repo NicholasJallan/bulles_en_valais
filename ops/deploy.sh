@@ -49,7 +49,8 @@ remote '
 previous="$(linked_release "$link")"
 echo "$link -> ${previous:-nothing yet}; new release: $release ($commit)"
 
-rsync_options=(-rlt --chmod=D755,F644 --rsync-path='sudo rsync' --exclude='.DS_Store')
+# macOS ships openrsync (no --chmod): modes are set on the Pi after the transfer.
+rsync_options=(-rlt --rsync-path='sudo rsync' --exclude='.DS_Store')
 if $dry_run; then
   step "Dry run: files that would go to releases/$release"
   rsync "${rsync_options[@]}" -n --stats dist/ "$REMOTE:$BASE/releases/$release/" | tail -n 16
@@ -59,7 +60,7 @@ fi
 
 step "Send dist/ to releases/$release"
 rsync "${rsync_options[@]}" dist/ "$REMOTE:$BASE/releases/$release/"
-remote 'sudo chown -R www-data:www-data "$1"' "$BASE/releases/$release"
+remote 'sudo chmod -R u=rwX,go=rX "$1" && sudo chown -R www-data:www-data "$1"' "$BASE/releases/$release"
 
 step "Switch $link"
 switch_link "$link" "$release"
