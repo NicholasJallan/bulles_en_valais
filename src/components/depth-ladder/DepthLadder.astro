@@ -5,13 +5,15 @@ import { ladderCourses } from '@/data/courses.ts';
 import { markerDepth } from '@/data/sections.ts';
 import { getDictionary, localize } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
-import { groupByDepth, ladderPosition } from '@/lib/depth/ladder-scale.ts';
-import { formatDepth } from '@/lib/format.ts';
+import { groupByDepth, ladderPosition, ladderTicks } from '@/lib/depth/ladder-scale.ts';
+import { formatDecimal, formatDepth } from '@/lib/format.ts';
 
 /**
- * Static depth ladder (E9 animates it in S08): each certification at its real maximum depth.
- * The space between two rungs follows the scale (real to 40 m, compressed below), with a minimum
- * so that close depths stay readable.
+ * Depth ladder (E9): each certification at its real maximum depth. Static, a list whose rungs
+ * are spaced by the scale (real to 40 m, compressed below), with a minimum so that close depths
+ * stay readable. On a desktop with motion, ladder.ts pins the section (data-pinned): the ruler
+ * scrolls under the « you are here » marker and the rungs light up at their depth. The ruler and
+ * the marker are decoration (aria-hidden): the list holds the information in every mode.
  */
 interface Props {
   locale: Locale;
@@ -27,10 +29,11 @@ const rungs = groups.map((group, index) => ({
   gap: ladderPosition(group.depth) - ladderPosition(groups[index - 1]?.depth ?? 0),
   compressed: group.depth > KNEE && (groups[index - 1]?.depth ?? 0) <= KNEE,
 }));
+const ticks = ladderTicks();
 ---
 
 <Section id="depth" tone="deep" class="ladder-section">
-  <div class="wrap split">
+  <div class="wrap split ladder-layout">
     <SectionHeader
       id="depth-title"
       depth={markerDepth('depth')}
@@ -39,30 +42,55 @@ const rungs = groups.map((group, index) => ({
       lead={t.lead}
       class="ladder-head"
     />
-    <figure class="ladder-figure">
-      <figcaption class="fine">{t.legend}</figcaption>
-      <ol class="bare-list ladder">
-        {rungs.map((rung) => (
-          <li
-            class:list={['rung', { 'rung-deep': rung.depth > KNEE }]}
-            style={`--gap: ${rung.gap.toFixed(3)}`}
-          >
-            <span class="rung-depth tabular">{formatDepth(rung.depth, locale)}</span>
-            <ul class="bare-list rung-courses">
-              {rung.items.map((course) => (
-                <li>
-                  <span class="rung-agency">
-                    {dictionary.courses.agencies[course.agency].label}
-                  </span>{' '}
-                  {localize(course.name, locale)}
-                </li>
-              ))}
-            </ul>
-            {rung.compressed && <p class="rung-note fine">{t.scaleNote}</p>}
-          </li>
-        ))}
-      </ol>
-    </figure>
+    <div class="ladder-stage" data-ladder-stage>
+      <figure class="ladder-figure">
+        <figcaption class="fine ladder-legend">{t.legend}</figcaption>
+        <div class="ladder-track" data-ladder-track>
+          <div class="ladder-ruler" aria-hidden="true">
+            {ticks.map((tick) => (
+              <span
+                class:list={['tick', { 'tick-major': tick.major }]}
+                style={`--pos: ${tick.position.toFixed(4)}`}
+              >
+                {tick.major && (
+                  <span class="tick-label tabular">{formatDecimal(tick.depth, locale, 0)}</span>
+                )}
+              </span>
+            ))}
+          </div>
+          <ol class="bare-list ladder">
+            {rungs.map((rung) => (
+              <li
+                class:list={['rung', { 'rung-deep': rung.depth > KNEE }]}
+                style={`--gap: ${rung.gap.toFixed(3)}; --pos: ${ladderPosition(rung.depth).toFixed(4)}`}
+                data-ladder-rung
+                data-position={ladderPosition(rung.depth)}
+              >
+                <span class="rung-depth tabular">{formatDepth(rung.depth, locale)}</span>
+                <ul class="bare-list rung-courses">
+                  {rung.items.map((course) => (
+                    <li>
+                      <span class="rung-agency">
+                        {dictionary.courses.agencies[course.agency].label}
+                      </span>{' '}
+                      {localize(course.name, locale)}
+                    </li>
+                  ))}
+                </ul>
+                {rung.compressed && <p class="rung-note fine">{t.scaleNote}</p>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </figure>
+      <p class="ladder-marker" aria-hidden="true">
+        <span class="ladder-here">{t.youAreHere}</span>
+        <span class="ladder-reading tabular">
+          <span data-ladder-depth>{formatDecimal(0, locale, 0)}</span>{' '}
+          <span class="ladder-unit">m</span>
+        </span>
+      </p>
+    </div>
   </div>
 </Section>
 
@@ -142,5 +170,209 @@ const rungs = groups.map((group, index) => ({
 
   .rung-note {
     grid-column: 2;
+  }
+
+  /* Decoration of the pinned ladder only. */
+  .ladder-ruler,
+  .ladder-marker {
+    display: none;
+  }
+
+  /* ——— Pinned (ladder.ts, desktop with motion): the header scrolls by, then the stage is
+     pinned and the ruler scrolls under a fixed marker. ——— */
+  .ladder-section[data-pinned] {
+    --track-length: 240svh;
+    --rung-offset: 2.5rem;
+    --ladder-marker-span: 4;
+
+    /* The bottom half of the pinned stage is already open water. */
+    padding-block-end: 0;
+  }
+
+  /* From 80 rem, the ruler can give the text a wider column. */
+  @media (width >= 80rem) {
+    .ladder-section[data-pinned] {
+      --rung-offset: 3.5rem;
+      --ladder-marker-span: 5;
+    }
+  }
+
+  [data-pinned] .ladder-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-pinned] .ladder-layout > * {
+    grid-column: 1 / -1;
+  }
+
+  [data-pinned] :global(.ladder-head) {
+    position: static;
+    max-inline-size: 40rem;
+  }
+
+  [data-pinned] .ladder-stage {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    gap: var(--grid-gap);
+    align-items: center;
+    block-size: 100svh;
+  }
+
+  [data-pinned] .ladder-figure {
+    position: relative;
+    grid-column: calc(var(--ladder-marker-span) + 1) / -1;
+    grid-row: 1;
+    align-self: stretch;
+    overflow: hidden;
+    mask-image: linear-gradient(transparent, black 22%, black 78%, transparent);
+  }
+
+  /* The « you are here » line, across the middle of the water. */
+  [data-pinned] .ladder-figure::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    block-size: 1px;
+    background-image: linear-gradient(to right, transparent, var(--action) 50%, transparent);
+  }
+
+  [data-pinned] .ladder-legend {
+    position: absolute;
+    clip-path: inset(50%);
+  }
+
+  [data-pinned] .ladder-track {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    block-size: var(--track-length);
+  }
+
+  [data-pinned] .ladder-ruler {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 50%;
+    inline-size: 1px;
+    background-color: var(--line);
+  }
+
+  .tick {
+    position: absolute;
+    inset-block-start: calc(var(--pos) * 100%);
+    inset-inline-start: 0;
+    inline-size: 0.5rem;
+    block-size: 1px;
+    background-color: var(--fg-soft);
+    translate: -50% 0;
+  }
+
+  .tick-major {
+    inline-size: 1.25rem;
+  }
+
+  .tick-label {
+    position: absolute;
+    inset-inline-end: calc(100% + var(--space-2xs));
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    font-size: var(--step--2);
+    color: var(--fg-soft);
+  }
+
+  [data-pinned] .ladder {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  [data-pinned] .rung {
+    position: absolute;
+    inset-block-start: calc(var(--pos) * 100%);
+    grid-template-columns: auto minmax(0, 1fr);
+    inline-size: calc(50% - var(--rung-offset));
+    max-inline-size: 22rem;
+    padding: var(--space-xs) var(--space-s);
+    font-size: var(--step--1);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-drift);
+    translate: 0 -1.4em;
+  }
+
+  /* Alternating sides: the shallow rungs to the left of the ruler, the next to the right. */
+  [data-pinned] .rung:nth-child(odd) {
+    inset-inline-end: calc(50% + var(--rung-offset));
+    grid-template-columns: minmax(0, 1fr) auto;
+    text-align: end;
+  }
+
+  [data-pinned] .rung:nth-child(odd) .rung-depth {
+    order: 2;
+  }
+
+  [data-pinned] .rung:nth-child(even) {
+    inset-inline-start: calc(50% + var(--rung-offset));
+  }
+
+  [data-pinned] .rung-depth {
+    font-size: var(--step-0);
+  }
+
+  [data-pinned] .rung-depth::before {
+    content: none;
+  }
+
+  /* A light on the ruler, level with the rung. */
+  .ladder-section[data-pinned] .rung::after {
+    content: '';
+    position: absolute;
+    inset-block: 1.4em auto;
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: var(--radius-round);
+    background: var(--action);
+    box-shadow: var(--glow-soft);
+    translate: 0 -50%;
+  }
+
+  .ladder-section[data-pinned] .rung:nth-child(odd)::after {
+    inset-inline: auto calc(-1 * var(--rung-offset) - 0.25rem);
+  }
+
+  .ladder-section[data-pinned] .rung:nth-child(even)::after {
+    inset-inline: calc(-1 * var(--rung-offset) - 0.25rem) auto;
+  }
+
+  [data-pinned] .rung-note {
+    grid-column: 1 / -1;
+  }
+
+  [data-pinned] .ladder-marker {
+    display: grid;
+    grid-column: 1 / span var(--ladder-marker-span);
+    grid-row: 1;
+    gap: var(--space-3xs);
+  }
+
+  .ladder-here {
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+    color: var(--fg-soft);
+  }
+
+  .ladder-reading {
+    font-family: var(--font-display);
+    font-size: var(--step-hero);
+    line-height: 0.9;
+  }
+
+  .ladder-unit {
+    font-size: var(--step-3);
+    color: var(--fg-soft);
   }
 </style>

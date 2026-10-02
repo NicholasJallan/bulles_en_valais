@@ -10,9 +10,11 @@ import { toneWater } from './water-tones.ts';
 interface Props {
   from: Tone;
   to: Tone;
+  /** A depth marker written in the band, like on a descent line (« Remontée · 40 m »). */
+  label?: string;
 }
 
-const { from, to } = Astro.props;
+const { from, to, label } = Astro.props;
 ---
 
 <div
@@ -24,6 +26,7 @@ const { from, to } = Astro.props;
   style={`--from: ${toneWater(from)}; --to: ${toneWater(to)}`}
 >
   <div class="thermocline-shimmer" data-thermocline-shimmer></div>
+  {label && <p class="thermocline-label wrap fine">{label}</p>}
 </div>
 
 <style>
@@ -37,6 +40,24 @@ const { from, to } = Astro.props;
   /* With the motion module, the middle of the band shows the fixed water column. */
   :global(html.motion-ready) .thermocline {
     background-image: linear-gradient(var(--from), transparent 35%, transparent 65%, var(--to));
+  }
+
+  .thermocline-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    block-size: 100%;
+    max-inline-size: none;
+    color: var(--c-foam-soft);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .thermocline-label::before {
+    content: '';
+    inline-size: var(--space-l);
+    block-size: 1px;
+    background-color: currentcolor;
   }
 
   .thermocline-shimmer {

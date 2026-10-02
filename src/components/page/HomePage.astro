@@ -22,6 +22,8 @@ import WhatsAppDialog from '@/components/whatsapp/WhatsAppDialog.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { formatDepth } from '@/lib/format.ts';
 import { buildJsonLd, serializeJsonLd } from '@/lib/seo/jsonld.ts';
 
 /** The one page, in the order of the dive profile (01-direction-artistique.md §2). */
@@ -61,7 +63,11 @@ const jsonLd = serializeJsonLd(
     <Courses locale={locale} />
     <Interlude locale={locale} variant="descent" from="lagoon" to="deep" />
     <DepthLadder locale={locale} />
-    <Thermocline from="deep" to="abyss" />
+    <Thermocline
+      from="deep"
+      to="abyss"
+      label={`${t.depthLadder.ascent} · ${formatDepth(markerDepth('compare'), locale)}`}
+    />
     <CompareTable locale={locale} />
     <Interlude locale={locale} variant="light" from="abyss" to="abyss" />
     <Specialties locale={locale} />
