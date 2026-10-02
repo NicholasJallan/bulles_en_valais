@@ -28,6 +28,8 @@ export function trackDepth(): Cleanup {
   let page = 0;
 
   const update = (scroll: number): void => {
+    // ScrollTrigger may update before its first refresh (a page opened on an anchor).
+    if (sections.length === 0) return;
     showReading(resolveDepth(sections, probeLine(scroll, viewport, page)));
   };
   const refresh = (scroll: number): void => {

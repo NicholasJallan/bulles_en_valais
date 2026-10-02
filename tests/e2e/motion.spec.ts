@@ -49,6 +49,15 @@ test.describe('motion', () => {
     await expect(page.locator('[data-hud-temperature]')).toHaveText(/^8\s°C$/);
   });
 
+  test('a page opened on an anchor starts its motion', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text());
+    });
+    await gotoMoving(page, '/#agencies');
+    expect(errors).toEqual([]);
+  });
+
   test('the HUD hides itself in the depth ladder', async ({ page }) => {
     await gotoMoving(page);
     await scrollToSection(page, 'depth');
