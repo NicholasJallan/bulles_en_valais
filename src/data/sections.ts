@@ -1,6 +1,7 @@
 // The dive profile of the one-page site (plans/refonte-la-descente/01-direction-artistique.md §2):
 // section order, anchors, the depth of each eyebrow marker (« — 12 m · Cursus ») and the
 // narrative depths the HUD interpolates between (data-depth-start / data-depth-end, S06).
+import { fillHiddenDepths } from '@/lib/depth/profile.ts';
 
 export interface DepthRange {
   readonly start: number;
@@ -37,6 +38,12 @@ export const DIVE_PROFILE = [
 ] as const satisfies readonly SectionProfile[];
 
 export type SectionId = (typeof DIVE_PROFILE)[number]['id'];
+
+/**
+ * Depths of every section for the HUD and its dive profile: the sections that hide the HUD run
+ * from the depth before them to the depth after them, so that the reading never jumps.
+ */
+export const HUD_PROFILE = fillHiddenDepths(DIVE_PROFILE);
 
 /** Anchors already used by links and Google Ads extensions (02-architecture.md §13). */
 export const HISTORICAL_ANCHORS = [

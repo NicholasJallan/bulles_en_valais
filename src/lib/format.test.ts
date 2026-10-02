@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatDecimal,
   formatCHF,
   formatCoordinates,
   formatDepth,
@@ -135,5 +136,17 @@ describe('formatDuration', () => {
 
   it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('rejects %s', (seconds) => {
     expect(() => formatDuration(seconds)).toThrow(RangeError);
+  });
+});
+
+describe('formatDecimal', () => {
+  it('writes the figure alone, with the decimal mark of the locale', () => {
+    expect(formatDecimal(12.44, 'fr')).toBe('12,4');
+    expect(formatDecimal(12.44, 'en')).toBe('12.4');
+    expect(formatDecimal(-0, 'fr', 0)).toBe('0');
+  });
+
+  it('refuses a value that is not a number', () => {
+    expect(() => formatDecimal(Number.NaN, 'fr')).toThrow(RangeError);
   });
 });

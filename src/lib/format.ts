@@ -35,6 +35,12 @@ export function formatCHF(amount: number, locale: Locale): string {
   return `CHF${NO_BREAK_SPACE}${numberFormat(locale, 0).format(amount)}`;
 }
 
+/** A figure alone, « 12,4 » in French and « 12.4 » in English (the HUD sets the unit apart). */
+export function formatDecimal(value: number, locale: Locale, decimals = 1): string {
+  if (!Number.isFinite(value)) throw new RangeError(`Expected a finite number, got ${value}`);
+  return numberFormat(locale, decimals).format(value + 0);
+}
+
 /** « 12,4 m » in French, « 12.4 m » in English. */
 export function formatDepth(metres: number, locale: Locale, decimals = 0): string {
   if (!(metres >= 0) || !Number.isFinite(metres)) {

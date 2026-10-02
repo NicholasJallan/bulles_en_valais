@@ -1,5 +1,5 @@
 ---
-import { DIVE_PROFILE, type SectionId } from '@/data/sections.ts';
+import { HUD_PROFILE, type SectionId } from '@/data/sections.ts';
 
 export type Tone = 'surface' | 'lagoon' | 'emerald' | 'deep' | 'abyss';
 
@@ -16,9 +16,8 @@ interface Props {
 }
 
 const { id, tone, class: className, ...attributes } = Astro.props;
-const profile = DIVE_PROFILE.find((section) => section.id === id);
+const profile = HUD_PROFILE.find((section) => section.id === id);
 if (profile === undefined) throw new Error(`Section "${id}" is not in the dive profile`);
-const { hud } = profile;
 ---
 
 <section
@@ -26,9 +25,9 @@ const { hud } = profile;
   class:list={['section', className]}
   aria-labelledby={`${id}-title`}
   data-tone={tone}
-  data-depth-start={hud?.start}
-  data-depth-end={hud?.end}
-  data-hud={hud === null ? 'hidden' : undefined}
+  data-depth-start={profile.start}
+  data-depth-end={profile.end}
+  data-hud={profile.hidden ? 'hidden' : undefined}
   {...attributes}
 >
   <slot />

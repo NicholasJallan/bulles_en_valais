@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { getDictionary } from '../i18n/index.ts';
 import type { Dictionary } from '../i18n/dictionary.ts';
-import { DIVE_PROFILE, HISTORICAL_ANCHORS, markerDepth, type SectionId } from './sections.ts';
+import {
+  DIVE_PROFILE,
+  HISTORICAL_ANCHORS,
+  HUD_PROFILE,
+  markerDepth,
+  type SectionId,
+} from './sections.ts';
 
 /** Section of the page that renders each block of the dictionary with an eyebrow. */
 const EYEBROW_SECTIONS = {
@@ -75,5 +81,18 @@ describe('DIVE_PROFILE', () => {
 
   it('refuses the marker of a section without eyebrow', () => {
     expect(() => markerDepth('interlude-descent')).toThrow(/has no depth marker/);
+  });
+});
+
+describe('HUD_PROFILE', () => {
+  it('gives every section of the profile a start and an end depth', () => {
+    expect(HUD_PROFILE.map((section) => section.id)).toEqual(DIVE_PROFILE.map((s) => s.id));
+    for (const section of HUD_PROFILE) {
+      expect(Number.isFinite(section.start) && Number.isFinite(section.end)).toBe(true);
+    }
+  });
+
+  it('hides the HUD exactly where the dive profile says so', () => {
+    expect(HUD_PROFILE.filter((s) => s.hidden).map((s) => s.id)).toEqual(['depth', 'compare']);
   });
 });
