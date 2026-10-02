@@ -203,7 +203,7 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 
 **E14 — Fenêtre de Snell (retour à la surface)**
 - Quoi : derrière le titre du contact, un disque de lumière doux, comme le ciel vu depuis le fond à travers la surface (cône d'environ 97°) ; en approchant, le fond s'éclaircit jusqu'à l'écume. Accroche : « Sous l'eau, on ne parle pas. Remontons. »
-- Comment : dégradé radial + léger miroitement (bruit en `transform`).
+- Comment : dégradé radial cerné d'un anneau d'eau plus sombre + léger miroitement (bruit en `transform`) ; une fois en place, la surface continue de bouger doucement (deuxième houle qui dérive, fenêtre qui respire de 2,5 %, cycle ≈ 7 s), seulement quand la section est à l'écran (retour de Nicholas après S10).
 - Session : S10.
 
 **E15 — Intro (≤ 1,2 s, jamais bloquante)**

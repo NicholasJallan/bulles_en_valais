@@ -13,7 +13,7 @@ import ContactForm from './ContactForm.astro';
 /**
  * Back at the surface (E14): under a Snell's window — the disc of sky seen from below the surface,
  * soft light behind the title — the direct channels first, then the form. With motion, snell.ts
- * opens the window as the section comes up, and its shimmer drifts with the scroll.
+ * opens the window as the section comes up, and the surface keeps moving gently in it.
  */
 interface Props {
   locale: Locale;
@@ -43,8 +43,11 @@ const channels = [
 
 <Section id="contact" tone="surface" class="contact">
   <div class="snell" aria-hidden="true" data-snell>
-    <div class="snell-disc" data-snell-disc>
-      <div class="snell-shimmer" data-snell-shimmer></div>
+    <div class="snell-swell" data-snell-swell>
+      <div class="snell-disc" data-snell-disc>
+        <div class="snell-shimmer" data-snell-shimmer></div>
+        <div class="snell-waves" data-snell-waves></div>
+      </div>
     </div>
   </div>
   <div class="wrap contact-inner">
@@ -117,7 +120,7 @@ const channels = [
       justify-items: start;
     }
 
-    .snell-disc {
+    .snell-swell {
       margin-inline-start: calc(28% - var(--snell-size) / 2);
     }
   }
@@ -149,6 +152,17 @@ const channels = [
     background-size: 40rem 14rem;
     opacity: 0.12;
     mask-image: radial-gradient(closest-side, var(--fg) 30%, transparent 70%);
+  }
+
+  /* A second, wider swell crossing the first one: their interference reads as a moving surface
+     (snell.ts keeps it drifting while the section is on screen). */
+  .snell-waves {
+    position: absolute;
+    inset: -25%;
+    background-image: url('@/assets/textures/shimmer.svg');
+    background-size: 64rem 22rem;
+    opacity: 0.1;
+    mask-image: radial-gradient(closest-side, var(--fg) 25%, transparent 65%);
   }
 
   .contact-inner {
