@@ -21,7 +21,7 @@ const price = isOnRequest(course.price)
 const equivalent = card.equivalent && localize(courseById(card.equivalent).name, locale);
 ---
 
-<li class="specialty">
+<li class="specialty" data-tab-row data-torch-card>
   <p class="specialty-num tabular" aria-hidden="true">
     {card.num}
   </p>
@@ -38,6 +38,7 @@ const equivalent = card.equivalent && localize(courseById(card.equivalent).name,
 
 <style>
   .specialty {
+    position: relative;
     display: grid;
     grid-template-columns: 4.5rem 1fr auto;
     grid-template-areas:
@@ -48,6 +49,23 @@ const equivalent = card.equivalent && localize(courseById(card.equivalent).name,
     gap: var(--space-3xs) var(--space-s);
     padding-block: var(--space-m);
     border-block-start: 1px solid var(--line);
+  }
+
+  /* Lit by the lamp (torch.ts, E8): a rim and a glow of the lamp, the text does not change. */
+  .specialty::after {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--space-s));
+    border: 1px solid color-mix(in oklch, var(--c-torch) 70%, transparent);
+    border-radius: var(--radius-soft);
+    box-shadow: var(--glow-lit);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-surface);
+  }
+
+  .specialty.is-lit::after {
+    opacity: 1;
   }
 
   .specialty-num {

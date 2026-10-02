@@ -40,7 +40,7 @@ const tabs = SPECIALTY_TABS.map((tab) => ({
           data-active={index === 0 ? '' : undefined}
         >
           <div class="specialty-panel-head">
-            <h3>{t.tabs[tab].label}</h3>
+            <h3 data-tab-headline>{t.tabs[tab].label}</h3>
             <p>{t.tabs[tab].lead}</p>
           </div>
           <ul class="bare-list specialty-list">
@@ -58,6 +58,55 @@ const tabs = SPECIALTY_TABS.map((tab) => ({
   .specialties-inner {
     display: grid;
     gap: var(--space-xl);
+  }
+
+  /* ——— The lamp (torch.ts, E8): under the content, it only adds light. ——— */
+  .specialties[data-torch] {
+    --torch-size: clamp(18rem, 12rem + 24vw, 34rem);
+
+    position: relative;
+    isolation: isolate;
+  }
+
+  .specialties[data-torch] .specialties-inner {
+    position: relative;
+    z-index: var(--z-raised);
+  }
+
+  .specialties :global(.torch) {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    pointer-events: none;
+  }
+
+  .specialties :global(.torch-beam) {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: var(--torch-size);
+    aspect-ratio: 1;
+    overflow: clip;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklch, var(--c-torch-glow) 20%, transparent),
+      color-mix(in oklch, var(--c-torch-glow) 7%, transparent) 55%,
+      transparent
+    );
+    mask-image: radial-gradient(closest-side, var(--fg) 30%, transparent);
+    will-change: transform;
+  }
+
+  /* The motes of the whole section, held still while the beam moves over them. */
+  .specialties :global(.torch-motes) {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    /* Wider than the beam: not the max-inline-size of the reset. */
+    max-inline-size: none;
+    opacity: 0.55;
+    will-change: transform;
   }
 
   .specialty-panel {
