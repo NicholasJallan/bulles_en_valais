@@ -261,6 +261,32 @@ export interface Dictionary {
     readonly social: string;
     readonly backToSurface: string;
   };
+  /** Consent banner and preferences (vanilla-cookieconsent, S11): plain text, no HTML. */
+  readonly consent: {
+    /** Accessible name of the banner. */
+    readonly label: string;
+    readonly title: string;
+    readonly description: string;
+    readonly acceptAll: string;
+    readonly rejectAll: string;
+    readonly showPreferences: string;
+    readonly preferences: {
+      readonly title: string;
+      readonly intro: string;
+      readonly save: string;
+      readonly close: string;
+      readonly categories: Readonly<
+        Record<
+          'necessary' | 'analytics' | 'marketing',
+          { readonly title: string; readonly description: string }
+        >
+      >;
+      readonly moreTitle: string;
+      readonly moreDescription: string;
+    };
+    /** Label of the link to the privacy page, in the banner and the preferences. */
+    readonly privacyLink: string;
+  };
   readonly notFound: {
     readonly meta: PageMeta;
     readonly eyebrow: string;

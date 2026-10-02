@@ -16,6 +16,11 @@ const { locale, route = 'home' } = Astro.props;
 const dictionary = getDictionary(locale);
 const t = dictionary.footer;
 const year = new Date().getFullYear();
+const consentTexts = JSON.stringify({
+  ...dictionary.consent,
+  privacyHref: routePath('privacy', locale),
+  lang: locale,
+});
 const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
 ---
 
@@ -63,8 +68,15 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
       <p id="calm-mode-description" class="fine js-only">
         {t.calmMode.description}
       </p>
-      {/* Inactive until the consent banner arrives (S11). */}
-      <button class="footer-cookies" type="button" disabled data-consent-manage>
+      {/* Enabled by the consent controller (S11); without JavaScript there is no banner either. */}
+      <button
+        class="footer-cookies"
+        type="button"
+        disabled
+        data-consent-manage
+        data-controller="consent"
+        data-consent-texts={consentTexts}
+      >
         {t.cookies}
       </button>
     </div>

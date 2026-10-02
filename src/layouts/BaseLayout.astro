@@ -39,6 +39,8 @@ const links =
     <meta charset="utf-8" />
     {/* External file in public/, run before any stylesheet: never inline code (CSP). */}
     <script is:inline src="/js/boot.js"></script>
+    {/* Consent Mode defaults, then the Google tag in production only (S11): also an external file. */}
+    <script is:inline src="/js/consent-default.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />

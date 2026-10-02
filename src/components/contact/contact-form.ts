@@ -2,6 +2,7 @@
 // per field (aria-invalid, aria-describedby) with a focused summary, JSON sending, then success or
 // alternatives. A failure never opens mailto: by itself: the visitor chooses a channel.
 import { whatsappUrl } from '@/data/contact.ts';
+import { trackLead } from '@/lib/analytics/events.ts';
 import type { Locale } from '@/i18n/types.ts';
 import type { Cleanup } from '@/lib/controllers.ts';
 import { buildPayload, mailtoHref, sendContact, type MailLabels } from '@/lib/form/submit.ts';
@@ -162,6 +163,8 @@ async function submitForm(context: FormContext): Promise<void> {
     form.hidden = true;
     context.success.hidden = false;
     context.success.focus();
+    // A filled honeypot gets a fake success from contact.php: not a lead.
+    if (website === '') trackLead();
   } else if (outcome.kind === 'invalid') {
     showRefused(context, outcome.fields);
     showFailure(context, fields, false);

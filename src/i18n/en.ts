@@ -578,6 +578,43 @@ export const en: Dictionary = {
     social: 'Social media',
     backToSurface: 'Back to the surface',
   },
+  consent: {
+    label: 'Cookie consent',
+    title: 'A few cookies, with your consent',
+    description:
+      "I use Google Analytics to learn how the site is read, and Google Ads to measure the enquiries that come from my ads. None of their cookies is set without your consent, and you can change your mind at any time with 'Manage cookies', at the bottom of the page.",
+    acceptAll: 'Accept all',
+    rejectAll: 'Reject all',
+    showPreferences: 'Choose',
+    preferences: {
+      title: 'Manage cookies',
+      intro:
+        'Choose what you accept. Without your consent, Google only receives anonymous signals, with no cookie or identifier.',
+      save: 'Save my choices',
+      close: 'Close',
+      categories: {
+        necessary: {
+          title: 'Necessary',
+          description:
+            'Always on: they only remember your consent choice and, if you turn it on, Calm mode.',
+        },
+        analytics: {
+          title: 'Audience measurement',
+          description:
+            'Google Analytics: pages viewed and paths through the site, aggregated, to improve it.',
+        },
+        marketing: {
+          title: 'Advertising',
+          description:
+            'Google Ads: measuring the enquiries that come from my ads. No ads are shown on this site.',
+        },
+      },
+      moreTitle: 'Learn more',
+      moreDescription:
+        'The name, provider and duration of each cookie, and your rights, are set out in the privacy policy.',
+    },
+    privacyLink: 'Privacy policy',
+  },
   notFound: {
     meta: {
       title: 'Page not found — Bulles en Valais',
