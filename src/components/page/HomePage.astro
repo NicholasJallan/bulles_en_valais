@@ -1,0 +1,88 @@
+---
+import Contact from '@/components/contact/Contact.astro';
+import CompareTable from '@/components/depth-ladder/CompareTable.astro';
+import DepthLadder from '@/components/depth-ladder/DepthLadder.astro';
+import Courses from '@/components/courses/Courses.astro';
+import Faq from '@/components/faq/Faq.astro';
+import Footer from '@/components/footer/Footer.astro';
+import Gifts from '@/components/gifts/Gifts.astro';
+import Hero from '@/components/hero/Hero.astro';
+import DepthGauge from '@/components/hud/DepthGauge.astro';
+import Instructor from '@/components/instructor/Instructor.astro';
+import Interlude from '@/components/interlude/Interlude.astro';
+import Manifesto from '@/components/manifesto/Manifesto.astro';
+import Nav from '@/components/nav/Nav.astro';
+import Places from '@/components/places/Places.astro';
+import Prepare from '@/components/prepare/Prepare.astro';
+import Specialties from '@/components/specialties/Specialties.astro';
+import Testimonials from '@/components/testimonials/Testimonials.astro';
+import Thermocline from '@/components/water/Thermocline.astro';
+import WaterColumn from '@/components/water/WaterColumn.astro';
+import WhatsAppDialog from '@/components/whatsapp/WhatsAppDialog.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { formatDepth } from '@/lib/format.ts';
+import { buildJsonLd, serializeJsonLd } from '@/lib/seo/jsonld.ts';
+
+/** The one page, in the order of the dive profile (01-direction-artistique.md §2). */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const jsonLd = serializeJsonLd(
+  buildJsonLd({
+    locale,
+    site: new URL(Astro.site ?? '').origin,
+    description: t.meta.description,
+    labels: t.meta.structuredData,
+  }),
+);
+---
+
+<BaseLayout
+  locale={locale}
+  route="home"
+  title={t.meta.title}
+  description={t.meta.description}
+  ogTitle={t.meta.ogTitle}
+  ogDescription={t.meta.ogDescription}
+>
+  {/* Structured data, the only inline script allowed (JSON, not code; escaped by serializeJsonLd). */}
+  <script type="application/ld+json" is:inline slot="head" set:html={jsonLd} />
+  <WaterColumn />
+  <Nav locale={locale} />
+  <main id="content">
+    <Hero locale={locale} />
+    <Manifesto locale={locale} />
+    <Instructor locale={locale} />
+    <Thermocline from="surface" to="lagoon" />
+    <Courses locale={locale} />
+    <Interlude locale={locale} variant="descent" from="lagoon" to="deep" />
+    <DepthLadder locale={locale} />
+    <Thermocline
+      from="deep"
+      to="abyss"
+      label={`${t.depthLadder.ascent} · ${formatDepth(markerDepth('compare'), locale)}`}
+    />
+    <CompareTable locale={locale} />
+    <Interlude locale={locale} variant="light" from="abyss" to="abyss" />
+    <Specialties locale={locale} />
+    <Thermocline from="abyss" to="deep" />
+    <Places locale={locale} />
+    <Thermocline from="deep" to="emerald" />
+    <Prepare locale={locale} />
+    <Thermocline from="emerald" to="lagoon" />
+    <Gifts locale={locale} />
+    <Thermocline from="lagoon" to="surface" />
+    <Testimonials locale={locale} />
+    <Faq locale={locale} />
+    <Contact locale={locale} />
+  </main>
+  <Footer locale={locale} />
+  <DepthGauge locale={locale} />
+  <WhatsAppDialog locale={locale} />
+</BaseLayout>

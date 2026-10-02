@@ -1,0 +1,57 @@
+---
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Section from '@/components/ui/Section.astro';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).manifesto;
+---
+
+<Section id="manifesto" tone="surface" class="manifesto">
+  <div class="wrap manifesto-grid">
+    <Eyebrow depth={markerDepth('manifesto')} label={t.eyebrow} class="manifesto-eyebrow" />
+    <h2 id="manifesto-title" class="manifesto-title display" data-reveal="lines">
+      <EmphasisText value={t.title} />
+    </h2>
+    <p class="lead manifesto-body">{t.body}</p>
+  </div>
+</Section>
+
+<style>
+  .manifesto {
+    padding-block: var(--space-breath) var(--space-section);
+  }
+
+  .manifesto-grid {
+    display: grid;
+    gap: var(--space-l) var(--grid-gap);
+  }
+
+  .manifesto-title {
+    font-size: var(--step-5);
+    line-height: var(--leading-snug);
+    max-inline-size: 16ch;
+  }
+
+  @media (width >= 64rem) {
+    .manifesto-grid {
+      grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    }
+
+    .manifesto-grid > :global(.manifesto-eyebrow),
+    .manifesto-title {
+      grid-column: 2 / -1;
+    }
+
+    .manifesto-body {
+      grid-column: 7 / -1;
+    }
+  }
+</style>

@@ -1,0 +1,138 @@
+import { expect, test, type Page } from '@playwright/test';
+import { gotoReady } from './ready.ts';
+
+const isMobile = (page: Page) => (page.viewportSize()?.width ?? 0) < 1024;
+
+test.describe('essential controllers', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoReady(page, '/');
+  });
+
+  test('courses tabs follow the APG keyboard model', async ({ page }) => {
+    const tablist = page.getByRole('tablist', { name: 'Choisir une école' });
+    const tabs = tablist.getByRole('tab');
+    await expect(tabs).toHaveCount(3);
+    await tabs.first().focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(tabs.nth(1)).toBeFocused();
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(tabs.nth(0)).toHaveAttribute('tabindex', '-1');
+    await expect(page.locator('#agency-padi')).toBeVisible();
+    await expect(page.locator('#agency-sdi-tdi')).toBeHidden();
+    await page.keyboard.press('End');
+    await expect(tabs.nth(2)).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('ArrowLeft');
+    await expect(tabs.nth(2)).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(page.locator('#agency-sdi-tdi')).toBeVisible();
+  });
+
+  test('specialty tabs switch on click', async ({ page }) => {
+    await page.getByRole('tab', { name: 'FFESSM' }).last().click();
+    await expect(page.locator('#specialties-ffessm')).toBeVisible();
+    await expect(page.locator('#specialties-sdi')).toBeHidden();
+  });
+
+  test('FAQ keeps one answer open at a time', async ({ page }) => {
+    const items = page.locator('#faq details');
+    await items.nth(0).locator('summary').click();
+    await expect(items.nth(0)).toHaveAttribute('open', '');
+    await items.nth(1).locator('summary').click();
+    await expect(items.nth(1)).toHaveAttribute('open', '');
+    await expect(items.nth(0)).not.toHaveAttribute('open');
+  });
+
+  test('the gift voucher link selects the gift interest and starts the form', async ({ page }) => {
+    await page.getByRole('link', { name: 'Offrir un bon cadeau' }).click();
+    await expect(page).toHaveURL(/#contact-form$/);
+    await expect(page.locator('#contact-interest')).toHaveValue('gift');
+    await expect(page.locator('#contact-name')).toBeFocused();
+    // Lenis glides there from the middle of the page: a long way under a loaded test run.
+    await expect(page.locator('#contact-name')).toBeInViewport({ timeout: 10_000 });
+  });
+
+  test('the WhatsApp dialog traps the focus, closes on Escape and gives the focus back', async ({
+    page,
+  }) => {
+    const opener = page.getByRole('link', { name: 'Discuter sur WhatsApp' });
+    await opener.click();
+    const dialog = page.getByRole('dialog', { name: 'Discuter avec Nicholas' });
+    await expect(dialog).toBeVisible();
+    await expect(page.locator('#whatsapp-message')).toBeFocused();
+    await page.locator('#whatsapp-message').fill('Bonjour, une question');
+    const send = dialog.getByRole('link', { name: /Envoyer sur WhatsApp/ });
+    await expect(send).toHaveAttribute(
+      'href',
+      'https://wa.me/41794368112?text=Bonjour%2C%20une%20question',
+    );
+    await expect(send).toHaveAttribute('rel', 'noopener noreferrer');
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(opener).toBeFocused();
+  });
+
+  test('the mobile menu is a modal dialog', async ({ page }) => {
+    test.skip(!isMobile(page), 'the menu only exists below 1024 px');
+    const button = page.getByRole('button', { name: 'Ouvrir le menu' });
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    const menu = page.locator('#site-menu');
+    await expect(menu).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(button).toBeFocused();
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+
+    await button.click();
+    await menu.getByRole('link', { name: 'FAQ' }).click();
+    await expect(menu).toBeHidden();
+    await expect(page).toHaveURL(/#faq$/);
+    await expect(page.locator('#faq-title')).toBeFocused();
+  });
+
+  test('calm mode is remembered and stops the motion classes', async ({ page }) => {
+    const toggle = page.locator('.site-footer').getByRole('button', { name: 'Mode calme' });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await Promise.all([page.waitForEvent('load'), toggle.click()]);
+    for (const each of await page.getByRole('button', { name: 'Mode calme' }).all()) {
+      await expect(each).toHaveAttribute('aria-pressed', 'true');
+    }
+    await expect(page.locator('html')).not.toHaveClass(/motion-ok/);
+    expect(await page.evaluate(() => localStorage.getItem('bv-calm'))).toBe('1');
+  });
+
+  test('calm mode is always at hand: in the masthead, or in the menu on a phone', async ({
+    page,
+  }) => {
+    if (isMobile(page)) {
+      await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
+      await expect(
+        page.getByRole('dialog').getByRole('button', { name: 'Mode calme' }),
+      ).toBeVisible();
+      return;
+    }
+    const toggle = page.locator('.site-header').getByRole('button', { name: 'Mode calme' });
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveText('Calme');
+    await Promise.all([page.waitForEvent('load'), toggle.click()]);
+    await expect(page.locator('html')).not.toHaveClass(/motion-ok/);
+  });
+
+  test('the masthead holds on one row from 1024 px, in French and in English', async ({ page }) => {
+    test.skip(isMobile(page), 'the links live in the menu below 1024 px');
+    for (const path of ['/', '/en/']) {
+      for (const width of [1024, 1152, 1279]) {
+        await page.setViewportSize({ width, height: 800 });
+        await gotoReady(page, path);
+        // A second row would start below the logo, which opens the first one.
+        const wrapped = await page.locator('.site-header-inner > *').evaluateAll((items) => {
+          const logoBottom = items[0]?.getBoundingClientRect().bottom ?? 0;
+          return items.some((item) => item.getBoundingClientRect().top >= logoBottom);
+        });
+        expect(wrapped, `${path} at ${width} px`).toBe(false);
+      }
+    }
+  });
+});

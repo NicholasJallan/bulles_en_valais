@@ -41,7 +41,11 @@
 - Mac : **Node 26.10.0**, **npm 11.19.1**, **ffmpeg 9.0.2**, `cwebp`, Python 3.14 (`.venv/` du projet), Homebrew, **PHP 8.5** (installé en S00 pour les tests du formulaire ; la production est en 7.4, voir §2).
 - MCP utiles : `chrome-devtools` (Lighthouse, traces de performance, captures), `nano-banana` (génération et retouche d'images, S04). La skill `xccr-diver-render` (fal.ai) existe mais demande que le MCP fal-ai soit configuré.
 - Versions npm vérifiées le 30.09.2026 : `astro@7.3.5` (Node ≥ 22.12), `gsap@3.15.0` (tous les plugins gratuits, licence « Standard no charge »), `lenis@1.3.26`, `ogl@1.0.11` (Unlicense), `@astrojs/sitemap@3.7.4`, `vanilla-cookieconsent@3.1.0`, `vitest@5.0.3`, `@playwright/test@1.63.0`, `@axe-core/playwright@4.13.0`, `sharp@0.35.5`.
+- Installées en S01 (01.10.2026) : les versions ci-dessus, plus `typescript@6.0.3` (D16 : `@astrojs/check@0.9.10` ne prend pas encore TypeScript 7 en charge), `@astrojs/check@0.9.10`, `prettier@3.9.9`, `prettier-plugin-astro@1.1.0` et `es-module-lexer@2.3.2` (budgets).
 - **Astro 7** (sorti le 22.06.2026) : compilateur Rust par défaut (**plus aucune correction HTML automatique** : balise non fermée = erreur), **`compressHTML: 'jsx'` par défaut** (les espaces entre éléments inline disparaissent comme en React : mettre `{' '}` explicitement), Vite 8 + Rolldown, `src/fetch.ts` réservé. Fonts API et `security.csp` stables depuis Astro 6.
+  - Sous un agent (Claude Code), `astro dev` et `astro preview` **passent en arrière-plan** (processus détaché, fichier verrou) : `npx astro dev stop` / `npx astro preview stop` pour les arrêter, `--ignore-lock` pour rester au premier plan (c'est ce qu'utilise Playwright).
+  - Un script de moins de 4 Ko sans import serait inliné : `vite.build.assetsInlineLimit: 0` l'empêche (D17).
+- **Playwright 1.63** : son Firefox (155, build 1543) ne démarre pas sur macOS 27.0.1 (« Could not find profile folder »). Les tests E2E tournent donc sur chromium, webkit, mobile-chrome et mobile-safari ; Firefox n'est validé que s'il fonctionne (D21).
 
 ## 4. État des lieux du site actuel (audit du 30.09.2026)
 
@@ -90,6 +94,7 @@ Ordre actuel : Hero → Instructeur (01) → Cursus (02 : SDI/TDI, PADI, FFESSM 
 
 - **Langues** : identifiants et code en anglais, commentaires rares et en anglais, **textes visibles uniquement dans `src/i18n/`** (et `src/data/` pour les libellés localisés des données). FR est la langue source ; EN est une vraie traduction, pas du mot à mot.
 - **Parité FR/EN obligatoire**, garantie par le type `Dictionary` et par `src/i18n/parity.test.ts`. Ajouter l'allemand = ajouter `'de'` au type `Locale` et laisser TypeScript lister les manques.
+- **Typographie au rendu** : apostrophes droites et espaces simples dans les sources ; `getDictionary()` et `localize()` appliquent `typeset()` (`src/lib/typography.ts`). **Un fait, une source** : prix, profondeurs et intérêts dans `src/data/courses.ts`, coordonnées dans `src/data/contact.ts`, marqueurs des sur-titres dans `src/data/sections.ts`.
 - **Organisation par fonctionnalité** (`src/components/<feature>/`), fichiers de 200 à 400 lignes (800 au maximum), fonctions de moins de 50 lignes, pas d'imbrication au-delà de 4 niveaux, immutabilité par défaut.
 - **Aucune valeur de design en dur** : couleurs, espacements, rayons, durées et courbes passent par les tokens (`src/styles/tokens.css`, miroir TS dans `src/lib/motion/tokens.ts`).
 - **Pas de framework UI au runtime** (ni React ni Preact) : composants `.astro` + petits contrôleurs TypeScript pilotés par attributs `data-*`.
@@ -115,9 +120,9 @@ Ordre actuel : Hero → Instructeur (01) → Cursus (02 : SDI/TDI, PADI, FFESSM 
 
 ## 8. Invariants (à vérifier à la fin de chaque session à partir de S01)
 
-- `npm run build`, `npm run check` (types Astro) et `npm test` (Vitest) passent.
-- Parité FR/EN verte. Aucune erreur console sur `/` et `/en/` en `npm run preview`.
-- À partir de S11 : aucun `<script>` exécutable inline dans `dist/` (seul `application/ld+json` est permis). Vérification : `grep -rn "<script" dist --include=*.html`.
+- `npm run build` (qui enchaîne `check:dist`), `npm run check` (types Astro) et `npm test` (Vitest) passent.
+- Parité FR/EN verte. Aucune erreur console sur `/` et `/en/` en `npm run preview` (vérifié par `tests/e2e/smoke.spec.ts`).
+- Aucun JavaScript inline dans `dist/` (seul `application/ld+json` est permis) ni script ou feuille de style d'une autre origine ; aucun fichier caché, clé ni `settings.json` ; rien sous `api/` ni en PHP hormis `api/contact.php`, qui doit être présent : vérifié automatiquement par `check:dist` à chaque `npm run build` depuis S01 (D17).
 - Budgets du §7 non dépassés (suivis en S06, S07, S12 et à la demande).
 - `main` reste déployable et intact jusqu'à S13 (aucun commit de refonte sur `main`).
 
@@ -135,7 +140,8 @@ Ordre actuel : Hero → Instructeur (01) → Cursus (02 : SDI/TDI, PADI, FFESSM 
 - Toucher, afficher ou committer `mail-config.php` ou tout secret.
 - `rsync --delete` vers le docroot de production sans filtres de protection ni essai à blanc (`-n`) préalable.
 - Modifier une langue sans l'autre.
-- `is:inline` pour du JavaScript exécutable (CSP). Les données JSON-LD sont la seule exception.
+- `is:inline` sur du code JavaScript (CSP). Exceptions : les données JSON-LD, et un `<script src>` vers un fichier de `public/` comme `boot.js`, qui n'est pas du code inline (D20).
+- `astro dev --host` : le serveur de dev sert tous les fichiers du projet (D18). Pour le réseau local, `astro preview --host`, qui ne sert que `dist/`.
 - Dépasser un budget du §7 sans décision consignée dans `PROGRESS.md`.
 - Pousser sur GitHub (dépôt public) le dossier `plans/` ou tout détail de la faille **avant** que le correctif S00 soit en production.
 

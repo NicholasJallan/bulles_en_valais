@@ -96,16 +96,17 @@ Pour **reprendre une session interrompue** (point de sortie intermédiaire), mê
 4. **Vérifier** : commandes de la session + invariants globaux (`00-contexte.md` §8).
 5. **Revue** : agent `code-reviewer` sur le diff de la session. Ajouter `security-reviewer` pour S00, S10 (formulaire), S11 (CSP/consentement) et S12–S13 (serveur). Corriger tout CRITICAL/HIGH avant de conclure.
 6. **Commits** conventionnels (`feat:`, `fix:`, `refactor:`, `perf:`, `test:`, `docs:`, `chore:`), petits et cohérents.
-7. **Journaliser** dans `PROGRESS.md` : cocher la session, ajouter une entrée au journal (date, fait, écarts, décisions, points ouverts, captures utiles), committer (`docs(plan): …`).
-8. **Conclure** par un résumé court et le nom de la session suivante. Ne pas enchaîner sur la suivante.
+7. **Prévisualiser** (dès qu'une session change ce qu'on voit, D42) : `npm run build && npm run preview:pi` (essai à blanc), puis `npm run preview:pi -- --apply`, qui publie la page sur `https://dive.bullesenvalais.ch/preview/` (et `/preview/en/`) à côté du site en ligne, sans y toucher ; ouvrir la page publiée (aucune erreur console, effets de la session présents) ; donner les URL et les points à juger dans la conclusion. Autorisé en permanence par Nicholas pour cette seule commande.
+8. **Journaliser** dans `PROGRESS.md` : cocher la session, ajouter une entrée au journal (date, fait, écarts, décisions, points ouverts, captures utiles), committer (`docs(plan): …`).
+9. **Conclure** par un résumé court et le nom de la session suivante. Ne pas enchaîner sur la suivante.
 
 ### Gates 🛑
 
-Une gate est un **arrêt obligatoire**. L'agent présente ce qu'il faut juger (captures aux 4 largeurs, URL de preview LAN, choix proposés avec une recommandation) et attend la validation explicite de Nicholas, consignée dans `PROGRESS.md`. Jamais franchie implicitement, jamais « en attendant ».
+Une gate est un **arrêt obligatoire**. L'agent présente ce qu'il faut juger (captures aux 4 largeurs, URL de la prévisualisation sur le Pi `https://dive.bullesenvalais.ch/preview/` (D42), questions numérotées dans la conversation, choix proposés avec une recommandation) et attend la validation explicite de Nicholas, consignée dans `PROGRESS.md`. Jamais franchie implicitement, jamais « en attendant ».
 
 ### Actions sortantes
 
-Tout ce qui touche le Pi (ssh, rsync, nginx), le DNS, GitHub (push, PR) ou un service tiers (génération IA payante, Search Console, Google Ads) se fait **après confirmation de Nicholas dans la session**, avec une commande en mode simulation (`rsync -n`, `nginx -t`) d'abord.
+Tout ce qui touche le Pi (ssh, rsync, nginx), le DNS, GitHub (push, PR) ou un service tiers (génération IA payante, Search Console, Google Ads) se fait **après confirmation de Nicholas dans la session**, avec une commande en mode simulation (`rsync -n`, `nginx -t`) d'abord. Exception (D42) : `npm run preview:pi` (essai à blanc, puis `-- --apply`), qui ne touche que `_astro/`, `js/`, `styleguide/` et `preview/` du docroot, est autorisé à chaque session.
 
 ### Mutation du plan
 
@@ -118,7 +119,7 @@ Si une étape doit changer : consigner dans `PROGRESS.md` §Mutations (date, ses
 - Labo mobile (CPU ×4, Fast 4G, cache vide) : LCP ≤ 2,0 s, CLS ≤ 0,05, TBT ≤ 200 ms ; INP ≤ 200 ms sur onglets, FAQ, formulaire.
 - JS ≤ 150 Ko gzip au total (≤ 90 Ko au chargement initial), CSS ≤ 30 Ko gzip, images initiales ≤ 1 Mo.
 - axe : 0 violation sérieuse/critique (FR et EN). Navigation clavier complète. `prefers-reduced-motion` respecté partout.
-- Chrome, Firefox, Safari (macOS + iOS) et Chrome Android validés à la main.
+- Chrome, Safari (macOS + iOS) et Chrome Android validés à la main ; Firefox seulement s'il fonctionne (D21).
 - Formulaire durci et limité en débit ; CSP sans `unsafe-eval` ni script inline ; en-têtes de sécurité conservés.
 - `robots.txt`, `sitemap`, `hreflang`, JSON-LD valides ; plus aucune « soft 404 ».
 - Bandeau de consentement fonctionnel, conversions Google Ads et GA4 reçues après consentement.

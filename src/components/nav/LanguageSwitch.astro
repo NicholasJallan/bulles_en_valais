@@ -1,0 +1,65 @@
+---
+import { getDictionary } from '@/i18n/index.ts';
+import { routePath, type RouteId } from '@/i18n/routes.ts';
+import { LANG_TAGS, LOCALES, type Locale } from '@/i18n/types.ts';
+
+/** Real links to the same page in each language, computed at build time (routes.ts). */
+interface Props {
+  locale: Locale;
+  route: RouteId;
+  class?: string;
+}
+
+const { locale, route, class: className } = Astro.props;
+const t = getDictionary(locale);
+---
+
+<nav class:list={['language-switch', className]} aria-label={t.a11y.languageSwitch}>
+  <ul class="bare-list">
+    {LOCALES.map((target) => (
+      <li>
+        <a
+          href={routePath(route, target)}
+          hreflang={LANG_TAGS[target]}
+          aria-current={target === locale ? 'page' : undefined}
+        >
+          <span aria-hidden="true">{target.toUpperCase()}</span>
+          <span class="visually-hidden">{t.a11y.languageNames[target]}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .language-switch ul {
+    display: flex;
+    gap: var(--space-3xs);
+  }
+
+  .language-switch a {
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: var(--tap-min);
+    min-block-size: var(--tap-min);
+    color: inherit;
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    text-decoration: none;
+    opacity: 0.72;
+  }
+
+  .language-switch a[aria-current] {
+    opacity: 1;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+  }
+
+  @media (hover: hover) {
+    .language-switch a:hover {
+      opacity: 1;
+    }
+  }
+</style>

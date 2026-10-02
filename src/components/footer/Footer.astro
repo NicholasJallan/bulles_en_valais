@@ -1,0 +1,199 @@
+---
+import Logo from '@/assets/brand/logo.svg';
+import CalmToggle from '@/components/calm/CalmToggle.astro';
+import LanguageSwitch from '@/components/nav/LanguageSwitch.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { SOCIAL_PROFILES } from '@/data/contact.ts';
+import { getDictionary, localePath } from '@/i18n/index.ts';
+import { routePath, type RouteId } from '@/i18n/routes.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+interface Props {
+  locale: Locale;
+  route?: RouteId;
+}
+
+const { locale, route = 'home' } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.footer;
+const year = new Date().getFullYear();
+const consentTexts = JSON.stringify({
+  ...dictionary.consent,
+  privacyHref: routePath('privacy', locale),
+  lang: locale,
+});
+const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
+---
+
+<footer class="site-footer" data-tone="surface">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <Logo class="footer-logo" aria-hidden="true" focusable="false" />
+      <p class="fine">{t.region}</p>
+    </div>
+
+    <div class="footer-column">
+      <h2 class="footer-title">{t.social}</h2>
+      <ul class="bare-list">
+        {SOCIAL_PROFILES.map((profile) => (
+          <li>
+            <a href={profile.url} target="_blank" rel="noopener noreferrer">
+              {profile.label} {profile.handle}
+              <span class="visually-hidden"> {dictionary.a11y.newTab}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="footer-column">
+      <h2 class="footer-title">{t.creditsTitle}</h2>
+      <ul class="bare-list fine">
+        <li>{t.credits.photos}</li>
+      </ul>
+    </div>
+
+    <div class="footer-column footer-settings">
+      <LanguageSwitch locale={locale} route={route} />
+      <CalmToggle label={t.calmMode.label} describedBy="calm-mode-description" />
+      <p id="calm-mode-description" class="fine js-only">
+        {t.calmMode.description}
+      </p>
+      {/* Enabled by the consent controller (S11); without JavaScript there is no banner either. */}
+      <button
+        class="footer-cookies"
+        type="button"
+        disabled
+        data-consent-manage
+        data-controller="consent"
+        data-consent-texts={consentTexts}
+      >
+        {t.cookies}
+      </button>
+    </div>
+  </div>
+  <div class="wrap footer-bottom fine">
+    <p>
+      © {year} {t.copyright}
+    </p>
+    <ul class="bare-list footer-legal">
+      <li>
+        <a href={routePath('privacy', locale)}>{t.legalLinks.privacy}</a>
+      </li>
+      <li>
+        <a href={routePath('legalNotice', locale)}>{t.legalLinks.legalNotice}</a>
+      </li>
+    </ul>
+    <a href={top} class="footer-top">
+      {t.backToSurface}
+      <Icon name="arrow-up" />
+    </a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: var(--space-2xl) var(--space-xl);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: var(--space-xl) var(--grid-gap);
+  }
+
+  @media (width >= 48rem) {
+    .footer-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (width >= 64rem) {
+    .footer-grid {
+      grid-template-columns: 3fr 2fr 3fr 3fr;
+    }
+  }
+
+  .footer-brand {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .footer-brand :global(.footer-logo) {
+    inline-size: auto;
+    block-size: 5rem;
+    color: var(--c-ink);
+  }
+
+  .footer-column {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .footer-column ul {
+    display: grid;
+  }
+
+  .footer-column a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+  }
+
+  .footer-title {
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+    color: var(--fg-soft);
+  }
+
+  .footer-settings {
+    justify-items: start;
+  }
+
+  .footer-cookies {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-block-size: var(--tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .footer-cookies:disabled {
+    color: var(--fg-soft);
+    cursor: not-allowed;
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-s);
+    margin-block-start: var(--space-2xl);
+    padding-block-start: var(--space-s);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+  }
+
+  .footer-legal a,
+  .footer-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-block-size: var(--tap-min);
+  }
+</style>

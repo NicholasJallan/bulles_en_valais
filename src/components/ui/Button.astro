@@ -1,0 +1,170 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from './icons.ts';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'link';
+
+interface Props {
+  variant?: Variant;
+  /** Renders a link; without it, a button. */
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  icon?: IconName;
+  class?: string;
+  /** Links only: `_blank` with `rel="noopener noreferrer"` for another site. */
+  target?: '_blank';
+  rel?: string;
+  [attribute: `data-${string}`]: string | undefined;
+  [attribute: `aria-${string}`]: string | undefined;
+}
+
+const {
+  variant = 'primary',
+  href,
+  type = 'button',
+  disabled = false,
+  icon,
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const classes = ['button', `button-${variant}`, className];
+---
+
+{href === undefined ? (
+  <button class:list={classes} type={type} disabled={disabled} {...attributes}>
+    <span class="button-label">
+      <slot />
+    </span>
+    {icon && <Icon name={icon} />}
+  </button>
+) : (
+  /* A disabled link loses its href: it can be neither followed nor focused. */
+  <a
+    class:list={classes}
+    href={disabled ? undefined : href}
+    role={disabled ? 'link' : undefined}
+    aria-disabled={disabled ? 'true' : undefined}
+    {...attributes}
+  >
+    <span class="button-label">
+      <slot />
+    </span>
+    {icon && <Icon name={icon} />}
+  </a>
+)}
+
+<style>
+  .button {
+    --button-bg: transparent;
+    --button-fg: var(--fg);
+    --button-border: transparent;
+    --button-glow: var(--glow-soft);
+    --glow-opacity: 0;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    min-block-size: var(--tap-min);
+    padding: 0.7em 1.4em;
+    border: 1px solid var(--button-border);
+    border-radius: var(--radius-sharp);
+    background-color: var(--button-bg);
+    color: var(--button-fg);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* Only composited properties move: the press, the magnetic pull (E17, motion module) and
+       the opacity of the glow below. */
+    translate: var(--magnet-x, 0) var(--magnet-y, 0);
+    transition:
+      transform var(--dur-instant) var(--ease-surface),
+      translate var(--dur-fast) var(--ease-surface);
+  }
+
+  /* The glow lives on its own layer: lighting up only animates its opacity. */
+  .button::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: var(--button-glow);
+    opacity: var(--glow-opacity);
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-surface);
+  }
+
+  /* Primary: the lamp. Deep red in daylight, lit and glowing in the dark tones. */
+  .button-primary {
+    --button-bg: var(--action);
+    --button-fg: var(--action-ink);
+    --button-border: var(--action);
+    --button-glow: var(--glow-lit);
+  }
+
+  .button-secondary {
+    --button-border: var(--fg-soft);
+  }
+
+  .button-ghost {
+    padding-inline: 1em;
+  }
+
+  /* Link: no box, but still a 44 px target. */
+  .button-link {
+    --button-fg: var(--action-text);
+    --button-glow: none;
+    padding-inline: 0;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+  }
+
+  /* Hover states. The ghost keeps --fg on its veil: --action-text there fell under 4.5:1.
+     A real pointer only (no glow left behind by a tap), never on a disabled button. */
+  @media (hover: hover) {
+    .button-primary:hover:not(:disabled, [aria-disabled='true']) {
+      --glow-opacity: 1;
+    }
+
+    .button-secondary:hover:not(:disabled, [aria-disabled='true']) {
+      --button-border: var(--action);
+      --button-fg: var(--action-text);
+      --glow-opacity: 1;
+    }
+
+    .button-ghost:hover:not(:disabled, [aria-disabled='true']) {
+      --button-bg: var(--veil-hover);
+    }
+
+    .button-link:hover:not(:disabled, [aria-disabled='true']) {
+      text-decoration-thickness: 2px;
+      text-shadow: var(--glow-text);
+    }
+  }
+
+  .button:focus-visible {
+    outline: var(--focus-width) solid var(--action);
+    outline-offset: var(--focus-offset);
+    box-shadow: var(--focus-halo);
+  }
+
+  .button:active:not(:disabled, [aria-disabled='true']) {
+    --glow-opacity: 0;
+    transform: translateY(1px);
+  }
+
+  /* Disabled: the lamp is off (no glow, no colour), not just paler. */
+  .button:is(:disabled, [aria-disabled='true']) {
+    --glow-opacity: 0;
+    opacity: 0.5;
+    filter: grayscale(1);
+    cursor: not-allowed;
+  }
+</style>

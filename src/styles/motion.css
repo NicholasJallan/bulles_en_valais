@@ -1,0 +1,94 @@
+/* Motion baseline. The motion tokens are in tokens.css (mirror: src/lib/motion/tokens.ts). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Reveals (E5, E6): hidden only while motion is allowed (html.motion-ok, public/js/boot.js),
+   until the motion module marks them. If it does not start, boot.js withdraws motion-ok after
+   3 s and everything shows. Only opacity and clip-path: nothing moves in the layout. */
+@media (prefers-reduced-motion: no-preference) {
+  html.motion-ok [data-reveal='lines']:not([data-revealed]),
+  html.motion-ok [data-reveal='fade']:not([data-revealed]),
+  html.motion-ok [data-reveal='stagger']:not([data-revealed]) > * {
+    opacity: 0;
+  }
+
+  html.motion-ok [data-reveal='image']:not([data-revealed]) {
+    clip-path: inset(100% 0 0 0);
+  }
+}
+
+/* Intro (E15): the hero title and the HUD figures wait for hero.ts, which sets html[data-intro]
+   once their entrance has started. Same guard as the reveals: no motion-ok, nothing hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  html.motion-ok:not([data-intro]) .hero-title,
+  html.motion-ok:not([data-intro]) .hud-readout {
+    opacity: 0;
+  }
+}
+
+/* Masks of the split lines, padded so that accents and descenders show while the lines rise. */
+.reveal-line-mask {
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+
+/* Between two lines the negative margins collapse into one: the second takes both, so that a
+   split heading keeps the height it had before the split (no layout shift). */
+.reveal-line-mask + .reveal-line-mask {
+  margin-block-start: -0.24em;
+}
+
+/* Lenis (lenis/dist/lenis.css, without `overflow: clip` when stopped: a stopped Lenis already
+   blocks the wheel, and clipping would also block the jump to an anchor). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+html.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* The fixed navigation (E16) must not cover the section an anchor leads to. */
+html.nav-fixed {
+  scroll-padding-block-start: var(--nav-block-size, 0px);
+}
+
+/* E18: cross-fade between FR and EN, navigation and HUD stay in place. Not in calm mode. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+html:not(.motion-ok)::view-transition-group(*),
+html:not(.motion-ok)::view-transition-old(*),
+html:not(.motion-ok)::view-transition-new(*) {
+  animation: none;
+}
+
+/* Bubbles (E7): one canvas over the page, created by the emitter on the first release. */
+.bubbles-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-bubbles);
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}

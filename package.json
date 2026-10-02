@@ -1,0 +1,52 @@
+{
+  "name": "bulles-en-valais",
+  "private": true,
+  "type": "module",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && npm run check:dist",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test tests/e2e",
+    "test:visual": "playwright test tests/visual",
+    "test:a11y": "playwright test tests/a11y",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:budgets": "node scripts/check-budgets.mjs",
+    "check:dist": "node scripts/check-dist.mjs",
+    "serve:csp": "node scripts/serve-with-csp.mjs",
+    "test:csp": "playwright test --project=csp"
+  },
+  "dependencies": {
+    "astro": "^7.3.5",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.26",
+    "ogl": "^1.0.11",
+    "vanilla-cookieconsent": "^3.1.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/sitemap": "^3.7.4",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "es-module-lexer": "^2.3.2",
+    "opentype.js": "^2.0.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.0",
+    "sharp": "^0.35.5",
+    "svgo": "^4.1.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

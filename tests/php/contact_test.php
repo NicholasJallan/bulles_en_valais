@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// Unit tests for api/contact.php — dependency-free, runs on PHP 7.4+.
+// Unit tests for public/api/contact.php — dependency-free, runs on PHP 7.4+.
 // Usage: php tests/php/contact_test.php  (exit code 1 on failure)
 
 if (PHP_SAPI !== 'cli') {
@@ -19,7 +19,7 @@ register_shutdown_function(static function (): void {
 
 define('CONTACT_CONFIG_PATH', __DIR__ . '/no-such-config.php'); // never the real mail-config.php
 define('CONTACT_NO_AUTORUN', true);
-require __DIR__ . '/../../api/contact.php';
+require __DIR__ . '/../../public/api/contact.php';
 
 function check(string $label, bool $condition): void
 {
@@ -140,6 +140,7 @@ check('phone of 40 multibyte chars → ok', $fieldErrors(['phone' => str_repeat(
 check('message over 5000 chars → error', in_array('message', $fieldErrors(['message' => str_repeat('é', 5001)]), true));
 check('message of 5000 chars → ok', $fieldErrors(['message' => str_repeat('é', 5000)]) === []);
 check('invalid UTF-8 message → error', in_array('message', $fieldErrors(['message' => "abc\xC3\x28"]), true));
+check('gift voucher interest is kept', validate_payload(valid_payload(['interest' => 'gift']))['data']['interest'] === 'gift');
 check('unknown interest → other', validate_payload(valid_payload(['interest' => 'hack\r\n']))['data']['interest'] === 'other');
 check('non-string interest → other', validate_payload(valid_payload(['interest' => 42]))['data']['interest'] === 'other');
 check('known locale is kept', validate_payload(valid_payload(['locale' => 'en']))['data']['locale'] === 'en');
@@ -152,7 +153,7 @@ check('non-string honeypot → honeypot', spam_reason(valid_payload(['website' =
 check('elapsed < 3000 → too_fast', spam_reason(valid_payload(['elapsed' => 2999])) === 'too_fast');
 check('non-numeric elapsed → too_fast', spam_reason(valid_payload(['elapsed' => 'soon'])) === 'too_fast');
 check('negative elapsed → too_fast', spam_reason(valid_payload(['elapsed' => -5])) === 'too_fast');
-check('missing elapsed (page loaded before S00) → accepted', spam_reason(array_diff_key(valid_payload(), ['elapsed' => 0])) === null);
+check('missing elapsed → too_fast (every client sends it since S10)', spam_reason(array_diff_key(valid_payload(), ['elapsed' => 0])) === 'too_fast');
 check('normal submission → accepted', spam_reason(valid_payload()) === null);
 check('elapsed exactly 3000 → accepted', spam_reason(valid_payload(['elapsed' => 3000])) === null);
 
@@ -191,9 +192,49 @@ check('spam → 200 ok without sending, with its reason', $spam['status'] === 20
 $invalid = evaluate_request('POST', 'application/json', $site, json_encode(valid_payload(['email' => 'nope'])));
 check('validation error → 400 with fields', $invalid['status'] === 400 && $invalid['body']['fields'] === ['email']);
 $accepted = evaluate_request('POST', 'application/json', $site, $json);
-check('valid request → data to send', $accepted['send'] !== null && $accepted['send']['email'] === 'elodie@example.com' && $accepted['dropped'] === null && $accepted['note'] === null);
-$legacy = evaluate_request('POST', 'application/json', $site, json_encode(array_diff_key(valid_payload(), ['elapsed' => 0])));
-check('request without elapsed → delivered, with a note to log', $legacy['send'] !== null && $legacy['note'] === 'accepted without elapsed');
+check('valid request → data to send', $accepted['send'] !== null && $accepted['send']['email'] === 'elodie@example.com' && $accepted['dropped'] === null);
+$noElapsed = evaluate_request('POST', 'application/json', $site, json_encode(array_diff_key(valid_payload(), ['elapsed' => 0])));
+check('request without elapsed → 200 ok without sending (too_fast)', $noElapsed['status'] === 200 && $noElapsed['send'] === null && $noElapsed['dropped'] === 'too_fast');
+
+// ---------------------------------------------------------------------------
+section('daily limit');
+check('the limit is 50 e-mails a day', DAILY_LIMIT === 50);
+check('quota of today is read', parse_quota('2026-10-02 12', '2026-10-02') === 12);
+check('quota of another day starts again at 0', parse_quota('2026-10-01 50', '2026-10-02') === 0);
+check('empty counter → 0', parse_quota('', '2026-10-02') === 0);
+check('malformed counter → 0', parse_quota("2026-10-02 lots\n", '2026-10-02') === 0);
+check('counter with a trailing newline is read', parse_quota("2026-10-02 7\n", '2026-10-02') === 7);
+$previousLog = ini_set('error_log', '/dev/null');
+check('counter in a missing directory → unknown (null)', @take_daily_quota(sys_get_temp_dir() . '/no-such-dir/quota', '2026-10-02', 2) === null);
+$unknown = deliver_within_quota(validate_payload(valid_payload())['data'], sys_get_temp_dir() . '/no-such-dir/quota', '2026-10-02');
+check('counter unavailable → sent anyway (here 500: no configuration in the tests)', $unknown['status'] === 500 && $unknown['body']['error'] === 'delivery');
+// These write a counter in the temporary directory: skipped on the Pi (run_unit_php74.sh).
+if (!defined('CONTACT_TEST_NO_FILES')) {
+    $quotaFile = (string) tempnam(sys_get_temp_dir(), 'bev-quota-');
+    check('first e-mail of the day → allowed', take_daily_quota($quotaFile, '2026-10-02', 2) === true);
+    check('the counter holds the day and the count', file_get_contents($quotaFile) === '2026-10-02 1');
+    check('second e-mail → allowed', take_daily_quota($quotaFile, '2026-10-02', 2) === true);
+    check('past the limit → refused', take_daily_quota($quotaFile, '2026-10-02', 2) === false);
+    check('a refused e-mail is not counted', file_get_contents($quotaFile) === '2026-10-02 2');
+    check('next day → allowed again', take_daily_quota($quotaFile, '2026-10-03', 2) === true && file_get_contents($quotaFile) === '2026-10-03 1');
+    $quotaLink = $quotaFile . '-link';
+    @symlink($quotaFile, $quotaLink);
+    check('counter behind a symbolic link → unknown (null), never followed', take_daily_quota($quotaLink, '2026-10-02', 2) === null);
+    @unlink($quotaLink);
+    $quotaHardLink = $quotaFile . '-hard';
+    @link($quotaFile, $quotaHardLink);
+    check('counter with another hard link → unknown (null)', take_daily_quota($quotaFile, '2026-10-02', 2) === null);
+    @unlink($quotaHardLink);
+    file_put_contents($quotaFile, '2026-10-02 50');
+    $busy = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02');
+    check('limit reached → 503 busy, nothing sent', $busy['status'] === 503 && $busy['body'] === ['ok' => false, 'error' => 'busy']);
+    file_put_contents($quotaFile, '2026-10-02 3');
+    $counted = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02');
+    check('under the limit → counted and sent', $counted['status'] === 500 && file_get_contents($quotaFile) === '2026-10-02 4');
+    @unlink($quotaFile);
+}
+ini_set('error_log', (string) $previousLog);
+check('quota_path is in shared/state/, outside the docroot and the releases', quota_path() === '/var/www/bullesenvalais/shared/state/contact-quota');
 
 // ---------------------------------------------------------------------------
 section('build_message');
@@ -251,6 +292,7 @@ $loopback = normalize_mail_config(array_merge($baseConfig, ['host' => '127.0.0.1
 check('STARTTLS off towards loopback (tests) → allowed', $loopback !== null && $loopback['starttls'] === false);
 check('configuration that is not an array → rejected', normalize_mail_config('nope') === null);
 check('missing configuration file → rejected', load_mail_config(__DIR__ . '/no-such-config.php') === null);
+check('production configuration lives in shared/, outside the releases', MAIL_CONFIG_FILE === '/var/www/bullesenvalais/shared/mail-config.php');
 
 // ---------------------------------------------------------------------------
 section('smtp_dialogue (in-memory socket pair)');

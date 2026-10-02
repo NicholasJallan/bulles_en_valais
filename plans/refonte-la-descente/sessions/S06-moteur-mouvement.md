@@ -22,7 +22,7 @@ La page statique existe. Il faut maintenant le **moteur commun** du mouvement, s
 
 ## Tâches
 
-1. **`src/lib/motion/`** :
+1. **`src/lib/motion/`** (réalisé : la colle DOM/GSAP est dans `src/scripts/motion/`, hors couverture ; seule la logique pure reste dans `src/lib/`, voir `PROGRESS.md` §Mutations) :
    - `gsap.ts` : `registerPlugin` (ScrollTrigger, SplitText, CustomEase ; DrawSVG sera chargé à la demande en S09), `ScrollTrigger.config({ ignoreMobileResize: true })`. Tout le module de mouvement est chargé par `import()` dynamique depuis `app.ts` (`02-architecture.md` §7), jamais dans le bundle initial ;
    - `eases.ts` : `CustomEase` `buoyant`, `surface`, `drift`, `sink` créées à partir de `tokens.ts` ;
    - `reduced-motion.ts` : `gsap.matchMedia()` avec les conditions `motion`, `desktop` et `fine`, **et** la classe `motion-ok` ;

@@ -23,18 +23,23 @@ La préproduction est validée. On bascule `dive.bullesenvalais.ch` sur la nouve
 ## Tâches
 
 1. **Sauvegardes** : copie datée de la configuration nginx ; vérifier que `/var/www/html/dive` (ancien site) est intact. Il sert de retour arrière pendant au moins 2 semaines.
-2. **Nettoyage avant build** : supprimer `src/pages/styleguide.astro` (et ses composants de démo) puis `legacy/` ; vérifier que `dist/` ne contient plus de `styleguide` ; tests verts ; commit `chore: remove styleguide and legacy site`.
-3. **Release de production** : `ops/deploy.sh production` → `releases/<horodatage>/` et symlink `current`. La release n'est pas encore servie : nginx pointe toujours vers l'ancien docroot.
+2. **Nettoyage avant build** : supprimer `src/pages/styleguide.astro` (et ses composants de démo), `scripts/preview-pi.mjs` avec `scripts/lib/preview-page.*` et le script `preview:pi` (ils visent l'ancien docroot, D42 ; une prévisualisation future passera par `ops/deploy.sh staging`), puis `legacy/` ; vérifier que `dist/` ne contient plus de `styleguide` ; tests verts ; commit `chore: remove styleguide and legacy site`.
+3. **Release de production** : `ops/deploy.sh production` (scripts éprouvés en S12 sur `staging` ; il demande confirmation ; `ops/rollback.sh --list`) → `releases/<horodatage>/` et symlink `current`. La release n'est pas encore servie : nginx pointe toujours vers l'ancien docroot.
 4. **nginx `dive`** (feu vert de Nicholas juste avant) :
    - `root /var/www/bullesenvalais/current;` ;
    - PHP : `fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;` et `fastcgi_param DOCUMENT_ROOT $realpath_root;` ; correspondance `/api/contact` → `contact.php` conservée ; seul `contact.php` exécute du PHP (`location = /api/contact.php` avec sa limite de débit, tout autre `.php` → 404, comme depuis S00) ;
    - `try_files $uri $uri/ =404;` et `error_page 404 /404.html;` (fin du repli SPA) ;
    - cache : `/_astro/` 1 an `immutable`, images et polices 30 jours, HTML `no-cache` ; `gzip` pour les types texte ;
-   - `include` de `ops/nginx/security-headers.conf` (CSP finale **sans** `unsafe-eval`, **sans** unpkg, **sans** script inline) ; limite de débit de `/api/contact` conservée ;
+   - `include` de `ops/nginx/security-headers.conf` (CSP finale **sans** `unsafe-eval`, **sans** unpkg, **sans** script inline) dans le bloc `server` **et** dans chaque `location` qui pose ses propres `add_header` (nginx ne les hérite pas) ; limite de débit de `/api/contact` conservée ;
+   - formulaire : depuis S12, `contact.php` lit `shared/mail-config.php` et tient le compteur du plafond dans `shared/state/contact-quota` (PHP-FPM n'a pas de `PrivateTmp`, `/tmp` est partagé) ; après la mise en ligne, un envoi réel doit créer ce compteur (`AAAA-MM-JJ 1`) ;
+   - `gzip_types` (le bloc `http` ne compresse aujourd'hui que le HTML : JS, CSS, SVG, JSON, XML, manifeste à ajouter, dans le bloc `dive` pour ne pas toucher aux autres sites) ;
+   - certbot renouvelle le certificat de tous les noms par webroot `/var/www/html/dive` (`/etc/letsencrypt/renewal/www.bullesenvalais.ch.conf`) : garder les `location ^~ /.well-known/acme-challenge/` vers ce dossier, ou changer `webroot_path`, avant de supprimer l'ancien docroot (J+14) ;
+   - le bloc `http` accepte encore TLS 1.0 et 1.1 (tous les sites du Pi) : le proposer à Nicholas, sans l'imposer ;
+   - rapports CSP (reporté de S11) : soit `public/api/csp-report.php` (JSON ≤ 8 Ko, journal hors docroot, sa propre `location` exacte limitée en débit, `check:dist` à étendre), soit pas de `report-uri` du tout ; trancher avec Nicholas ;
    - `sudo nginx -t && sudo systemctl reload nginx`.
-5. **Vérifications immédiates** :
+5. **Vérifications immédiates** (S12 a retenu l'option B : la recette **serveur** se fait ici, juste après la bascule) :
    - `curl -sI` : 200 sur `/` et `/en/`, en-têtes attendus, 404 réelle sur une URL inconnue, `robots.txt` et `sitemap-index.xml` servis en texte ou XML, 301 conservées depuis `bullesenvalais.ch` et `www.` ;
-   - `/api/contact` : `GET` → 405, `POST` sans `Origin` → 403 ; **message réel** envoyé par Nicholas → reçu ;
+   - `/api/contact` : `GET` → 405, `POST` sans `Origin` → 403 ; **message réel** envoyé par Nicholas → reçu, accents et `Reply-To` corrects (premier envoi par le `contact.php` de la refonte) ; `site.webmanifest` servi en JSON ;
    - MCP `chrome-devtools` : aucune erreur console, **aucune violation CSP**, après consentement comme sans ; bandeau fonctionnel ;
    - assistant de balises Google (avec Nicholas) : balise Ads et GA4 actives après consentement, conversions déclenchées (formulaire, WhatsApp, téléphone) ; temps réel GA4 ;
    - Lighthouse mobile en production → tableau Mesures de `PROGRESS.md` ;
@@ -66,3 +71,5 @@ curl -s https://dive.bullesenvalais.ch/robots.txt | head -3
 ## 🔁 Fin du plan
 
 Consigner dans `PROGRESS.md` le bilan (mesures avant/après, écarts, idées pour la suite : allemand, vidéo, journal de plongées).
+
+Suite proposée à Nicholas une fois le site en ligne : **`plans/mesure-google/README.md`**, phase A (GA4 reçoit des données, tableau des cookies relevé en production), puis B à D quand il le décide (D40).

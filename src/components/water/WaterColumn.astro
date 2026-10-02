@@ -1,0 +1,37 @@
+---
+import { TONES } from '@/lib/color/palette.ts';
+import { toneWater } from './water-tones.ts';
+
+/**
+ * The water column (E4): one fixed layer per tone behind the page. The sections paint their own
+ * water, so it only shows through the thermoclines; water.ts fades the layers (opacity only).
+ */
+---
+
+<div class="water-column" aria-hidden="true" data-water-column>
+  {TONES.map((tone) => (
+    <div class="water-layer" data-water-tone={tone} style={`--water: ${toneWater(tone)}`} />
+  ))}
+</div>
+
+<style>
+  .water-column {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+  }
+
+  :global(html.motion-ready) .water-column {
+    display: block;
+  }
+
+  .water-layer {
+    position: absolute;
+    inset: 0;
+    background-color: var(--water);
+    opacity: 0;
+    visibility: hidden;
+  }
+</style>

@@ -1,0 +1,7 @@
+/* Fixed elements that float over the sections: an element screenshot taller than the viewport
+   would paint them at random places (the skip link, parked above the viewport, included). */
+.skip-link,
+.hud,
+.whatsapp-fab {
+  visibility: hidden !important;
+}

@@ -6,3 +6,18 @@ node_modules/
 .idea/
 settings.json
 api/mail-config.php
+public/api/mail-config.php
+
+# Astro
+dist/
+.astro/
+
+# Tests
+coverage/
+test-results/
+playwright-report/
+
+# Raw photos (full resolution, EXIF/GPS): kept locally, resized copies go in src/assets/images/
+src/assets/original/
+.claude/worktrees/
+tests/php/.quota-integration

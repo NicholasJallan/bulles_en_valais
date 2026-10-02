@@ -1,0 +1,81 @@
+// Ripples of the hero surface (E1): rings on the lake, at most 16, passed to the shader as
+// uRipples[16] (x, z on the water in metres, age in seconds; lake.ts), and the pointer gestures
+// that create them.
+import { groupSpeed, phaseSpeed } from './lake.ts';
+
+export interface Ripple {
+  /** Point of the lake, in metres: x to the right, z away from the camera. */
+  readonly x: number;
+  readonly z: number;
+  /** Time of birth, in seconds of the surface clock. */
+  readonly born: number;
+}
+
+export const MAX_RIPPLES = 16;
+/** A ring has faded out after this long (the shader fades it out by then: uRingWave.w). */
+export const RIPPLE_LIFETIME_S = 5;
+/** A pebble, a fingertip: ripples of about 12 cm, the scale of the rings seen on the photo. */
+export const RING_WAVELENGTH_M = 0.12;
+
+/** uRingWave: wavenumber (rad/m), speeds of the crests and of the ring (m/s), lifetime (s). */
+export function ringWave(): [number, number, number, number] {
+  return [
+    (2 * Math.PI) / RING_WAVELENGTH_M,
+    phaseSpeed(RING_WAVELENGTH_M),
+    groupSpeed(RING_WAVELENGTH_M),
+    RIPPLE_LIFETIME_S,
+  ];
+}
+const EMPTY_SLOT = -1;
+
+export function addRipple(list: readonly Ripple[], ripple: Ripple): Ripple[] {
+  return [...list, ripple].slice(-MAX_RIPPLES);
+}
+
+/** The same list when nothing expired, so that callers can skip work. */
+export function liveRipples(list: readonly Ripple[], now: number): readonly Ripple[] {
+  const live = list.filter((ripple) => now - ripple.born < RIPPLE_LIFETIME_S);
+  return live.length === list.length ? list : live;
+}
+
+/** Fills the uniform buffer (16 × vec3) in place: it is uploaded on every frame. */
+export function writeRipples(list: readonly Ripple[], now: number, out: number[]): void {
+  for (let slot = 0; slot < MAX_RIPPLES; slot += 1) {
+    const ripple = list[slot];
+    out[slot * 3] = ripple?.x ?? 0;
+    out[slot * 3 + 1] = ripple?.z ?? 0;
+    out[slot * 3 + 2] = ripple === undefined ? EMPTY_SLOT : now - ripple.born;
+  }
+}
+
+/** A pointer position in CSS pixels, with its time in milliseconds. */
+export interface PointerSample {
+  readonly x: number;
+  readonly y: number;
+  readonly t: number;
+}
+
+export interface EmitOptions {
+  readonly minIntervalMs: number;
+  readonly minDistancePx: number;
+}
+
+const distance = (a: PointerSample, b: PointerSample): number => Math.hypot(b.x - a.x, b.y - a.y);
+
+/** A moving mouse leaves a ripple now and then, not one per event. */
+export function shouldEmit(
+  last: PointerSample | undefined,
+  next: PointerSample,
+  { minIntervalMs, minDistancePx }: EmitOptions,
+): boolean {
+  if (last === undefined) return true;
+  return next.t - last.t >= minIntervalMs && distance(last, next) >= minDistancePx;
+}
+
+const TAP_MAX_MS = 300;
+const TAP_MAX_PX = 10;
+
+/** On touch screens, only a short tap makes a ripple: never a swipe (it scrolls the page). */
+export function isTap(down: PointerSample, up: PointerSample): boolean {
+  return up.t - down.t <= TAP_MAX_MS && distance(down, up) <= TAP_MAX_PX;
+}

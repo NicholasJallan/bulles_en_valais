@@ -1,0 +1,100 @@
+#!/usr/bin/env node
+// @ts-check
+// Favicons from the symbol of the logo (#mark of src/assets/brand/logo.svg):
+//   public/favicon.svg            navy, white when the browser is in dark mode
+//   public/favicon.ico            32 px navy fallback
+//   public/apple-touch-icon.png   180 px, navy symbol on a white tile
+//   public/icon-192.png, icon-512.png (site.webmanifest)
+// Usage: node scripts/make-icons.mjs
+import { readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import sharp from 'sharp';
+
+const ROOT = path.resolve(import.meta.dirname, '..');
+const LOGO = path.join(ROOT, 'src/assets/brand/logo.svg');
+const PUBLIC = path.join(ROOT, 'public');
+/** The logo is only ever navy on white or white on black (Gate 3, D35). */
+const NAVY = '#141646';
+const WHITE = '#ffffff';
+/** Share of the tile left around the symbol (the safe zone of a maskable icon is 80 %). */
+const TILE_PADDING = 0.16;
+const FAVICON_PADDING = 0.02;
+
+const logo = readFileSync(LOGO, 'utf8');
+const viewBox = /viewBox="([^"]+)"/.exec(logo)?.[1];
+const markPath = /<g id="mark"><path d="([^"]+)"\/><\/g>/.exec(logo)?.[1];
+if (!viewBox || !markPath) throw new Error('logo.svg: viewBox or #mark not found');
+const [, , width, height] = viewBox.split(' ').map(Number);
+
+/** Bounding box of the symbol, measured on a rendering of it. */
+async function markBox() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${width}" height="${height}"><path d="${markPath}"/></svg>`;
+  const { info } = await sharp(Buffer.from(svg))
+    .trim({ threshold: 1 })
+    .toBuffer({ resolveWithObject: true });
+  return {
+    x: -(info.trimOffsetLeft ?? 0),
+    y: -(info.trimOffsetTop ?? 0),
+    w: info.width,
+    h: info.height,
+  };
+}
+
+/**
+ * Square viewBox centred on the symbol, with a padding ratio.
+ * @param {{ x: number, y: number, w: number, h: number }} box
+ * @param {number} padding
+ */
+function square(box, padding) {
+  const side = Math.max(box.w, box.h) / (1 - 2 * padding);
+  const x = box.x + box.w / 2 - side / 2;
+  const y = box.y + box.h / 2 - side / 2;
+  return [x, y, side, side].map((v) => Math.round(v)).join(' ');
+}
+
+const box = await markBox();
+
+const favicon =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${square(box, FAVICON_PADDING)}">` +
+  `<style>path{fill:${NAVY}}@media (prefers-color-scheme:dark){path{fill:${WHITE}}}</style>` +
+  `<path d="${markPath}"/></svg>\n`;
+writeFileSync(path.join(PUBLIC, 'favicon.svg'), favicon);
+
+// favicon.ico for the browsers without SVG favicons (and the default /favicon.ico request, which
+// nginx would otherwise answer with index.html): one 32 px PNG wrapped in an ICO container.
+const png32 = await sharp(
+  Buffer.from(favicon.replace(/<style>.*<\/style>/, '').replace('<path ', `<path fill="${NAVY}" `)),
+)
+  .resize(32, 32)
+  .png({ compressionLevel: 9 })
+  .toBuffer();
+const header = Buffer.alloc(22);
+header.writeUInt16LE(1, 2); // type: icon
+header.writeUInt16LE(1, 4); // one image
+header.writeUInt8(32, 6); // width
+header.writeUInt8(32, 7); // height
+header.writeUInt16LE(1, 10); // colour planes
+header.writeUInt16LE(32, 12); // bits per pixel
+header.writeUInt32LE(png32.length, 14);
+header.writeUInt32LE(22, 18); // offset of the PNG data
+writeFileSync(path.join(PUBLIC, 'favicon.ico'), Buffer.concat([header, png32]));
+
+const tile = (/** @type {number} */ size) =>
+  Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${square(box, TILE_PADDING)}" width="${size}" height="${size}">` +
+      `<rect x="-99999" y="-99999" width="199999" height="199999" fill="${WHITE}"/>` +
+      `<path d="${markPath}" fill="${NAVY}"/></svg>`,
+  );
+for (const [name, size] of /** @type {const} */ ([
+  ['apple-touch-icon.png', 180],
+  ['icon-192.png', 192],
+  ['icon-512.png', 512],
+])) {
+  await sharp(tile(size))
+    .flatten({ background: WHITE })
+    .png({ compressionLevel: 9, palette: true })
+    .toFile(path.join(PUBLIC, name));
+}
+console.log(
+  `favicon.svg (${favicon.length} bytes), apple-touch-icon.png, icon-192.png, icon-512.png`,
+);

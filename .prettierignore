@@ -1,0 +1,7 @@
+# Prettier also skips everything listed in .gitignore.
+.venv/
+plans/
+package-lock.json
+*.md
+# Kept byte for byte as specified in plans/refonte-la-descente/02-architecture.md §7.
+public/js/boot.js

@@ -1,0 +1,122 @@
+---
+import { PLACES } from '@/data/places.ts';
+import { LAKE, RHONE, RHONE_FRAME } from '@/data/rhone.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { fractionAlong, frameHeight, projectPoint } from '@/lib/geo.ts';
+
+/**
+ * The Rhône from Sion to the Léman, with the three sites. Static; on a desktop with motion,
+ * places.ts draws the river as the sites go by (E10): `pathLength="1"` lets it set the drawn
+ * share, and each station carries its share of the river (`data-fraction`).
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).places;
+const project = ([lat, lng]: readonly [number, number]) => projectPoint({ lat, lng }, RHONE_FRAME);
+const toPath = (points: readonly (readonly [number, number])[], close = false) =>
+  points
+    .map(project)
+    .map(({ x, y }, index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`)
+    .join(' ') + (close ? ' Z' : '');
+const river = RHONE.map(project);
+const height = frameHeight(RHONE_FRAME);
+const sites = PLACES.map((place) => {
+  const point = projectPoint(place.coords, RHONE_FRAME);
+  return {
+    ...point,
+    id: place.id,
+    name: localize(place.name, locale),
+    fraction: Math.round(fractionAlong(river, point) * 1000) / 1000,
+    // Labels near the east edge go on the left of their point.
+    anchor: point.x > RHONE_FRAME.width * 0.7 ? 'end' : 'start',
+  };
+});
+const titleId = 'rhone-map-title';
+---
+
+<svg
+  class="rhone-map"
+  viewBox={`0 0 ${RHONE_FRAME.width} ${height}`}
+  role="img"
+  aria-labelledby={titleId}
+  data-rhone-map
+>
+  <title id={titleId}>{t.route}</title>
+  <path class="rhone-lake" d={toPath(LAKE, true)}></path>
+  <path class="rhone-river rhone-river-ghost" d={toPath(RHONE)}></path>
+  <path class="rhone-river" d={toPath(RHONE)} pathLength="1" data-rhone-river></path>
+  {sites.map((site) => (
+    <g
+      class="rhone-site"
+      transform={`translate(${site.x} ${site.y})`}
+      data-station={site.id}
+      data-fraction={site.fraction}
+    >
+      <circle r="6"></circle>
+      <text x={site.anchor === 'end' ? -14 : 14} y="5" text-anchor={site.anchor}>
+        {site.name}
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .rhone-map {
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .rhone-lake {
+    fill: var(--line-faint);
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .rhone-river {
+    fill: none;
+    stroke: var(--fg-soft);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The whole river, faint, under the drawn one: the route reads before it is drawn. */
+  .rhone-river-ghost {
+    stroke: var(--line);
+  }
+
+  .rhone-site circle {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      transform var(--dur-base) var(--ease-surface),
+      fill var(--dur-base) var(--ease-surface);
+  }
+
+  .rhone-site text {
+    fill: var(--fg-soft);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 500;
+    transition: fill var(--dur-base) var(--ease-surface);
+  }
+
+  /* The station of the place in view (places.ts). */
+  .rhone-site[data-active] circle {
+    fill: var(--action);
+    stroke: var(--action);
+    transform: scale(1.5);
+  }
+
+  .rhone-site[data-active] text {
+    fill: var(--fg);
+  }
+</style>

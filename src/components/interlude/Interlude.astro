@@ -1,0 +1,152 @@
+---
+import descentWide from '@/assets/images/interludes/descent-16x9.jpg';
+import descentTall from '@/assets/images/interludes/descent-4x5.jpg';
+import light from '@/assets/images/interludes/light.jpg';
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import { toneWater } from '@/components/water/water-tones.ts';
+import { DIVE_PROFILE } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import type { Tone } from '@/lib/color/palette.ts';
+
+/**
+ * Full-width image between two sections, with its quote and its credit (not a section). Its top
+ * and bottom edges melt into the waters of the sections around it (thermoclines, E4); with
+ * motion, interlude.ts adds the parallax, and on a fine pointer the bubble trail (E7).
+ */
+interface Props {
+  locale: Locale;
+  variant: 'descent' | 'light';
+  /** Tones of the sections before and after. */
+  from: Tone;
+  to: Tone;
+}
+
+const { locale, variant, from, to } = Astro.props;
+const t = getDictionary(locale).interludes[variant];
+const id = variant === 'descent' ? 'interlude-descent' : 'interlude-light';
+const hud = DIVE_PROFILE.find((section) => section.id === id)?.hud;
+// Descent: 16:9 from 48 rem, 4:5 on phones (D34). Light: one landscape crop (D33).
+const crops =
+  variant === 'descent'
+    ? {
+        sources: [{ media: '(width >= 48rem)', src: descentWide, widths: [960, 1440, 1707] }],
+        fallback: { src: descentTall, widths: [480, 720, 952] },
+      }
+    : { sources: [], fallback: { src: light, widths: [640, 960, 1440, 1920, 2752] } };
+---
+
+<figure
+  id={id}
+  class:list={['interlude', `interlude-${variant}`]}
+  data-tone="abyss"
+  data-depth-start={hud?.start}
+  data-depth-end={hud?.end}
+  data-interlude
+  style={`--from: ${toneWater(from)}; --to: ${toneWater(to)}`}
+>
+  <ArtPicture {...crops} sizes="100vw" alt={t.imageAlt} class="interlude-image" />
+  <div class="interlude-veil" aria-hidden="true"></div>
+  <blockquote class="interlude-quote wrap">
+    <p class="display" data-reveal="lines">
+      {t.quote}
+    </p>
+  </blockquote>
+  <figcaption class="interlude-credit wrap fine">{t.credit}</figcaption>
+</figure>
+
+<style>
+  .interlude {
+    --edge: clamp(4rem, 12svh, 8rem);
+
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: end;
+    min-block-size: min(100svh, 56rem);
+    padding-block: var(--space-section) calc(var(--edge) + var(--space-xs));
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  /* Thermoclines in and out: the image rises out of the water above and sinks into the next. */
+  .interlude::before,
+  .interlude::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    z-index: -1;
+    block-size: var(--edge);
+    pointer-events: none;
+  }
+
+  .interlude::before {
+    inset-block-start: 0;
+    background-image: linear-gradient(var(--from), transparent);
+  }
+
+  .interlude::after {
+    inset-block-end: 0;
+    background-image: linear-gradient(transparent, var(--to));
+  }
+
+  /* Room for the parallax (interlude.ts): the picture overflows by 6 % above and below. */
+  :global(html.motion-ready) .interlude[data-parallax] :global(.interlude-image) {
+    inset-block-start: -6%;
+    block-size: 112%;
+  }
+
+  /* The ring that replaces the pointer while bubbles follow it (fine pointer, motion). */
+  .interlude[data-trail] {
+    cursor: none;
+  }
+
+  .interlude :global(.interlude-cursor) {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: var(--z-bubbles);
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    margin: -1.125rem 0 0 -1.125rem;
+    border: 1px solid var(--c-foam);
+    border-radius: var(--radius-round);
+    box-shadow: inset 0 0 0.75rem color-mix(in oklch, var(--c-foam) 18%, transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .interlude :global(.interlude-image),
+  .interlude :global(.interlude-image img) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .interlude-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to top,
+      oklch(14% 0.03 245 / 0.88),
+      oklch(14% 0.03 245 / 0.35) 55%,
+      oklch(14% 0.03 245 / 0.1)
+    );
+  }
+
+  .interlude-quote p {
+    max-inline-size: 22ch;
+    font-size: var(--step-4);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .interlude-credit {
+    margin-block-start: var(--space-xl);
+    color: var(--fg-soft);
+  }
+</style>

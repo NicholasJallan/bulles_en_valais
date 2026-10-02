@@ -1,0 +1,116 @@
+---
+import { Font } from 'astro:assets';
+import '@/styles/tokens.css';
+import '@/styles/global.css';
+import '@/styles/typography.css';
+import '@/styles/motion.css';
+import '@/styles/utilities.css';
+import { BUSINESS } from '@/data/contact.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import { COLORS } from '@/lib/color/palette.ts';
+import { oklchToSrgb, srgbToHex } from '@/lib/color/contrast.ts';
+import { alternates, routePath, type RouteId } from '@/i18n/routes.ts';
+import { LANG_TAGS, LOCALES, type Locale } from '@/i18n/types.ts';
+
+interface PageProps {
+  locale: Locale;
+  title: string;
+  description: string;
+  /** Title and description of the share card, when they differ from the page (home). */
+  ogTitle?: string;
+  ogDescription?: string;
+}
+
+/**
+ * A localised page has a route (canonical and hreflang). A page outside the routes (the
+ * 404 page) has neither, so it must not be indexed: TypeScript refuses it without noindex.
+ */
+type Props = PageProps &
+  ({ route: RouteId; noindex?: boolean } | { route?: undefined; noindex: true });
+
+const { locale, route, title, description, ogTitle, ogDescription, noindex = false } = Astro.props;
+const { site } = Astro;
+if (site === undefined) throw new Error('`site` is missing from astro.config.mjs');
+
+const canonical = route === undefined ? undefined : new URL(routePath(route, locale), site).href;
+const links =
+  route === undefined
+    ? []
+    : alternates(route).map(({ hreflang, path }) => ({ hreflang, href: new URL(path, site).href }));
+
+// Open Graph and Twitter cards (02-architecture.md §13), for the pages that have a canonical URL.
+const OG_LOCALES: Readonly<Record<Locale, string>> = { fr: 'fr_CH', en: 'en_GB' };
+const share = canonical && {
+  url: canonical,
+  title: ogTitle ?? title,
+  description: ogDescription ?? description,
+  image: new URL(`/og/og-${locale}.jpg`, site).href,
+  imageAlt: getDictionary(locale).meta.ogImageAlt,
+  alternateLocales: LOCALES.filter((other) => other !== locale).map((other) => OG_LOCALES[other]),
+};
+// Browser chrome in the ink of the palette (the nav sits on the dark hero photo).
+const themeColor = srgbToHex(oklchToSrgb(COLORS.ink));
+---
+
+<!doctype html>
+<html lang={LANG_TAGS[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    {/* External file in public/, run before any stylesheet: never inline code (CSP). */}
+    <script is:inline src="/js/boot.js"></script>
+    {/* Consent Mode defaults, then the Google tag in production only (S11): also an external file. */}
+    <script is:inline src="/js/consent-default.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {links.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={href} />
+    ))}
+    <meta name="theme-color" content={themeColor} />
+    {share && (
+      <>
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={BUSINESS.name} />
+        <meta property="og:url" content={share.url} />
+        <meta property="og:title" content={share.title} />
+        <meta property="og:description" content={share.description} />
+        <meta property="og:image" content={share.image} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={share.imageAlt} />
+        <meta property="og:locale" content={OG_LOCALES[locale]} />
+        {share.alternateLocales.map((other) => (
+          <meta property="og:locale:alternate" content={other} />
+        ))}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={share.title} />
+        <meta name="twitter:description" content={share.description} />
+        <meta name="twitter:image" content={share.image} />
+        <meta name="twitter:image:alt" content={share.imageAlt} />
+      </>
+    )}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {/* Gate 1: Instrument Serif (roman, italic) and Switzer roman, three files at most (§7). */}
+    <Font
+      cssVariable="--font-instrument-serif"
+      preload={[{ style: 'normal' }, { style: 'italic' }]}
+    />
+    <Font cssVariable="--font-switzer" preload={[{ style: 'normal' }]} />
+    <slot name="head" />
+    <script>
+      import '@/scripts/app.ts';
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">
+      {getDictionary(locale).a11y.skipLink}
+    </a>
+    <slot />
+  </body>
+</html>

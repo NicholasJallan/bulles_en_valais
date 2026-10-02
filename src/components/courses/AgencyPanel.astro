@@ -1,0 +1,108 @@
+---
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import { cursusCourses, type AgencyId } from '@/data/courses.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import PriceList from './PriceList.astro';
+
+interface Props {
+  locale: Locale;
+  agency: AgencyId;
+  active: boolean;
+}
+
+const { locale, agency, active } = Astro.props;
+const t = getDictionary(locale).courses.agencies[agency];
+const panelId = `agency-${agency}`;
+---
+
+<div id={panelId} class="agency-panel" data-tab-panel data-active={active ? '' : undefined}>
+  <div class="agency-text">
+    <p class="agency-label">
+      <span>{t.label}</span>
+      <span class="agency-sub">{t.sub}</span>
+    </p>
+    <h3 class="agency-headline" data-tab-headline data-reveal={active ? 'lines' : undefined}>
+      <EmphasisText value={t.headline} />
+    </h3>
+    <p>{t.description}</p>
+    <ul class="agency-highlights">
+      {t.highlights.map((highlight) => (
+        <li>{highlight}</li>
+      ))}
+    </ul>
+  </div>
+  <div class="agency-prices">
+    <PriceList
+      locale={locale}
+      courses={cursusCourses(agency, 'row')}
+      extras={cursusCourses(agency, 'extra')}
+      headingId={`${panelId}-prices`}
+    />
+    {t.note && <p class="fine">{t.note}</p>}
+  </div>
+</div>
+
+<style>
+  .agency-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl) var(--grid-gap);
+    padding: clamp(var(--space-m), 4vw, var(--space-2xl));
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-drift);
+  }
+
+  /* Stacked without JavaScript: each panel keeps its distance from the next. */
+  .agency-panel + :global(.agency-panel) {
+    margin-block-start: var(--space-l);
+  }
+
+  @media (width >= 64rem) {
+    .agency-panel {
+      grid-template-columns: 7fr 5fr;
+    }
+  }
+
+  .agency-text {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .agency-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .agency-sub {
+    font-weight: var(--text-weight);
+    color: var(--fg-soft);
+  }
+
+  .agency-headline {
+    font-size: var(--step-3);
+  }
+
+  .agency-highlights {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-inline-start: 1.1em;
+  }
+
+  .agency-highlights li::marker {
+    content: '— ';
+    color: var(--fg-soft);
+  }
+
+  .agency-prices {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+</style>

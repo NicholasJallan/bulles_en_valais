@@ -1,0 +1,135 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import type { Course } from '@/data/courses.ts';
+import { isOnRequest } from '@/data/courses.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { formatCHF } from '@/lib/format.ts';
+
+/** Courses and prices of an agency (courses.ts), each with a link that prefills the form. */
+interface Props {
+  locale: Locale;
+  courses: readonly Course[];
+  /** Lines under the list (`cursus: 'extra'`). */
+  extras: readonly Course[];
+  headingId: string;
+}
+
+const { locale, courses, extras, headingId } = Astro.props;
+const t = getDictionary(locale).courses;
+const price = (course: Course) =>
+  isOnRequest(course.price) ? t.onRequest : formatCHF(course.price.amount, locale);
+---
+
+<div class="price-list">
+  <h4 id={headingId} class="price-list-title">
+    {t.priceListTitle}
+  </h4>
+  <ul class="bare-list" aria-labelledby={headingId}>
+    {courses.map((course) => (
+      <li class="price-row" data-tab-row>
+        <span class="price-name">
+          {localize(course.name, locale)}
+          {course.meta && <span class="price-meta">{localize(course.meta, locale)}</span>}
+        </span>
+        <span
+          class:list={[
+            'price-amount',
+            'tabular',
+            { 'price-on-request': isOnRequest(course.price) },
+          ]}
+        >
+          {price(course)}
+        </span>
+        {course.formInterest && (
+          <a class="price-ask" href="#contact-form" data-prefill-interest={course.formInterest}>
+            <Icon name="message" />
+            <span class="visually-hidden">
+              {t.askAbout} — {localize(course.name, locale)}
+            </span>
+          </a>
+        )}
+      </li>
+    ))}
+  </ul>
+  {extras.length > 0 && (
+    <ul class="bare-list price-extras fine">
+      {extras.map((course) => (
+        <li>
+          {localize(course.name, locale)} · <span class="tabular">{price(course)}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+<style>
+  .price-list {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .price-list-title {
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    letter-spacing: var(--tracking-label);
+    color: var(--fg-soft);
+  }
+
+  .price-row {
+    display: grid;
+    grid-template-columns: 1fr auto var(--tap-min);
+    align-items: center;
+    gap: var(--space-s);
+    padding-block: var(--space-2xs);
+    border-block-end: 1px solid var(--line);
+  }
+
+  .price-row:first-child {
+    border-block-start: 1px solid var(--line);
+  }
+
+  .price-name {
+    display: grid;
+    font-weight: var(--text-strong);
+    line-height: 1.3;
+  }
+
+  .price-meta {
+    font-size: var(--step--1);
+    font-weight: var(--text-weight);
+    color: var(--fg-soft);
+  }
+
+  .price-amount {
+    font-size: var(--step-1);
+    white-space: nowrap;
+  }
+
+  .price-on-request {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .price-ask {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    border-radius: var(--radius-round);
+    color: var(--action-text);
+    transition: background-color var(--dur-fast) var(--ease-surface);
+  }
+
+  @media (hover: hover) {
+    .price-ask:hover {
+      background-color: var(--veil-hover);
+    }
+  }
+
+  .price-extras {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+</style>

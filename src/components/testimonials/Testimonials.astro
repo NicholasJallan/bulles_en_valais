@@ -1,0 +1,471 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { GOOGLE_PROFILE_URL } from '@/data/contact.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import { LANG_TAGS, type Locale } from '@/i18n/types.ts';
+
+/**
+ * Google reviews (E12). Static: the header, a rail of quotes that snaps (rail.ts adds the previous
+ * and next buttons), then the invitation to leave a review. With motion (testimonials.ts, D45), the
+ * stage is pinned and the vertical scroll slides the header, the quotes and the invitation by.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.testimonials;
+const showLanguageNote = t.items.some((item) => item.lang !== locale || item.translated);
+/** Past this length a review gets a wider card when pinned, rather than a taller one, and is cut
+ * short in the static rail. */
+const LONG_REVIEW_CHARS = 600;
+const isLong = (text: readonly string[]) => text.join('').length > LONG_REVIEW_CHARS;
+---
+
+<Section id="testimonials" tone="surface" class="testimonials">
+  <div class="testimonials-stage" data-controller="rail" data-rail-stage>
+    {/* First in the document, so the buttons come before the quotes they move. */}
+    <div class="wrap rail-controls js-only">
+      <span class="rail-progress" aria-hidden="true">
+        <span class="rail-progress-bar" data-rail-progress></span>
+      </span>
+      <button class="rail-button" type="button" data-rail-previous>
+        <Icon name="arrow-left" />
+        <span class="visually-hidden">{t.previous}</span>
+      </button>
+      <button class="rail-button" type="button" data-rail-next>
+        <Icon name="arrow-right" />
+        <span class="visually-hidden">{t.next}</span>
+      </button>
+    </div>
+    <div class="wrap testimonials-window" data-rail-window>
+      <div class="testimonials-track" data-rail-track>
+        <div class="wrap testimonials-head" data-rail-panel>
+          <SectionHeader
+            id="testimonials-title"
+            depth={markerDepth('testimonials')}
+            eyebrow={t.eyebrow}
+            title={t.title}
+            lead={t.lead}
+          />
+          <p class="fine testimonials-source">
+            {t.source}
+            {showLanguageNote && <> · {t.languageNote}</>}
+          </p>
+        </div>
+        <ul class="bare-list rail" tabindex="0" aria-labelledby="testimonials-title" data-rail>
+          {t.items.map((item) => (
+            <li
+              class:list={['testimonial', { 'testimonial-long': isLong(item.text) }]}
+              data-rail-panel
+            >
+              <figure>
+                <span class="testimonial-mark" aria-hidden="true" data-rail-mark></span>
+                <blockquote lang={item.lang === locale ? undefined : LANG_TAGS[item.lang]}>
+                  {item.text.map((paragraph) => (
+                    <p>{paragraph}</p>
+                  ))}
+                </blockquote>
+                {/* Long reviews are cut short from the start (static rail); pinned, reviews.ts shows
+                    it on the reviews taller than the window. */}
+                <button
+                  class="testimonial-more js-only"
+                  type="button"
+                  hidden={!isLong(item.text)}
+                  data-review-open
+                >
+                  {t.readMore}
+                  <span class="visually-hidden"> · {item.author}</span>
+                </button>
+                <figcaption>
+                  <span class="testimonial-author">{item.author}</span>
+                  <span class="testimonial-course">{item.course}</span>
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+        <div class="wrap testimonials-cta" data-rail-panel>
+          <p>{t.prompt}</p>
+          <Button
+            href={GOOGLE_PROFILE_URL}
+            variant="secondary"
+            icon="arrow-up-right"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.cta}
+            <span class="visually-hidden"> {dictionary.a11y.newTab}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <dialog class="review-dialog" aria-labelledby="review-dialog-title" data-review-dialog>
+    <div class="review-dialog-head">
+      <h2 id="review-dialog-title" class="review-dialog-title" data-review-title></h2>
+      <button class="review-dialog-close" type="button" data-review-close>
+        <Icon name="close" />
+        <span class="visually-hidden">{dictionary.a11y.closeDialog}</span>
+      </button>
+    </div>
+    <div class="review-dialog-body" data-lenis-prevent data-review-body></div>
+  </dialog>
+</Section>
+
+<style>
+  /* ——— Static: header, buttons, the rail of quotes that snaps, then the invitation. The window
+     and the track only matter pinned. ——— */
+  .testimonials-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'head' 'controls' 'rail' 'cta';
+    gap: var(--space-m);
+  }
+
+  .testimonials-window,
+  .testimonials-track {
+    display: contents;
+  }
+
+  .testimonials-head {
+    grid-area: head;
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .rail-controls {
+    grid-area: controls;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .rail {
+    --rail-inset: max(var(--gutter), (100% - var(--page-max)) / 2);
+    grid-area: rail;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(85%, 26rem);
+    align-items: start;
+    gap: var(--grid-gap);
+    padding-inline: var(--rail-inset);
+    padding-block: var(--space-2xs) var(--space-m);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scroll-padding-inline: var(--rail-inset);
+    scrollbar-width: thin;
+  }
+
+  .testimonial {
+    scroll-snap-align: start;
+  }
+
+  .testimonial figure {
+    position: relative;
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-float);
+  }
+
+  /* A large opening quote mark in the corner (its glyph follows the language of the page);
+     it drifts a little as the rail moves (testimonials.ts). */
+  .testimonial-mark {
+    position: absolute;
+    inset-block-start: calc(-0.28 * var(--step-5));
+    inset-inline-end: var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    line-height: 1;
+    color: var(--accent-deco);
+    pointer-events: none;
+  }
+
+  /* Each mark opens a first-level quote: without the closing, the next one would nest (‹). */
+  .testimonial-mark::before {
+    content: open-quote no-close-quote;
+  }
+
+  .testimonial blockquote {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .testimonial blockquote p:first-child {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: var(--leading-lead);
+  }
+
+  .testimonial blockquote p:not(:first-child) {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+  }
+
+  .testimonial figcaption {
+    display: grid;
+    padding-block-start: var(--space-xs);
+    border-block-start: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .testimonial-author {
+    font-weight: var(--text-strong);
+  }
+
+  .testimonial-course {
+    color: var(--fg-soft);
+  }
+
+  .rail-button {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    border: 1px solid var(--fg-soft);
+    border-radius: var(--radius-round);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-surface);
+  }
+
+  @media (hover: hover) {
+    .rail-button:hover:not(:disabled) {
+      border-color: var(--action);
+      color: var(--action-text);
+    }
+  }
+
+  .rail-button:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  .rail-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* The progress of the pinned rail only. */
+  .rail-progress {
+    display: none;
+  }
+
+  .testimonials-cta {
+    grid-area: cta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+  }
+
+  /* ——— Pinned (testimonials.ts, with motion, on every screen): a stage of one screen where the
+     header, the quotes and the invitation slide by; the buttons and the progress below. ——— */
+  .testimonials[data-pinned] {
+    padding-block: 0;
+  }
+
+  .testimonials[data-pinned] .testimonials-stage {
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: 'window' 'controls';
+    gap: var(--space-s);
+    block-size: 100svh;
+    padding-block: calc(var(--nav-block-size, 0px) + var(--space-l)) var(--space-xl);
+  }
+
+  .testimonials[data-pinned] .testimonials-window {
+    grid-area: window;
+    display: flex;
+    align-items: center;
+    /* The quotes fade at the edges of the window instead of being cut. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      var(--fg) var(--space-l),
+      var(--fg) calc(100% - var(--space-l)),
+      transparent
+    );
+    /* hidden, not clip: axe knows the panels beyond the window are not shown (the track keeps
+       its scroll at 0). */
+    overflow: hidden;
+  }
+
+  .testimonials[data-pinned] .testimonials-track {
+    /* The offsetParent of the panels, whose offsetLeft the track measures. */
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    inline-size: max-content;
+    padding-inline: var(--space-l);
+    will-change: transform;
+  }
+
+  .testimonials[data-pinned] .testimonials-head,
+  .testimonials[data-pinned] .testimonials-cta {
+    flex: 0 0 min(34rem, 80vw);
+    inline-size: auto;
+    margin: 0;
+  }
+
+  .testimonials[data-pinned] .testimonials-cta {
+    flex-basis: min(24rem, 80vw);
+  }
+
+  /* Not the row that snaps: the track moves the quotes. */
+  .testimonials[data-pinned] .rail {
+    display: flex;
+    gap: var(--space-xl);
+    overflow: visible;
+    padding: var(--space-xl) 0 0;
+    scroll-snap-type: none;
+  }
+
+  .testimonials[data-pinned] .testimonial {
+    flex: 0 0 min(78vw, 28rem);
+  }
+
+  /* Phones: the buttons above the depth gauge and the WhatsApp bubble. */
+  @media (width < 64rem) {
+    .testimonials[data-pinned] .testimonials-stage {
+      padding-block: calc(var(--nav-block-size, 0px) + var(--space-s))
+        calc(var(--tap-min) + var(--space-xl));
+    }
+  }
+
+  /* Cut short, the rest in the dialog: pinned, to the height of the window (reviews.ts sets it);
+     in the static rail, the long reviews to a fixed height from the first paint (with
+     JavaScript: without it there is no dialog, the review stays whole). */
+  .testimonial[data-clamped] blockquote,
+  :global(html.js) .testimonials:not([data-pinned]) .testimonial-long blockquote {
+    overflow: hidden;
+    mask-image: linear-gradient(var(--fg) 70%, transparent);
+  }
+
+  :global(html.js) .testimonials:not([data-pinned]) .testimonial-long blockquote {
+    max-block-size: 16rem;
+  }
+
+  .testimonial-more {
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--action-text);
+    font-weight: var(--text-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  .testimonial-more[hidden] {
+    display: none;
+  }
+
+  .review-dialog {
+    inline-size: min(100% - 2 * var(--gutter), 36rem);
+    max-block-size: min(100% - 2 * var(--gutter), 44rem);
+    padding: var(--space-m);
+    border: 0;
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    color: var(--fg);
+    box-shadow: var(--shadow-depth);
+  }
+
+  .review-dialog[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--space-s);
+  }
+
+  .review-dialog::backdrop {
+    background-color: var(--backdrop-scrim);
+  }
+
+  .review-dialog-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .review-dialog-title {
+    font-size: var(--step-2);
+  }
+
+  .review-dialog-close {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    border: 0;
+    border-radius: var(--radius-round);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .review-dialog-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .review-dialog-body :global(.testimonial-mark),
+  .review-dialog-body :global(.testimonial-author),
+  .review-dialog-body :global(.testimonial-more) {
+    display: none;
+  }
+
+  .review-dialog-body :global(blockquote) {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .review-dialog-body :global(blockquote p:first-child) {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: var(--leading-lead);
+  }
+
+  .review-dialog-body :global(figcaption) {
+    margin-block-start: var(--space-m);
+    color: var(--fg-soft);
+    font-size: var(--step--1);
+  }
+
+  /* The longest reviews take more width rather than more height. */
+  .testimonials[data-pinned] .testimonial-long {
+    flex-basis: min(88vw, 40rem);
+  }
+
+  .testimonials[data-pinned] .rail-progress {
+    display: block;
+    flex: 1;
+    max-inline-size: 16rem;
+    block-size: 2px;
+    margin-inline-end: auto;
+    background-color: var(--line);
+    overflow: hidden;
+  }
+
+  .rail-progress-bar {
+    display: block;
+    block-size: 100%;
+    background-color: var(--action);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+</style>

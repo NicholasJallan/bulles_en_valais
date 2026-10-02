@@ -1,0 +1,335 @@
+---
+import Logo from '@/assets/brand/logo.svg';
+import CalmToggle from '@/components/calm/CalmToggle.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary, localePath } from '@/i18n/index.ts';
+import type { RouteId } from '@/i18n/routes.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { formatDepthMarker } from '@/lib/format.ts';
+import LanguageSwitch from './LanguageSwitch.astro';
+
+/**
+ * Masthead laid over the hero. Below 1024 px the links move into a modal <dialog> (nav.ts);
+ * without JavaScript they stay in the masthead, wrapped.
+ */
+interface Props {
+  locale: Locale;
+  route?: RouteId;
+}
+
+const { locale, route = 'home' } = Astro.props;
+const t = getDictionary(locale);
+const home = localePath(locale, '/');
+// On the home page the anchors stay in the page; elsewhere they lead back to it.
+const anchor = (id: string) => (route === 'home' ? `#${id}` : `${home}#${id}`);
+const links = [
+  { id: 'about', label: t.nav.about },
+  { id: 'agencies', label: t.nav.courses },
+  { id: 'specialties', label: t.nav.specialties },
+  { id: 'places', label: t.nav.places },
+  { id: 'faq', label: t.nav.faq },
+] as const;
+---
+
+<header class="site-header" data-controller="nav" data-tone="deep">
+  <div class="wrap site-header-inner">
+    <a class="brand" href={anchor('top')} aria-label={t.a11y.home}>
+      <Logo class="brand-logo" aria-hidden="true" focusable="false" />
+    </a>
+    <nav class="nav-inline" aria-label={t.a11y.mainNav}>
+      <ul class="bare-list nav-links">
+        {links.map((link) => (
+          <li>
+            <a href={anchor(link.id)}>{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="nav-tools">
+      <CalmToggle
+        label={t.footer.calmMode.label}
+        short={t.footer.calmMode.short}
+        class="nav-calm"
+      />
+      <LanguageSwitch locale={locale} route={route} class="nav-language" />
+      <Button href={anchor('contact')} class="nav-cta">
+        {t.nav.contact}
+      </Button>
+      <button
+        class="menu-button js-only"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-menu-open
+      >
+        <Icon name="menu" />
+        <span class="visually-hidden">{t.a11y.openMenu}</span>
+      </button>
+    </div>
+  </div>
+
+  <dialog id="site-menu" class="menu" aria-label={t.a11y.mainNav} data-tone="deep">
+    <div class="menu-inner">
+      <button class="menu-close" type="button" data-menu-close>
+        <Icon name="close" />
+        <span class="visually-hidden">{t.a11y.closeMenu}</span>
+      </button>
+      <nav aria-label={t.a11y.mainNav}>
+        <ul class="bare-list menu-links">
+          {links.map((link, index) => (
+            <li style={`--i: ${index}`}>
+              <a href={anchor(link.id)} data-menu-link>
+                <span>{link.label}</span>
+                <span class="menu-depth" aria-hidden="true">
+                  {formatDepthMarker(markerDepth(link.id))}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="menu-footer">
+        <Button href={anchor('contact')} data-menu-link>
+          {t.nav.contact}
+        </Button>
+        <CalmToggle label={t.footer.calmMode.label} />
+        <LanguageSwitch locale={locale} route={route} />
+      </div>
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .site-header {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-nav);
+    /* Dark water for its roles (the CTA is the lit lamp), but the photo shows through. */
+    background-color: transparent;
+    view-transition-name: site-header;
+  }
+
+  /* E16, with the motion module: fixed, tucked away going down, frosted glass past the hero.
+     The glass is its own layer: only its opacity changes, and the bar only translates. */
+  :global(html.nav-fixed) .site-header {
+    position: fixed;
+    transition: translate var(--dur-base) var(--ease-surface);
+  }
+
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: color-mix(in oklch, var(--bg) 86%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: var(--shadow-drift);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-surface);
+  }
+
+  .site-header:global(.is-glass)::before {
+    opacity: 1;
+  }
+
+  .site-header:global(.is-tucked) {
+    translate: 0 -100%;
+    transition-timing-function: var(--ease-sink);
+  }
+
+  .nav-links a[aria-current='true'] {
+    background-size: 100% 1px;
+  }
+
+  .site-header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-m);
+    padding-block: var(--space-s);
+  }
+
+  .brand {
+    display: block;
+    color: inherit;
+    margin-inline-end: auto;
+  }
+
+  .brand :global(.brand-logo) {
+    inline-size: auto;
+    block-size: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+  }
+
+  .nav-links a,
+  .menu-links a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    padding-inline: var(--space-3xs);
+    font-size: var(--step--1);
+    font-weight: 500;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px;
+    background-position: 0 calc(50% + 0.85em);
+    background-repeat: no-repeat;
+    background-clip: content-box;
+    background-size: 0% 1px;
+    transition: background-size var(--dur-fast) var(--ease-surface);
+  }
+
+  @media (hover: hover) {
+    .nav-links a:hover {
+      background-size: 100% 1px;
+    }
+  }
+
+  .nav-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  /* The size of the links beside it; the menu and the footer keep the full label. */
+  .nav-tools :global(.nav-calm) {
+    font-size: var(--step--1);
+  }
+
+  .menu-button,
+  .menu-close {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    padding: 0;
+    border: 1px solid color-mix(in oklch, currentColor 40%, transparent);
+    border-radius: var(--radius-round);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Phones and tablets: the links and the CTA live in the menu (with JavaScript). */
+  @media (width < 64rem) {
+    html.js .nav-inline,
+    html.js .nav-tools :global(.nav-cta),
+    html.js .nav-tools :global(.nav-language),
+    .nav-tools :global(.nav-calm) {
+      display: none;
+    }
+
+    html:not(.js) .nav-inline {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    html:not(.js) .nav-tools :global(.nav-cta) {
+      display: none;
+    }
+  }
+
+  /* Laptops: the masthead never meets the depth gauge, so it takes the lane the page keeps for
+     it (utilities.css); otherwise the links, the tools and the CTA wrap onto two rows. */
+  @media (64rem <= width < 80rem) {
+    :global(html.js:has(.hud)) .site-header-inner {
+      inline-size: min(100% - 2 * var(--gutter), var(--page-max));
+    }
+  }
+
+  @media (width >= 64rem) {
+    .menu-button {
+      display: none;
+    }
+
+    .nav-inline {
+      margin-inline-end: var(--space-s);
+    }
+  }
+
+  .menu {
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 100dvh;
+    max-block-size: none;
+    padding: 0;
+    border: 0;
+  }
+
+  .menu::backdrop {
+    background-color: var(--c-abyss);
+  }
+
+  .menu-inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--space-l);
+    min-block-size: 100%;
+    padding: var(--space-s) var(--gutter) var(--space-xl);
+  }
+
+  .menu-close {
+    justify-self: end;
+  }
+
+  .menu-links {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: center;
+  }
+
+  .menu-links a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-3xs);
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-snug);
+  }
+
+  .menu-links a[aria-current='true'] {
+    color: var(--action-text);
+  }
+
+  /* « Dive » menu: each link with the depth of its section, revealed line by line. */
+  .menu-depth {
+    font-family: var(--font-hud);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-soft);
+  }
+
+  :global(html.motion-ok) .menu[open] .menu-links li {
+    animation: menu-line var(--dur-slow) var(--ease-buoyant) both;
+    animation-delay: calc(var(--i) * var(--stagger-line));
+  }
+
+  @keyframes menu-line {
+    from {
+      opacity: 0;
+      translate: 0 0.6em;
+    }
+  }
+
+  .menu-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+</style>

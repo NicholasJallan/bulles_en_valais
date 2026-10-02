@@ -27,7 +27,7 @@ La remontée : de 22 m à la surface. « Avant de s'immerger » (matériel et as
    - `GiftCard` : format 1,586:1, reflet caustique irisé (dégradés CSS + masque), inclinaison ≤ 8° au pointeur (`gsap.quickTo` sur `rotateX` et `rotateY`, perspective 800 px), au gyroscope **non** (évite les demandes de permission) ;
    - offres, « comment ça marche » en 3 étapes et conditions selon I-12 ;
    - CTA « Offrir » : `data-prefill-interest="gift"` → sélectionne « Bon cadeau » dans le formulaire, défile jusqu'au contact et place le focus sur le premier champ.
-3. **Témoignages** (E12) : rail `scroll-snap` + boutons précédent/suivant (état désactivé aux extrémités), indicateur de progression, glisser à la souris en amélioration progressive, parallaxe légère des guillemets ; `lang` corrects ; mentions de traduction (I-09).
+3. **Témoignages** (E12, **D45**) : avec mouvement, sur **tous les écrans**, rail épinglé dont le défilement vertical fait avancer les citations vers la droite, puis la page reprend à la butée — même modèle que le parcours du Rhône validé par Nicholas (`components/places/places.ts` : extraire la mécanique commune, piste + fenêtre `overflow: hidden` gardée à 0 + focus clavier + `refreshPriority: 1`, sans `anticipatePin`, dans un module partagé et testé, puis l'utiliser pour les Lieux et les Témoignages) ; boutons précédent/suivant qui font défiler la page jusqu'à la citation, indicateur de progression, parallaxe légère des guillemets. Sans mouvement : rail `scroll-snap` + boutons (état désactivé aux extrémités, `rail.ts` actuel). `lang` corrects ; mentions de traduction (I-09).
 
    > 🔁 Point de sortie possible.
 4. **Palier de sécurité — FAQ** (E13) : ouverture fluide (`interpolate-size: allow-keywords` et `::details-content` là où c'est supporté, sinon `grid-template-rows: 0fr → 1fr` via une classe) ; `hud.setMode('safety-stop')` tant que la section est visible (compte à rebours depuis 3:00, en pause hors de la vue, remise à zéro douce) ; sur-titre « Palier de sécurité · 5 m · 3 min ».
@@ -42,10 +42,11 @@ La remontée : de 22 m à la surface. « Avant de s'immerger » (matériel et as
    - vérifier que `ALLOWED_INTERESTS` contient `gift` (S03) ;
    - **plafond quotidien d'envois** (décidé en S00, risque d'épuisement du quota Gmail : un robot aux IP tournantes contourne la limite nginx par IP) : compteur `jour + nombre` dans un fichier verrouillé (`flock`), **hors docroot**, écrit par `www-data` ; au-delà d'un plafond (proposer 50 par jour à Nicholas), réponse `503 {ok:false,error:"busy"}` sans envoi, journalisée sans donnée personnelle ; si le compteur est illisible, envoyer quand même et journaliser (on ne perd pas un vrai message pour un souci de fichier) ; le client affiche alors le message d'échec avec ses alternatives ;
    - **rendre `elapsed` obligatoire** (absent → `too_fast`) : le nouveau client l'envoie toujours ; S00 l'avait rendu facultatif pour les pages chargées avant son déploiement ;
+   - **envoi sans JavaScript** (reporté de S05) : aujourd'hui `contact.php` n'accepte que du JSON, donc sans JS le formulaire affiche un avis (`contact.form.noScript`) et renvoie vers WhatsApp, le téléphone et l'e-mail. Option à soumettre à Nicholas : accepter aussi `application/x-www-form-urlencoded` (même `Origin`, mêmes règles) et répondre par une redirection 303 vers une page de confirmation ou d'erreur. Conflit à trancher : sans JS, pas d'`elapsed` (donc pas de garde « trop rapide ») ; soit ce chemin n'a que le pot de miel, soit on garde l'avis. Revue de sécurité obligatoire si le chemin est ouvert ;
    - optionnel (revue S00, risque faible) : délai global d'environ 30 s pour tout le dialogue SMTP, en plus du délai de 10 s par lecture ;
    - `php tests/php/contact_test.php`, `bash tests/php/run_integration.sh` et, avec l'accord de Nicholas, `bash tests/php/run_unit_php74.sh` verts.
 8. **Tests** :
-   - E2E : pré-remplissage cadeau (valeur, défilement, focus) ; formulaire (requêtes simulées 200 → succès avec canvas de bulles en mode mouvement, 400 → erreurs par champ, 429 → message, 500 → alternatives **sans navigation**) ; rail (boutons, clavier) ; FAQ exclusive ; mode palier du HUD ; dialogue WhatsApp (focus, `Esc`, URL générée) ;
+   - E2E : pré-remplissage cadeau (valeur, défilement, focus) ; formulaire (requêtes simulées 200 → succès avec canvas de bulles en mode mouvement, 400 → erreurs par champ, 429 → message, 500 → alternatives **sans navigation**) ; rail (épinglé avec mouvement sur ordinateur et téléphone, boutons, clavier ; `scroll-snap` sans mouvement) ; FAQ exclusive ; mode palier du HUD ; dialogue WhatsApp (focus, `Esc`, URL générée) ;
    - accessibilité : axe sur toute la page ;
    - revue `security-reviewer` du formulaire (client + PHP).
 
@@ -56,6 +57,8 @@ npm run build && npm run check && npm test && npm run test:e2e && npm run test:a
 php tests/php/contact_test.php && bash tests/php/run_integration.sh
 npm run check:budgets
 ```
+
+**Prévisualisation** (D42) : `npm run preview:pi`, puis `npm run preview:pi -- --apply` ; à juger sur `https://dive.bullesenvalais.ch/preview/` et `/preview/en/`. Attention : la page publiée poste son formulaire vers le `contact.php` **en ligne** (version S00), qui envoie un vrai e-mail ; tant que le `contact.php` de S10 n'est pas déployé (S13), un champ ou une règle ajoutée en S10 peut y être refusée : le dire à Nicholas avant qu'il teste l'envoi.
 
 ## Critères de sortie
 

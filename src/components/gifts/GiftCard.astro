@@ -1,0 +1,114 @@
+---
+import Logo from '@/assets/brand/logo.svg';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+
+/**
+ * The voucher itself, as an object (E11): a bank-card format with an iridescent, caustic sheen.
+ * With motion and a fine pointer, gift-card.ts tilts it towards the pointer and slides the sheen.
+ * Decorative: its texts are in Gifts.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+---
+
+<div class="gift-card-scene" data-gift-card>
+  <div class="gift-card" aria-hidden="true">
+    <div class="gift-card-main">
+      <Logo class="gift-card-logo" focusable="false" />
+      <p class="gift-card-label">{t.gifts.card.label}</p>
+      <p class="gift-card-brand">Bulles en Valais</p>
+    </div>
+    <div class="gift-card-stub">
+      <p class="tabular">{t.gifts.card.validity}</p>
+    </div>
+    <span class="gift-card-sheen" data-gift-sheen></span>
+  </div>
+</div>
+
+<style>
+  .gift-card-scene {
+    perspective: var(--perspective-object);
+  }
+
+  .gift-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    max-inline-size: 30rem;
+    aspect-ratio: 1.586;
+    overflow: hidden;
+    border-radius: var(--radius-soft);
+    background-color: var(--c-surface-raised);
+    color: var(--c-ink);
+    box-shadow: var(--shadow-depth);
+    transform: rotate(-3deg);
+  }
+
+  .gift-card-main {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    padding: var(--space-m);
+  }
+
+  .gift-card :global(.gift-card-logo) {
+    inline-size: auto;
+    block-size: clamp(4.75rem, 3.25rem + 5.5vw, 7.5rem);
+  }
+
+  .gift-card-label {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: 1;
+  }
+
+  .gift-card-brand {
+    font-size: var(--step--1);
+    color: var(--c-ink-soft);
+  }
+
+  /* The stub, behind a perforated line. */
+  .gift-card-stub {
+    display: grid;
+    place-items: center;
+    padding-inline: var(--space-s);
+    border-inline-start: 2px dashed color-mix(in oklch, var(--c-ink) 22%, transparent);
+    font-size: var(--step--1);
+    font-weight: var(--text-strong);
+    writing-mode: vertical-rl;
+  }
+
+  /* The sheen: iridescent light (conic gradient) seen through patches of caustics (the mask),
+     multiplied over the card so the ink stays dark. Larger than the card: it slides with the
+     tilt (transform only). */
+  .gift-card-sheen {
+    position: absolute;
+    inset: -30%;
+    background: conic-gradient(
+      from 210deg at 45% 55%,
+      var(--c-iris-aqua),
+      var(--c-iris-violet),
+      var(--c-iris-gold),
+      var(--c-iris-aqua),
+      var(--c-iris-violet),
+      var(--c-iris-aqua)
+    );
+    mask-image:
+      radial-gradient(ellipse 22% 14% at 28% 34%, black 20%, transparent 70%),
+      radial-gradient(ellipse 18% 24% at 62% 30%, black 15%, transparent 72%),
+      radial-gradient(ellipse 26% 16% at 46% 62%, black 18%, transparent 70%),
+      radial-gradient(ellipse 14% 20% at 76% 66%, black 12%, transparent 68%),
+      radial-gradient(
+        ellipse 60% 50% at 50% 50%,
+        color-mix(in srgb, black 35%, transparent),
+        transparent 75%
+      );
+    mix-blend-mode: multiply;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+</style>

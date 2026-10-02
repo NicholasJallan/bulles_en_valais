@@ -1,0 +1,48 @@
+---
+import type { Emphasis } from '@/i18n/types.ts';
+import EmphasisText from './EmphasisText.astro';
+import Eyebrow from './Eyebrow.astro';
+
+/** Eyebrow with its depth, title with its emphasis, optional lead. The id labels the section. */
+interface Props {
+  id: string;
+  depth: number;
+  eyebrow: string;
+  title: Emphasis;
+  lead?: string;
+  level?: 2 | 3;
+  class?: string;
+}
+
+const { id, depth, eyebrow, title, lead, level = 2, class: className } = Astro.props;
+const Heading = level === 2 ? 'h2' : 'h3';
+---
+
+<header class:list={['section-header', className]}>
+  <Eyebrow depth={depth} label={eyebrow} />
+  <Heading id={id} class="section-title" data-reveal="lines">
+    <EmphasisText value={title} />
+  </Heading>
+  {lead && (
+    <p class="lead" data-reveal="fade">
+      {lead}
+    </p>
+  )}
+</header>
+
+<style>
+  .section-header {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .section-title {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .lead {
+    margin-block-start: var(--space-2xs);
+    color: var(--fg-soft);
+  }
+</style>

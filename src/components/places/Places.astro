@@ -1,0 +1,248 @@
+---
+import Section from '@/components/ui/Section.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { PLACES } from '@/data/places.ts';
+import { markerDepth } from '@/data/sections.ts';
+import { getDictionary } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import PlaceCard from './PlaceCard.astro';
+import RhoneMap from './RhoneMap.astro';
+
+/**
+ * Places (E10). Static: the header and the map side by side, then the three sites (a row of
+ * cards that snaps on a narrow screen). With motion, places.ts pins the stage: the header and the
+ * sites slide by like the river, and the map beside them (above them on a phone) draws the route.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale).places;
+---
+
+<Section id="places" tone="deep" class="places">
+  <div class="wrap places-stage" data-places-stage>
+    <div class="places-window">
+      <div class="places-track" data-places-track>
+        <div class="places-intro" data-places-panel>
+          <SectionHeader
+            id="places-title"
+            depth={markerDepth('places')}
+            eyebrow={t.eyebrow}
+            title={t.title}
+            lead={t.lead}
+          />
+        </div>
+        {/* In the order of the Rhône: Sion, then the Rosel (Martigny), then the lake. */}
+        <ol class="bare-list places-list">
+          {PLACES.map((place) => (
+            <PlaceCard locale={locale} place={place} />
+          ))}
+        </ol>
+      </div>
+    </div>
+    <div class="places-map">
+      <RhoneMap locale={locale} />
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* ——— Static: header, map, then the sites. The window and the track only matter pinned. ——— */
+  .places-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'intro' 'map' 'list';
+    gap: var(--space-2xl) var(--grid-gap);
+  }
+
+  .places-window,
+  .places-track {
+    display: contents;
+  }
+
+  .places-intro {
+    grid-area: intro;
+  }
+
+  .places-map {
+    grid-area: map;
+  }
+
+  .places-list {
+    grid-area: list;
+    display: grid;
+    gap: var(--space-2xl) var(--grid-gap);
+  }
+
+  /* Narrow screens: a row of cards that snaps, the next one peeking in. */
+  @media (width < 64rem) {
+    .places-list {
+      display: flex;
+      gap: var(--grid-gap);
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      padding-block-end: var(--space-s);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+    }
+
+    .places-list > :global(.place) {
+      flex: 0 0 min(82%, 26rem);
+      scroll-snap-align: start;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .places-stage {
+      grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+      grid-template-areas: none;
+      align-items: start;
+    }
+
+    /* Rows given again: without the template, the named areas above all fell into one row. */
+    .places-intro {
+      grid-row: 1;
+      grid-column: 1 / span 5;
+    }
+
+    .places-map {
+      grid-row: 1;
+      grid-column: 7 / -1;
+    }
+
+    .places-list {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Each site a little lower: downstream. */
+    .places-list > :global(:nth-child(2)) {
+      margin-block-start: var(--space-3xl);
+    }
+
+    .places-list > :global(:nth-child(3)) {
+      margin-block-start: calc(2 * var(--space-3xl));
+    }
+  }
+
+  /* ——— Pinned (places.ts, with motion): a stage of one screen, the map on the left,
+     the header and the sites sliding to it in a window on the right. ——— */
+  .places[data-pinned] .places-stage {
+    --map-size: clamp(17rem, 6rem + 20vw, 28rem);
+    --place-size: clamp(19rem, 10rem + 16vw, 25rem);
+
+    grid-template-columns: var(--map-size) minmax(0, 1fr);
+    grid-template-areas: 'map window';
+    align-items: center;
+    block-size: 100svh;
+    padding-block: calc(var(--nav-block-size, 0px) + var(--space-l)) var(--space-l);
+  }
+
+  .places[data-pinned] .places-map {
+    grid-area: map;
+    grid-column: auto;
+  }
+
+  .places[data-pinned] .places-window {
+    grid-area: window;
+    display: block;
+    /* hidden, not clip: axe knows the panels beyond the window are not shown (places.ts keeps
+       its scroll at 0). */
+    overflow: hidden;
+    /* The panels fade at the edges of the window instead of being cut. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      var(--fg) var(--space-l),
+      var(--fg) calc(100% - var(--space-l)),
+      transparent
+    );
+  }
+
+  .places[data-pinned] .places-track {
+    /* The offsetParent of the panels, whose offsetLeft places.ts measures. */
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xl);
+    inline-size: max-content;
+    padding-inline: var(--space-l);
+    will-change: transform;
+  }
+
+  .places[data-pinned] .places-intro {
+    flex: 0 0 min(34rem, 38vw);
+  }
+
+  .places[data-pinned] .places-list {
+    display: flex;
+    gap: var(--space-3xl);
+  }
+
+  .places[data-pinned] .places-list > :global(.place) {
+    flex: 0 0 var(--place-size);
+    margin-block-start: 0;
+  }
+
+  /* The map is smaller than in the static layout: larger labels keep them readable. */
+  .places[data-pinned] :global(.rhone-site text) {
+    font-size: 25px;
+  }
+
+  /* The photo gives way on short screens: the text of the card always fits the stage. */
+  .places[data-pinned] .places-list :global(.place-photo) {
+    max-block-size: clamp(9rem, 100svh - var(--nav-block-size, 0px) - 30rem, 46svh);
+  }
+
+  /* ——— Pinned on a phone or a tablet: the map on top, the window of the sites below it, room
+     left at the bottom for the HUD. ——— */
+  @media (width < 64rem) {
+    .places[data-pinned] .places-stage {
+      --map-size: min(26svh, 14rem);
+      --place-size: min(78vw, 22rem);
+
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--map-size) minmax(0, 1fr);
+      grid-template-areas: 'map' 'window';
+      gap: var(--space-xs);
+      padding-block: calc(var(--nav-block-size, 0px) + var(--space-xs)) var(--space-2xl);
+    }
+
+    .places[data-pinned] .places-map {
+      display: flex;
+      justify-content: center;
+      block-size: 100%;
+    }
+
+    .places[data-pinned] :global(.rhone-map) {
+      inline-size: auto;
+      block-size: 100%;
+    }
+
+    .places[data-pinned] .places-intro {
+      flex-basis: min(80vw, 24rem);
+    }
+
+    /* Not the row that snaps: the track moves the cards. */
+    .places[data-pinned] .places-list {
+      overflow: visible;
+      margin-inline: 0;
+      padding: 0;
+      scroll-snap-type: none;
+      gap: var(--space-xl);
+    }
+
+    .places[data-pinned] .places-list :global(.place-photo) {
+      max-block-size: clamp(
+        6rem,
+        100svh - var(--nav-block-size, 0px) - var(--map-size) - 27rem,
+        32svh
+      );
+    }
+  }
+</style>

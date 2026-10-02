@@ -1,0 +1,97 @@
+---
+import Logo from '@/assets/brand/logo.svg';
+import Button from '@/components/ui/Button.astro';
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getDictionary, localePath } from '@/i18n/index.ts';
+import { LANG_TAGS, LOCALES } from '@/i18n/types.ts';
+
+// One page for every language (nginx serves it for any unknown path, S13): each block carries
+// its own lang; French first, the default locale.
+const fr = getDictionary('fr');
+---
+
+<BaseLayout
+  locale="fr"
+  title={fr.notFound.meta.title}
+  description={fr.notFound.meta.description}
+  noindex
+>
+  <main id="content" class="not-found" data-tone="deep">
+    <a class="not-found-logo" href="/" aria-label={fr.a11y.home}>
+      <Logo aria-hidden="true" focusable="false" />
+    </a>
+    <div class="wrap not-found-blocks">
+      {LOCALES.map((locale, index) => {
+        const t = getDictionary(locale).notFound;
+        return (
+          <section
+            class="not-found-block"
+            lang={LANG_TAGS[locale]}
+            aria-labelledby={`not-found-${locale}`}
+          >
+            <p class="eyebrow">{t.eyebrow}</p>
+            {index === 0 ? (
+              <h1 id={`not-found-${locale}`}>
+                <EmphasisText value={t.title} />
+              </h1>
+            ) : (
+              <h2 id={`not-found-${locale}`} class="display-section">
+                <EmphasisText value={t.title} />
+              </h2>
+            )}
+            <p class="lead">{t.lead}</p>
+            <Button href={localePath(locale, '/')} variant="secondary" icon="arrow-up">
+              {t.back}
+            </Button>
+          </section>
+        );
+      })}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    align-content: center;
+    gap: var(--space-2xl);
+    min-block-size: 100svh;
+    padding-block: var(--space-xl);
+  }
+
+  .not-found-logo {
+    justify-self: center;
+    color: var(--c-foam);
+  }
+
+  .not-found-logo :global(svg) {
+    inline-size: auto;
+    block-size: 5rem;
+  }
+
+  .not-found-blocks {
+    display: grid;
+    gap: var(--space-2xl) var(--grid-gap);
+  }
+
+  @media (width >= 64rem) {
+    .not-found-blocks {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .not-found-block {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .not-found-block :is(h1, h2) {
+    font-size: var(--step-5);
+  }
+
+  .not-found-block .lead {
+    color: var(--fg-soft);
+  }
+</style>

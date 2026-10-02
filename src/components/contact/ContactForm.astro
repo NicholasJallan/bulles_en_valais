@@ -1,0 +1,239 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Field from '@/components/ui/Field.astro';
+import {
+  DEFAULT_INTEREST,
+  EMAIL,
+  INTERESTS,
+  INTEREST_LABELS,
+  whatsappUrl,
+} from '@/data/contact.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { LIMITS } from '@/lib/form/validate.ts';
+
+/**
+ * The contact form (contact-form.ts validates it and sends JSON to /api/contact). Without
+ * JavaScript it cannot be sent (contact.php only accepts JSON, a choice of S10): a notice points to
+ * the direct channels.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dictionary = getDictionary(locale);
+const t = dictionary.contact.form;
+const options = INTERESTS.map((value) => ({
+  value,
+  label: localize(INTEREST_LABELS[value], locale),
+}));
+// Texts the script needs; data attributes, never an inline script (CSP).
+const messages = JSON.stringify({
+  errors: t.errors,
+  fieldNames: t.fieldNames,
+  errorSummary: t.errorSummary,
+  sending: t.sending,
+  submit: t.submit,
+  mail: t.mail,
+  errorDelivery: t.errorDelivery,
+  errorRateLimit: t.errorRateLimit,
+  errorBusy: t.errorBusy,
+  whatsappDefault: dictionary.whatsapp.defaultMessage,
+});
+---
+
+<div
+  class="contact-form-wrap"
+  data-controller="contact-form"
+  data-locale={locale}
+  data-email={EMAIL}
+  data-messages={messages}
+>
+  <form id="contact-form" class="contact-form" action="/api/contact" method="post" data-form>
+    <div class="form-summary" tabindex="-1" hidden data-summary>
+      <p class="form-summary-title">{t.errorSummary}</p>
+      <ul data-summary-list></ul>
+    </div>
+
+    <div class="form-grid">
+      <Field
+        id="contact-name"
+        name="name"
+        label={t.name}
+        placeholder={t.namePlaceholder}
+        autocomplete="name"
+        required
+        liveError
+        attributes={{ maxlength: LIMITS.name }}
+      />
+      <Field
+        id="contact-email"
+        name="email"
+        type="email"
+        label={t.email}
+        placeholder={t.emailPlaceholder}
+        autocomplete="email"
+        required
+        liveError
+        attributes={{ maxlength: LIMITS.email, spellcheck: 'false' }}
+      />
+      <Field
+        id="contact-phone"
+        name="phone"
+        type="tel"
+        label={t.phone}
+        placeholder={t.phonePlaceholder}
+        autocomplete="tel"
+        liveError
+        attributes={{ maxlength: LIMITS.phone }}
+      />
+      <Field
+        id="contact-interest"
+        name="interest"
+        control="select"
+        label={t.interest}
+        options={options}
+        value={DEFAULT_INTEREST}
+      />
+      <Field
+        id="contact-message"
+        name="message"
+        control="textarea"
+        label={t.message}
+        placeholder={t.messagePlaceholder}
+        rows={6}
+        liveError
+        attributes={{ maxlength: LIMITS.message }}
+      />
+    </div>
+
+    {/* Honeypot: off screen and out of the tab order; people never fill it, robots do. */}
+    <div class="form-honeypot" aria-hidden="true">
+      <label for="contact-website">{t.honeypot}</label>
+      <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <p class="fine no-js-only form-no-js">{t.noScript}</p>
+    <div class="form-actions js-only">
+      {/* Enabled by contact-form.ts: a click before it starts must not post the form natively. */}
+      <Button type="submit" icon="arrow-up-right" disabled data-submit>
+        {t.submit}
+      </Button>
+      <p class="form-status fine" role="status" data-status></p>
+    </div>
+  </form>
+
+  <div class="form-result form-success" tabindex="-1" hidden data-success>
+    <p>{t.success}</p>
+    <Button variant="secondary" data-reset>
+      {t.sendAnother}
+    </Button>
+  </div>
+
+  <div class="form-result form-failure" tabindex="-1" hidden data-failure>
+    <p data-failure-message>{t.errorDelivery}</p>
+    <div class="form-alternatives">
+      <Button href={`mailto:${EMAIL}`} icon="mail" data-mailto>
+        {t.sendByEmail}
+      </Button>
+      <Button
+        href={whatsappUrl(dictionary.whatsapp.defaultMessage)}
+        variant="secondary"
+        icon="message"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-whatsapp-fallback
+      >
+        {t.sendByWhatsApp}
+        <span class="visually-hidden"> {dictionary.a11y.newTab}</span>
+      </Button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-form-wrap {
+    display: grid;
+    gap: var(--space-m);
+    scroll-margin-block-start: var(--space-l);
+  }
+
+  .contact-form {
+    display: grid;
+    gap: var(--space-m);
+    scroll-margin-block-start: var(--space-l);
+  }
+
+  .form-grid {
+    display: grid;
+    gap: var(--space-m) var(--space-s);
+  }
+
+  @media (width >= 40rem) {
+    .form-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .form-grid > :global(:nth-child(4)),
+    .form-grid > :global(:nth-child(5)) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .form-honeypot {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .form-summary,
+  .form-result {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border-radius: var(--radius-soft);
+    background-color: var(--bg-panel);
+    box-shadow: var(--shadow-float);
+  }
+
+  .form-summary[hidden],
+  .form-result[hidden] {
+    display: none;
+  }
+
+  .form-summary {
+    border-inline-start: 3px solid var(--alert);
+  }
+
+  .form-summary-title {
+    font-weight: var(--text-strong);
+  }
+
+  .form-summary ul {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-inline-start: 1.1em;
+  }
+
+  .form-alternatives {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .form-no-js {
+    padding: var(--space-s);
+    border-inline-start: 3px solid var(--alert);
+    background-color: var(--bg-panel);
+  }
+</style>

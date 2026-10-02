@@ -1,0 +1,66 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+/**
+ * Art-directed <picture>: a different crop per media query (AVIF then WebP), the last crop as
+ * the fallback <img>. <Picture> of astro:assets serves one crop only.
+ */
+interface Crop {
+  src: ImageMetadata;
+  widths: number[];
+}
+
+interface Props {
+  /** Crops for wider screens, first match wins: `{ media: '(width >= 48rem)', ... }`. */
+  sources: (Crop & { media: string })[];
+  fallback: Crop;
+  sizes: string;
+  alt: string;
+  loading?: 'lazy' | 'eager';
+  class?: string;
+  /** Class of the <img>. */
+  imgClass?: string;
+  /** « Water line » reveal (E6) when it comes into view, with the motion module. */
+  reveal?: boolean;
+}
+
+const {
+  sources,
+  fallback,
+  sizes,
+  alt,
+  loading = 'lazy',
+  class: className,
+  imgClass,
+  reveal = false,
+} = Astro.props;
+const FORMATS = ['avif', 'webp'] as const;
+
+const sourceSets = await Promise.all(
+  [...sources, { ...fallback, media: undefined }].flatMap((crop) =>
+    FORMATS.map(async (format) => {
+      const image = await getImage({ src: crop.src, widths: crop.widths, format });
+      return { media: crop.media, type: `image/${format}`, srcset: image.srcSet.attribute };
+    }),
+  ),
+);
+const img = await getImage({ src: fallback.src, widths: fallback.widths, format: 'jpg' });
+---
+
+<picture class={className} data-reveal={reveal ? 'image' : undefined}>
+  {sourceSets.map((source) => (
+    <source media={source.media} type={source.type} srcset={source.srcset} sizes={sizes} />
+  ))}
+  <img
+    class={imgClass}
+    src={img.src}
+    srcset={img.srcSet.attribute}
+    sizes={sizes}
+    width={fallback.src.width}
+    height={fallback.src.height}
+    alt={alt}
+    loading={loading}
+    decoding="async"
+  />
+</picture>
