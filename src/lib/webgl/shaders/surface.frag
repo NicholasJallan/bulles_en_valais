@@ -2,8 +2,13 @@
 // Bulles en Valais, hero surface (E1, E2). Written for this site; the only borrowed code is the
 // simplex noise of webgl-noise (MIT, see noise.glsl), inserted at the #include line below.
 //
-// Above the water line: the photo, displaced by noise and by the ripples where the mask says
-// « water » (white), with faint caustics on the shallow lake bed. Below it (the line rises with
+// Above the water line: the photo, with the lake moving in it. Every water pixel is traced back to
+// its point of the lake, in metres (src/lib/webgl/lake.ts: the camera calibrated on the photo and
+// the swisstopo orthophoto), so that the wind ripples and the rings of the pointer live on the
+// water and reach the screen through the perspective of the photo: wide and flat far away, round
+// near the shore. Their slopes move the reflection (strongly, and mostly up and down) and the lake
+// bed seen through the water (a little), weighed by Fresnel; ripples finer than the pixels that
+// see them turn into a glossy blur instead of flickering. Below the water line (it rises with
 // uImmersion): the same photo seen from under the surface: refracted, washed out, tinted, with
 // light shafts coming down, caustics and particles in suspension.
 
@@ -18,8 +23,6 @@ uniform sampler2D uMask;
 uniform float uTime;
 uniform float uImmersion;
 uniform vec2 uResolution;
-// x, y in screen UV, age in seconds; a negative age is an empty slot.
-uniform vec3 uRipples[8];
 // object-fit: cover of the <img> (src/lib/webgl/viewport.ts).
 uniform vec2 uCoverScale;
 uniform vec2 uCoverOffset;
@@ -38,32 +41,10 @@ out vec4 fragColor;
 const float LEVEL_GAIN = 1.15;
 const float LEVEL_MARGIN = 0.04;
 
-const float RIPPLE_SPEED = 0.22;
-const float RIPPLE_WIDTH = 900.0;
-const float RIPPLE_FREQUENCY = 140.0;
-const float RIPPLE_DAMPING = 1.1;
-const float RIPPLE_STRENGTH = 0.006;
-
 const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
 vec2 toImage(vec2 uv) {
   return uv * uCoverScale + uCoverOffset;
-}
-
-// Rings spreading from each touch: a sine wave under a gaussian front, damped with age.
-vec2 rippleOffset(vec2 uv, float aspect) {
-  vec2 sum = vec2(0.0);
-  for (int i = 0; i < 8; i++) {
-    vec3 ripple = uRipples[i];
-    if (ripple.z < 0.0) continue;
-    vec2 d = uv - ripple.xy;
-    d.x *= aspect;
-    float dist = length(d);
-    float front = dist - ripple.z * RIPPLE_SPEED;
-    float envelope = exp(-front * front * RIPPLE_WIDTH) * exp(-ripple.z * RIPPLE_DAMPING);
-    sum += d / max(dist, 1e-4) * sin(front * RIPPLE_FREQUENCY) * envelope;
-  }
-  return sum * RIPPLE_STRENGTH;
 }
 
 // Caustics: the product of two ridged noises, the first one warping the second, sharpened.
@@ -73,6 +54,8 @@ float caustics(vec2 p, float t) {
   float b = 1.0 - abs(snoise(vec3(p * 1.6 - warp * 0.3, t * 0.8 + 11.0)));
   return pow(a * b, 5.0);
 }
+
+#include <lake>
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -129,28 +112,21 @@ void main() {
   float pixel = 1.0 / max(uResolution.y, 1.0);
   vec2 imageUv = toImage(uv);
   float water = texture(uMask, imageUv).r;
-  // Perspective of the lake: the far water, near the horizon, barely moves.
-  float near = smoothstep(0.62, 0.0, imageUv.y);
+  // Derivatives outside any branch: metres of lake per pixel of the screen, along x and along y.
+  Lake lake = lakeAt(imageUv);
+  mat2 metresPerPixel = mat2(dFdx(lake.point), dFdy(lake.point));
 
   float level = uImmersion * LEVEL_GAIN - LEVEL_MARGIN;
   float line = level + 0.012 * sin(uv.x * 9.0 + t * 1.1) + 0.006 * sin(uv.x * 23.0 - t * 1.7);
   float under = smoothstep(line + pixel * 1.5, line - pixel * 1.5, uv.y);
 
-  // Long horizontal ripples, like wind on a lake, plus the rings of the pointer.
-  vec2 breathe = vec2(
-    snoise(vec3(imageUv.x * 7.0, imageUv.y * 38.0, t * 0.22)),
-    snoise(vec3(imageUv.x * 5.0 + 3.7, imageUv.y * 26.0, t * 0.18))
-  ) * vec2(0.0035, 0.0025) * (0.35 + 0.65 * near);
-  vec2 offset = (breathe + rippleOffset(uv, aspect)) * max(water, under);
-
-  vec3 color = texture(uImage, imageUv + offset).rgb;
-  float shallow = water * near;
-  if (shallow > 0.001) {
-    color += uLight * caustics(imageUv * vec2(9.0, 18.0), t * 0.35) * shallow * 0.07;
+  vec3 color = texture(uImage, imageUv).rgb;
+  if (water > 0.001 && under < 1.0) {
+    color = mix(color, lakeColor(imageUv, lake, metresPerPixel, t), water);
   }
 
   if (uImmersion > 0.0) {
-    color = mix(color, underwater(uv, imageUv + offset, aspect, t), under);
+    color = mix(color, underwater(uv, imageUv, aspect, t), under);
     // The meniscus: a thin bright line where the surface meets the lens.
     float meniscus = exp(-pow((uv.y - line) / (pixel * 2.5), 2.0));
     color = mix(color, uLight, meniscus * 0.35);

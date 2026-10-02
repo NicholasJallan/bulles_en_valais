@@ -5,13 +5,22 @@ import { Mesh, Program, Renderer, Texture, Triangle } from 'ogl';
 import { COLORS, type ColorName } from '@/lib/color/palette.ts';
 import { oklchToSrgb } from '@/lib/color/contrast.ts';
 import {
+  lakeUniforms,
+  pointerToWater,
+  windUniforms,
+  type Cover,
+  type MaskPixels,
+} from '@/lib/webgl/lake.ts';
+import {
   MAX_RIPPLES,
   addRipple,
   liveRipples,
+  ringWave,
   writeRipples,
   type Ripple,
 } from '@/lib/webgl/ripples.ts';
 import { coverTransform, surfaceDpr, type FocalPoint } from '@/lib/webgl/viewport.ts';
+import lake from '@/lib/webgl/shaders/lake.glsl?raw';
 import fragmentSource from '@/lib/webgl/shaders/surface.frag?raw';
 import noise from '@/lib/webgl/shaders/noise.glsl?raw';
 import vertex from '@/lib/webgl/shaders/surface.vert?raw';
@@ -34,14 +43,17 @@ export interface SurfaceOptions {
 export interface Surface {
   /** 0 above the surface, 1 once the water line has crossed the screen (E2). */
   setImmersion(value: number): void;
-  /** A ripple at a point of the viewport, in CSS pixels. */
+  /** A ripple where a point of the viewport (CSS pixels) shows the lake; nothing elsewhere. */
   addRipple(clientX: number, clientY: number): void;
   start(): void;
   stop(): void;
   destroy(): void;
 }
 
-const fragment = fragmentSource.replace('#include <noise>', noise);
+// The size of uRipples comes from ripples.ts, so that the two never disagree.
+const fragment = fragmentSource
+  .replace('#include <noise>', noise)
+  .replace('#include <lake>', `#define MAX_RIPPLES ${MAX_RIPPLES}\n${lake}`);
 
 const rgb = (name: ColorName): [number, number, number] => {
   const { r, g, b } = oklchToSrgb(COLORS[name]);
@@ -51,6 +63,21 @@ const rgb = (name: ColorName): [number, number, number] => {
 const seconds = (): number => performance.now() / 1000;
 /** The water moves slowly: 60 frames per second at most, even on 120 Hz screens. */
 const MIN_FRAME_S = 1 / 62;
+
+/** The mask's pixels, read once to test the pointer on the CPU; without them, no rings. */
+function readMask(mask: HTMLImageElement): MaskPixels | undefined {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = mask.naturalWidth;
+    canvas.height = mask.naturalHeight;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (context === null) return undefined;
+    context.drawImage(mask, 0, 0);
+    return context.getImageData(0, 0, canvas.width, canvas.height);
+  } catch {
+    return undefined;
+  }
+}
 
 function linearTexture(gl: Renderer['gl'], image: HTMLImageElement): Texture {
   return new Texture(gl, {
@@ -91,6 +118,9 @@ function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
 
   // A plain array: OGL only resolves uRipples[0] on an Array value.
   const ripplesBuffer = Array.from({ length: MAX_RIPPLES * 3 }, () => 0);
+  const camera = lakeUniforms();
+  const wind = windUniforms();
+  const maskPixels = readMask(mask);
   const uniforms = {
     uImage: { value: linearTexture(gl, image) },
     uMask: { value: linearTexture(gl, mask) },
@@ -100,6 +130,11 @@ function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
     uRipples: { value: ripplesBuffer },
     uCoverScale: { value: [1, 1] },
     uCoverOffset: { value: [0, 0] },
+    uLakeLens: { value: camera.lens },
+    uLakeCamera: { value: camera.camera },
+    uRingWave: { value: ringWave() },
+    uWindWaves: { value: wind.wavelengths },
+    uWindDrift: { value: wind.drift },
     uTint: { value: rgb('lagoon-ink') },
     uDeep: { value: rgb('deep') },
     uLight: { value: rgb('foam') },
@@ -112,6 +147,7 @@ function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
 
   const startedAt = seconds();
   let ripples: readonly Ripple[] = [];
+  let cover: Cover = { scale: [1, 1], offset: [0, 0] };
   let started = false;
   let onScreen = true;
   let looping = false;
@@ -134,7 +170,7 @@ function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
     if (width === 0 || height === 0) return;
     renderer.setSize(width, height);
     uniforms.uResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
-    const cover = coverTransform(
+    cover = coverTransform(
       { width: image.naturalWidth, height: image.naturalHeight },
       { width, height },
       focal,
@@ -188,11 +224,11 @@ function mountSurface(options: SurfaceOptions, renderer: Renderer): Surface {
       if (!looping) render();
     },
     addRipple(clientX, clientY) {
+      if (maskPixels === undefined) return;
       const rect = canvas.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const x = (clientX - rect.left) / rect.width;
-      const y = 1 - (clientY - rect.top) / rect.height;
-      ripples = addRipple(ripples, { x, y, born: now() });
+      const water = pointerToWater({ x: clientX, y: clientY }, rect, cover, maskPixels);
+      if (water !== undefined)
+        ripples = addRipple(ripples, { x: water.x, z: water.z, born: now() });
     },
     start() {
       started = true;

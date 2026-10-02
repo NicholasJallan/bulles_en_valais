@@ -1,17 +1,31 @@
-// Ripples of the hero surface (E1): at most 8 rings, passed to the shader as uRipples[8]
-// (x, y in screen UV, age in seconds), and the pointer gestures that create them.
+// Ripples of the hero surface (E1): rings on the lake, at most 16, passed to the shader as
+// uRipples[16] (x, z on the water in metres, age in seconds; lake.ts), and the pointer gestures
+// that create them.
+import { groupSpeed, phaseSpeed } from './lake.ts';
 
 export interface Ripple {
-  /** Screen UV, 0 to 1, y up. */
+  /** Point of the lake, in metres: x to the right, z away from the camera. */
   readonly x: number;
-  readonly y: number;
+  readonly z: number;
   /** Time of birth, in seconds of the surface clock. */
   readonly born: number;
 }
 
-export const MAX_RIPPLES = 8;
-/** A ring has faded out after this long (the shader damps it to nothing). */
-export const RIPPLE_LIFETIME_S = 4;
+export const MAX_RIPPLES = 16;
+/** A ring has faded out after this long (the shader fades it out by then: uRingWave.w). */
+export const RIPPLE_LIFETIME_S = 5;
+/** A pebble, a fingertip: ripples of about 12 cm, the scale of the rings seen on the photo. */
+export const RING_WAVELENGTH_M = 0.12;
+
+/** uRingWave: wavenumber (rad/m), speeds of the crests and of the ring (m/s), lifetime (s). */
+export function ringWave(): [number, number, number, number] {
+  return [
+    (2 * Math.PI) / RING_WAVELENGTH_M,
+    phaseSpeed(RING_WAVELENGTH_M),
+    groupSpeed(RING_WAVELENGTH_M),
+    RIPPLE_LIFETIME_S,
+  ];
+}
 const EMPTY_SLOT = -1;
 
 export function addRipple(list: readonly Ripple[], ripple: Ripple): Ripple[] {
@@ -24,12 +38,12 @@ export function liveRipples(list: readonly Ripple[], now: number): readonly Ripp
   return live.length === list.length ? list : live;
 }
 
-/** Fills the uniform buffer (8 × vec3) in place: it is uploaded on every frame. */
+/** Fills the uniform buffer (16 × vec3) in place: it is uploaded on every frame. */
 export function writeRipples(list: readonly Ripple[], now: number, out: number[]): void {
   for (let slot = 0; slot < MAX_RIPPLES; slot += 1) {
     const ripple = list[slot];
     out[slot * 3] = ripple?.x ?? 0;
-    out[slot * 3 + 1] = ripple?.y ?? 0;
+    out[slot * 3 + 1] = ripple?.z ?? 0;
     out[slot * 3 + 2] = ripple === undefined ? EMPTY_SLOT : now - ripple.born;
   }
 }

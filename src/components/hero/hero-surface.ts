@@ -24,7 +24,8 @@ export interface HeroSurfaceOptions {
 const noop: Cleanup = () => undefined;
 const IDLE_TIMEOUT_MS = 2000;
 const IDLE_FALLBACK_MS = 200;
-const EMIT = { minIntervalMs: 140, minDistancePx: 48 } as const;
+/** 16 rings of 5 s: a moving mouse never frees a slot before its ring has faded. */
+const EMIT = { minIntervalMs: 320, minDistancePx: 40 } as const;
 
 /** Runs `task` once the page has loaded and the main thread is idle. */
 function whenIdleAfterLoad(task: () => void): Cleanup {
