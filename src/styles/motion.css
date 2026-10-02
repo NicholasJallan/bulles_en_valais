@@ -25,6 +25,15 @@
   }
 }
 
+/* Intro (E15): the hero title and the HUD figures wait for hero.ts, which sets html[data-intro]
+   once their entrance has started. Same guard as the reveals: no motion-ok, nothing hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  html.motion-ok:not([data-intro]) .hero-title,
+  html.motion-ok:not([data-intro]) .hud-readout {
+    opacity: 0;
+  }
+}
+
 /* Masks of the split lines, padded so that accents and descenders show while the lines rise. */
 .reveal-line-mask {
   padding-block: 0.12em;

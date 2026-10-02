@@ -1,6 +1,7 @@
 ---
 import { Picture } from 'astro:assets';
 import heroImage from '@/assets/images/hero/rosel.jpg';
+import waterMask from '@/assets/textures/water-mask.png';
 import Button from '@/components/ui/Button.astro';
 import EmphasisText from '@/components/ui/EmphasisText.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
@@ -27,7 +28,7 @@ const teaching = CREDENTIALS.filter((credential) =>
 ---
 
 <Section id="top" tone="deep" class="hero">
-  {/* The LCP element: never hidden, never waiting for WebGL (S07 lays the water over it). */}
+  {/* The LCP element: never hidden, never waiting for WebGL (hero.ts lays the water over it). */}
   <Picture
     src={heroImage}
     alt={t.hero.imageAlt}
@@ -39,6 +40,8 @@ const teaching = CREDENTIALS.filter((credential) =>
     fetchpriority="high"
     class="hero-image"
   />
+  {/* E2 without WebGL: the water line and the underwater veil, drawn by hero.ts. */}
+  <div class="hero-water" aria-hidden="true" data-hero-water data-mask={waterMask.src}></div>
   <div class="hero-scrim" aria-hidden="true"></div>
   <div class="wrap hero-content">
     <Eyebrow depth={markerDepth('top')} label={t.hero.eyebrow} />
@@ -91,6 +94,39 @@ const teaching = CREDENTIALS.filter((credential) =>
     block-size: 100%;
     object-fit: cover;
     object-position: 50% 60%;
+  }
+
+  /* The WebGL surface (E1) fades in over the photo, which stays beneath it as the fallback. */
+  .hero :global(.hero-canvas) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Underwater veil under the rising water line (E2 without WebGL): clipped away at the top. */
+  .hero-water {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--c-lagoon-ink) 55%, transparent),
+      color-mix(in oklch, var(--c-deep) 88%, transparent)
+    );
+    clip-path: inset(100% 0 0 0);
+    pointer-events: none;
+  }
+
+  :global(html.motion-ok) .hero-water {
+    display: block;
+  }
+
+  .hero[data-surface='webgl'] .hero-water {
+    display: none;
   }
 
   /* Dark water rising from the bottom carries the text; a lighter veil at the top, the masthead. */
