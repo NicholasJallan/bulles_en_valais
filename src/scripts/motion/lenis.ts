@@ -34,17 +34,14 @@ function samePageTarget(event: MouseEvent): { hash: string; target: HTMLElement 
   return target === null ? undefined : { hash: url.hash, target };
 }
 
-function scrollPadding(): number {
-  return Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingBlockStart) || 0;
-}
-
 function handleAnchors(lenis: Lenis): Cleanup {
   const onClick = (event: MouseEvent): void => {
     const jump = samePageTarget(event);
     if (jump === undefined || lenis.isStopped) return;
     event.preventDefault();
     if (window.location.hash !== jump.hash) window.history.pushState(null, '', jump.hash);
-    lenis.scrollTo(jump.target, { offset: -scrollPadding() });
+    // Lenis subtracts the scroll-padding of the page (the fixed nav) by itself.
+    lenis.scrollTo(jump.target);
     focusSection(jump.target);
   };
   document.addEventListener('click', onClick);

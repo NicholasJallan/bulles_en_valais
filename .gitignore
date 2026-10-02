@@ -19,3 +19,4 @@ playwright-report/
 
 # Raw photos (full resolution, EXIF/GPS): kept locally, resized copies go in src/assets/images/
 src/assets/original/
+.claude/worktrees/
