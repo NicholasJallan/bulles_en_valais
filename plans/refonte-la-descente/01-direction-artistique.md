@@ -174,14 +174,14 @@ Plus les panneaux de chaque ton (`*-raised`), l'ambre d'alerte des tons clairs (
 - Quoi : « Jusqu'où irez-vous ? ». Une règle verticale de 0 à 120 m défile pendant que le marqueur « vous êtes ici » descend. Chaque certification apparaît à sa profondeur maximale (I-04) : baptême 6 m, Open Water 18 m, FFESSM N1 20 m, Advanced 30 m, N2 et Deep 40 m, TDI Deco 45 m, N3 60 m, trimix PTH70 70 m et PTH120 120 m. Au-delà de 40 m, l'échelle est compressée. Le HUD global est masqué pendant la section, la règle prend le relais en très grands chiffres.
 - Comment (desktop ≥ 1024 px, mouvement autorisé) : section épinglée (~300vh), timeline scrubbée ; les données viennent de `src/data/courses.ts` (`maxDepth`).
 - Sortie : thermocline « Remontée · 40 m » vers l'interlude B.
-- Repli (mobile, Mode calme) : liste verticale statique avec règle à gauche, sans épinglage.
+- Sur téléphone (D43) : même épinglage sur une colonne (marqueur en haut, règle à gauche, toutes les certifications à sa droite). Repli (mouvement réduit, Mode calme) : liste verticale statique avec règle à gauche, sans épinglage.
 - Le **comparatif** SDI/TDI · PADI · FFESSM suit, en tableau sobre (en-tête collant, ligne survolée éclairée).
 - Session : S08.
 
 **E10 — Parcours du Rhône (lieux)**
 - Quoi : un tracé schématique suit le Rhône, **de Sion au Rosel (Martigny) puis au Léman**, et se dessine au scroll (DrawSVG). Trois « stations », chacune avec sa photo, ses coordonnées et ses données (profondeur max, températures, visibilité, accès : 📥).
 - Comment (desktop) : section épinglée avec défilement horizontal (`containerAnimation`). Le tracé est **dessiné à la main, schématique** (pas de fond de carte, donc pas de licence OSM ni swisstopo) ; positions relatives calculées à partir des coordonnées.
-- Repli (mobile) : cartes verticales en `scroll-snap`, tracé statique.
+- Sur téléphone (D43) : même parcours, la carte au-dessus de la fenêtre des lieux. Repli (mouvement réduit, Mode calme) : cartes en `scroll-snap` sous 64 rem, grille de trois au-delà, tracé statique.
 - Session : S09.
 
 **E11 — Carte cadeau holographique**

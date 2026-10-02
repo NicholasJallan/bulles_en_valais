@@ -223,7 +223,7 @@ export interface Course {
   gsap.ticker.lagSmoothing(0);
   ```
   `data-lenis-prevent` sur tout conteneur scrollable (menu mobile, dialogue WhatsApp, préférences cookies) ; `lenis.stop()` et `start()` à l'ouverture et à la fermeture des dialogues.
-- ScrollTrigger : `ScrollTrigger.config({ ignoreMobileResize: true })` ; épinglages **uniquement** en contexte `desktop` ; `invalidateOnRefresh` pour les valeurs calculées ; chaque section crée ses déclencheurs dans un `gsap.context()` qu'on peut annuler.
+- ScrollTrigger : `ScrollTrigger.config({ ignoreMobileResize: true })` ; épinglages de l'échelle et des Lieux sur tous les écrans quand le mouvement est permis (mise en page sur une colonne sous 64 rem, D43), sans `anticipatePin` (il épinglait les Lieux par-dessus les Spécialités après un long saut) ; `invalidateOnRefresh` pour les valeurs calculées ; chaque section crée ses déclencheurs dans un `gsap.context()` qu'on peut annuler.
 - SplitText : `SplitText.create(el, { type: 'lines', mask: 'lines', autoSplit: true, onSplit(self) { return gsap.from(self.lines, {…}); } })`. L'attribut `aria` par défaut conserve le texte lisible par les lecteurs d'écran.
 - Profondeur : `resolveDepth(sections, viewportCenterY)` (fonction pure : section courante, puis interpolation linéaire entre `depthStart` et `depthEnd` selon la progression). Branchée sur un ScrollTrigger global `onUpdate`.
 
