@@ -44,7 +44,7 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
           ))}
         </tr>
       </thead>
-      <tbody role="rowgroup">
+      <tbody role="rowgroup" data-reveal="stagger">
         {t.rows.map((row) => (
           <tr role="row">
             <th scope="row" role="rowheader">
@@ -70,6 +70,8 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
   }
 
   .compare-table {
+    --row-light: color-mix(in oklch, var(--c-torch-glow) 9%, transparent);
+
     inline-size: 100%;
     border-collapse: collapse;
     font-size: var(--step--1);
@@ -91,6 +93,18 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
   .compare-table tbody th {
     font-weight: var(--text-strong);
     color: var(--fg-soft);
+    transition: color var(--dur-fast) var(--ease-surface);
+  }
+
+  /* The row under the pointer is lit, as by a lamp (over the lighter SDI/TDI column too). */
+  @media (hover: hover) {
+    .compare-table tbody tr:hover > * {
+      background-image: linear-gradient(var(--row-light), var(--row-light));
+    }
+
+    .compare-table tbody tr:hover th {
+      color: var(--fg);
+    }
   }
 
   .compare-agency {
@@ -108,6 +122,20 @@ const label = (agency: (typeof AGENCIES)[number]) => dictionary.courses.agencies
   /* SDI/TDI, the default path since S00, sits in a lighter column. */
   .compare-table :is(th, td):nth-child(2) {
     background-color: var(--bg-panel);
+  }
+
+  /* The schools stay in sight while the criteria scroll by. */
+  @media (width >= 48rem) {
+    .compare-table thead th {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: var(--z-raised);
+      background-color: var(--bg);
+    }
+
+    .compare-table thead th:nth-child(2) {
+      background-color: var(--bg-panel);
+    }
   }
 
   .compare-footnote {
