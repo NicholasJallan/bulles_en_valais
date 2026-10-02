@@ -45,8 +45,10 @@ const channels = [
   <div class="snell" aria-hidden="true" data-snell>
     <div class="snell-swell" data-snell-swell>
       <div class="snell-disc" data-snell-disc>
-        <div class="snell-shimmer" data-snell-shimmer></div>
-        <div class="snell-waves" data-snell-waves></div>
+        <div class="snell-surface">
+          <div class="snell-shimmer" data-snell-shimmer></div>
+          <div class="snell-waves" data-snell-waves></div>
+        </div>
       </div>
     </div>
   </div>
@@ -141,36 +143,35 @@ const channels = [
       color-mix(in oklch, var(--c-lagoon) 30%, transparent) 86%,
       transparent
     );
-    overflow: hidden;
   }
 
   /* The surface ripples in the window: bands of water-tinted light seen through a noise that
-     tiles without seams (white: it is used as a mask), inside the disc only. */
+     tiles without seams (white: it is used as a mask). The ripples drift; the soft round fade
+     that holds them stays still on this layer, so the edge is soft wherever they are. */
+  .snell-surface {
+    position: absolute;
+    inset: -25%;
+    mask-image: radial-gradient(closest-side, var(--fg) 25%, transparent 62%);
+  }
+
   .snell-shimmer,
   .snell-waves {
     position: absolute;
     background-color: var(--c-lagoon-ink);
-    mask-image:
-      url('@/assets/textures/ripples.svg'),
-      radial-gradient(closest-side, var(--fg) 35%, transparent 72%);
-    mask-composite: intersect;
+    mask-image: url('@/assets/textures/ripples.svg');
   }
 
   .snell-shimmer {
-    inset: -20%;
-    mask-size:
-      60rem 20rem,
-      100% 100%;
+    inset: -10%;
+    mask-size: 60rem 20rem;
     opacity: 0.2;
   }
 
   /* A second, wider swell crossing the first one: their interference reads as a moving surface
      (snell.ts keeps it drifting while the section is on screen). */
   .snell-waves {
-    inset: -25%;
-    mask-size:
-      90rem 30rem,
-      100% 100%;
+    inset: -15%;
+    mask-size: 90rem 30rem;
     opacity: 0.3;
   }
 
