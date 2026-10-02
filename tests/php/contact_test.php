@@ -234,7 +234,7 @@ if (!defined('CONTACT_TEST_NO_FILES')) {
     @unlink($quotaFile);
 }
 ini_set('error_log', (string) $previousLog);
-check('quota_path is outside the docroot (temporary directory by default)', strpos(quota_path(), sys_get_temp_dir()) === 0);
+check('quota_path is in shared/state/, outside the docroot and the releases', quota_path() === '/var/www/bullesenvalais/shared/state/contact-quota');
 
 // ---------------------------------------------------------------------------
 section('build_message');
@@ -292,6 +292,7 @@ $loopback = normalize_mail_config(array_merge($baseConfig, ['host' => '127.0.0.1
 check('STARTTLS off towards loopback (tests) → allowed', $loopback !== null && $loopback['starttls'] === false);
 check('configuration that is not an array → rejected', normalize_mail_config('nope') === null);
 check('missing configuration file → rejected', load_mail_config(__DIR__ . '/no-such-config.php') === null);
+check('production configuration lives in shared/, outside the releases', MAIL_CONFIG_FILE === '/var/www/bullesenvalais/shared/mail-config.php');
 
 // ---------------------------------------------------------------------------
 section('smtp_dialogue (in-memory socket pair)');

@@ -4,7 +4,12 @@ declare(strict_types=1);
 // Contact form relay: validates the JSON request, then sends one plain-text
 // e-mail through an authenticated SMTP session (STARTTLS + AUTH LOGIN).
 // Must stay compatible with PHP 7.4 (the version PHP-FPM runs in production).
-// Credentials live in mail-config.php, on the server only (never committed).
+// Credentials live in mail-config.php, on the server only (never committed), in the shared
+// folder that every release reads (plans/refonte-la-descente/02-architecture.md §16).
+
+// Outside the docroot and kept across releases: 750 root:www-data, state/ 700 www-data.
+const SHARED_DIR = '/var/www/bullesenvalais/shared';
+const MAIL_CONFIG_FILE = SHARED_DIR . '/mail-config.php';
 
 const ALLOWED_ORIGINS = [
     'https://dive.bullesenvalais.ch',
@@ -31,7 +36,7 @@ const MIN_ELAPSED_MS = 3000;
 // Daily cap of e-mails (Gmail quota): a robot with rotating addresses gets past the nginx
 // limit per address. The counter holds no personal data.
 const DAILY_LIMIT = 50;
-const QUOTA_FILE = 'bulles-contact-quota';
+const QUOTA_FILE = SHARED_DIR . '/state/contact-quota';
 // Unquoted local part only: FILTER_VALIDATE_EMAIL alone accepts quoted parts
 // that smuggle LF or NUL into headers.
 const EMAIL_PATTERN = '/^[A-Za-z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[A-Za-z0-9.-]+$/D';
@@ -440,7 +445,7 @@ function smtp_send(array $cfg, string $message): ?string
 function mail_config_path(): string
 {
     // CONTACT_CONFIG_PATH is only defined by tests/php/router.php.
-    return defined('CONTACT_CONFIG_PATH') ? (string) constant('CONTACT_CONFIG_PATH') : __DIR__ . '/mail-config.php';
+    return defined('CONTACT_CONFIG_PATH') ? (string) constant('CONTACT_CONFIG_PATH') : MAIL_CONFIG_FILE;
 }
 
 /**
@@ -486,9 +491,7 @@ function load_mail_config(string $path): ?array
 /** Outside the docroot; CONTACT_QUOTA_PATH is only defined by tests/php/router.php. */
 function quota_path(): string
 {
-    return defined('CONTACT_QUOTA_PATH')
-        ? (string) constant('CONTACT_QUOTA_PATH')
-        : rtrim(sys_get_temp_dir(), '/') . '/' . QUOTA_FILE;
+    return defined('CONTACT_QUOTA_PATH') ? (string) constant('CONTACT_QUOTA_PATH') : QUOTA_FILE;
 }
 
 /** E-mails already counted today, from a counter "YYYY-MM-DD count" (0 if it is another day or unreadable). */
@@ -551,9 +554,10 @@ function deliver_within_quota(array $fields, string $quotaPath, string $today): 
 
 function deliver(array $fields): array
 {
-    $cfg = load_mail_config(mail_config_path());
+    $path = mail_config_path();
+    $cfg = load_mail_config($path);
     if ($cfg === null) {
-        error_log('contact: mail configuration missing or invalid');
+        error_log(is_file($path) ? 'contact: mail configuration invalid' : 'contact: mail configuration missing at ' . $path);
         return result(500, ['ok' => false, 'error' => 'delivery']);
     }
     $error = smtp_send($cfg, build_message($cfg, $fields));
