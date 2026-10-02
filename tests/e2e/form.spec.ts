@@ -69,6 +69,44 @@ test.describe('contact form', () => {
     ]);
   });
 
+  test('200 with motion: a burst of bubbles rises from the button', async ({ page }) => {
+    const moving = await page.evaluate(() =>
+      document.documentElement.classList.contains('motion-ready'),
+    );
+    test.skip(!moving, 'no bubbles without the motion module');
+    await mockContact(page, 200, { ok: true });
+    await fillForm(page);
+    await submit(page);
+    await expect(page.locator('[data-success]')).toBeVisible();
+    await expect(page.locator('canvas.bubbles-canvas')).toHaveCount(1);
+  });
+
+  test('429: asks to wait a minute, with the alternatives', async ({ page }) => {
+    await page.route('**/api/contact', (route) =>
+      route.fulfill({ status: 429, contentType: 'text/html', body: '<html>429</html>' }),
+    );
+    await fillForm(page);
+    await submit(page);
+    const failure = page.locator('[data-failure]');
+    await expect(failure).toBeFocused();
+    await expect(failure).toContainText('Réessayez dans une minute');
+    await expect(
+      failure.getByRole('link', { name: 'Envoyer mon message par e-mail' }),
+    ).toBeVisible();
+  });
+
+  test('503 busy: the daily limit points to the direct channels', async ({ page }) => {
+    await mockContact(page, 503, { ok: false, error: 'busy' });
+    await fillForm(page);
+    await submit(page);
+    const failure = page.locator('[data-failure]');
+    await expect(failure).toContainText('fait une pause');
+    await expect(failure.getByRole('link', { name: /Écrire sur WhatsApp/ })).toHaveAttribute(
+      'href',
+      /^https:\/\/wa\.me\/41794368112\?text=Bonjour/,
+    );
+  });
+
   test('400: marks the fields the server refused and offers the alternatives', async ({ page }) => {
     await mockContact(page, 400, { ok: false, error: 'validation', fields: ['email'] });
     await fillForm(page);

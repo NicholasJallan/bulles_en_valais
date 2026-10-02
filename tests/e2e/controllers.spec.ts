@@ -44,10 +44,13 @@ test.describe('essential controllers', () => {
     await expect(items.nth(0)).not.toHaveAttribute('open');
   });
 
-  test('the gift voucher link selects the gift interest', async ({ page }) => {
+  test('the gift voucher link selects the gift interest and starts the form', async ({ page }) => {
     await page.getByRole('link', { name: 'Offrir un bon cadeau' }).click();
     await expect(page).toHaveURL(/#contact-form$/);
     await expect(page.locator('#contact-interest')).toHaveValue('gift');
+    await expect(page.locator('#contact-name')).toBeFocused();
+    // Lenis glides there from the middle of the page: a long way under a loaded test run.
+    await expect(page.locator('#contact-name')).toBeInViewport({ timeout: 10_000 });
   });
 
   test('the WhatsApp dialog traps the focus, closes on Escape and gives the focus back', async ({
@@ -57,6 +60,7 @@ test.describe('essential controllers', () => {
     await opener.click();
     const dialog = page.getByRole('dialog', { name: 'Discuter avec Nicholas' });
     await expect(dialog).toBeVisible();
+    await expect(page.locator('#whatsapp-message')).toBeFocused();
     await page.locator('#whatsapp-message').fill('Bonjour, une question');
     const send = dialog.getByRole('link', { name: /Envoyer sur WhatsApp/ });
     await expect(send).toHaveAttribute(
