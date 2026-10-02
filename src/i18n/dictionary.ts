@@ -67,6 +67,8 @@ export interface Dictionary {
     readonly ogTitle: string;
     readonly ogDescription: string;
     readonly ogImageAlt: string;
+    /** Labels of the JSON-LD (src/lib/seo/jsonld.ts), read by search engines only. */
+    readonly structuredData: { readonly jobTitle: string; readonly catalogName: string };
   };
   readonly a11y: {
     readonly skipLink: string;

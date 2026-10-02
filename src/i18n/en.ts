@@ -14,6 +14,10 @@ export const en: Dictionary = {
       'Scuba training in Valais with Nicholas Jallan, SDI/TDI, PADI and FFESSM instructor. From try-dive to trimix, at your own pace.',
     ogImageAlt:
       'Bulles en Valais: Lac du Rosel and the title “Descending, slowly, into the silence”.',
+    structuredData: {
+      jobTitle: 'SDI/TDI, PADI and FFESSM scuba diving instructor',
+      catalogName: 'Scuba diving courses',
+    },
   },
   a11y: {
     skipLink: 'Skip to content',

@@ -15,6 +15,10 @@ export const fr: Dictionary = {
       'Formation plongée en Valais avec Nicholas Jallan, instructeur SDI/TDI, PADI et FFESSM. Du baptême au trimix, à votre rythme.',
     ogImageAlt:
       'Bulles en Valais : le lac du Rosel et le titre « Descendre, lentement, vers le silence ».',
+    structuredData: {
+      jobTitle: 'Instructeur de plongée SDI/TDI, PADI et FFESSM',
+      catalogName: 'Cours de plongée',
+    },
   },
   a11y: {
     skipLink: 'Aller au contenu',
