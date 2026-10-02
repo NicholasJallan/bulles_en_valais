@@ -59,11 +59,11 @@ const jsonLd = serializeJsonLd(
     <Instructor locale={locale} />
     <Thermocline from="surface" to="lagoon" />
     <Courses locale={locale} />
-    <Interlude locale={locale} variant="descent" />
+    <Interlude locale={locale} variant="descent" from="lagoon" to="deep" />
     <DepthLadder locale={locale} />
     <Thermocline from="deep" to="abyss" />
     <CompareTable locale={locale} />
-    <Interlude locale={locale} variant="light" />
+    <Interlude locale={locale} variant="light" from="abyss" to="abyss" />
     <Specialties locale={locale} />
     <Thermocline from="abyss" to="deep" />
     <Places locale={locale} />

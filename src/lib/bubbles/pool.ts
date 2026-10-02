@@ -35,7 +35,7 @@ export interface Release {
   readonly spread: number;
 }
 
-const MIN_RADIUS = 1.2;
+const MIN_RADIUS = 1.6;
 /** Largest radius at release, in px. */
 export const MAX_RADIUS = 5.2;
 const MAX_STEP_S = 0.05;
