@@ -114,6 +114,27 @@ test.describe('specialties and places with motion', () => {
   });
 });
 
+test('after a shorter specialties tab, the places still pin at the top of the screen', async ({
+  page,
+}) => {
+  test.skip(!isDesktop(page), 'pinned on a desktop only');
+  await gotoMoving(page);
+  // TDI has 4 cards, SDI 10: the page above Places gets shorter.
+  await page.locator('#specialties [role="tab"]').nth(1).click();
+  await expect(page.locator('#specialties [role="tabpanel"][data-active]')).toHaveCount(1);
+  const top = await page
+    .locator('[data-places-stage]')
+    .evaluate(
+      (stage) => (stage.parentElement as HTMLElement).getBoundingClientRect().top + window.scrollY,
+    );
+  await page.evaluate((y) => window.scrollTo(0, y + 200), top);
+  await expect
+    .poll(() =>
+      page.locator('[data-places-stage]').evaluate((stage) => stage.getBoundingClientRect().top),
+    )
+    .toBeCloseTo(0, 0);
+});
+
 test.describe('specialties and places with reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 

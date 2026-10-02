@@ -84,22 +84,30 @@ function follow(parts: Parts, route: Route): (progress: number) => void {
 
 /** Photos are revealed as their card enters the window, not as the stage enters the screen. */
 function deferReveals(parts: Parts, tween: gsap.core.Tween): Cleanup {
+  const context = gsap.context(() => undefined);
   const photos = Array.from(parts.track.querySelectorAll<HTMLElement>('[data-reveal="image"]'));
   const triggers = photos
     .filter((photo) => !('revealed' in photo.dataset))
     .map((photo) => {
       photo.dataset.revealDefer = '';
+      // A jump over the card (anchor, focus, restored scroll) leaves without entering.
+      const once = (): void => context.add(() => revealElement(photo));
       return ScrollTrigger.create({
         trigger: photo,
         containerAnimation: tween,
         start: REVEAL_START,
         once: true,
-        onEnter: () => revealElement(photo),
+        onEnter: once,
+        onLeave: once,
       });
     });
   return () => {
     for (const trigger of triggers) trigger.kill();
-    for (const photo of photos) delete photo.dataset.revealDefer;
+    context.revert();
+    for (const photo of photos) {
+      delete photo.dataset.revealDefer;
+      photo.style.clipPath = '';
+    }
   };
 }
 
@@ -136,7 +144,7 @@ export function pinPlaces(): Cleanup {
   const route: Route = { distance: 0, centres: [], knots: [] };
   parts.section.dataset.pinned = '';
   const update = follow(parts, route);
-  if (parts.river !== null) parts.river.style.strokeDasharray = '1 1';
+  if (parts.river !== null) parts.river.style.strokeDasharray = '1 2';
 
   const tween = gsap.to(parts.track, {
     x: () => -route.distance,

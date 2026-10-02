@@ -7,7 +7,6 @@ import type { Cleanup } from '@/lib/controllers.ts';
 import { DURATIONS_MS, seconds } from '@/lib/motion/tokens.ts';
 import { driftPoint, litIndex, particleField, type Box } from '@/lib/torch/torch.ts';
 import { gsap, ScrollTrigger } from '@/scripts/motion/gsap.ts';
-import { TABS_EVENT } from '@/components/ui/tabs.ts';
 
 /** Smoothing of the beam behind the pointer, in seconds (brief S09: ~0.15 s). */
 const FOLLOW_S = 0.15;
@@ -84,6 +83,7 @@ function createLamp(section: HTMLElement, cards: readonly HTMLElement[], beam: B
   const geometry = { top: 0, left: 0, width: 0, height: 0, radius: 0 };
   let boxes: Box[] = [];
   let lit = -1;
+  let drawn = '';
   const light = (index: number): void => {
     if (index === lit) return;
     cards[lit]?.classList.remove('is-lit');
@@ -111,6 +111,12 @@ function createLamp(section: HTMLElement, cards: readonly HTMLElement[], beam: B
     });
     beam.motes.style.width = `${rect.width}px`;
     beam.motes.style.height = `${rect.height}px`;
+    // Drawn again only when the section changes size (a resize, another tab): never stretched.
+    const size = `${Math.round(rect.width)}×${Math.round(rect.height)}`;
+    if (size !== drawn) {
+      drawn = size;
+      drawMotes(beam.motes, rect.width, rect.height);
+    }
     boxes = measureCards(section, cards);
     render();
   };
@@ -216,7 +222,6 @@ function listen(section: HTMLElement, lamp: Lamp, drift: Drift): Cleanup {
     ['pointerdown', onPointer],
     ['pointerleave', onLeave],
     ['focusin', onFocus],
-    [TABS_EVENT, lamp.measure],
   ] as const;
   for (const [type, listener] of listeners)
     section.addEventListener(type, listener as EventListener);
@@ -237,7 +242,6 @@ export function startTorch(): Cleanup {
   const lamp = createLamp(section, cards, beam);
   const drift = createDrift(lamp);
   lamp.measure();
-  drawMotes(beam.motes, lamp.geometry.width, lamp.geometry.height);
   lamp.position.x = lamp.geometry.width / 2;
   lamp.position.y = Math.min(lamp.geometry.height / 2, window.innerHeight / 2);
   lamp.render();

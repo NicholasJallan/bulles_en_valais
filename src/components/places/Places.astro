@@ -161,6 +161,8 @@ const t = getDictionary(locale).places;
   }
 
   .places[data-pinned] .places-track {
+    /* The offsetParent of the panels, whose offsetLeft places.ts measures. */
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--space-3xl);

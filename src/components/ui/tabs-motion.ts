@@ -5,7 +5,7 @@
 import type { Cleanup } from '@/lib/controllers.ts';
 import { cascadeStagger } from '@/lib/motion/cascade.ts';
 import { DURATIONS_MS, STAGGER_MS, seconds } from '@/lib/motion/tokens.ts';
-import { gsap, type SplitText } from '@/scripts/motion/gsap.ts';
+import { gsap, ScrollTrigger, type SplitText } from '@/scripts/motion/gsap.ts';
 import { splitLines } from '@/scripts/motion/split.ts';
 import { TABS_EVENT, type TabsDetail } from './tabs.ts';
 
@@ -137,6 +137,8 @@ export function animateTabs(): Cleanup {
   const onTabs = (event: Event): void => {
     const { panel } = (event as CustomEvent<TabsDetail>).detail;
     context.add(() => enterPanel(panel));
+    // Panels differ in height: the pins and depths below (ladder, Places, HUD) measure again.
+    ScrollTrigger.refresh();
   };
   document.addEventListener(TABS_EVENT, onTabs);
   return () => {
