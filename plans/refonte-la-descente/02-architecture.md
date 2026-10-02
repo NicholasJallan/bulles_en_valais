@@ -8,7 +8,7 @@
 |---|---|---|
 | Astro | `^7.3` | Build statique, i18n, `astro:assets` (sharp), Fonts API |
 | TypeScript | `^6`, strict | Contrôleurs, logique, données typées (7 pas encore pris en charge par `@astrojs/check`, D16) |
-| GSAP | `^3.15` | ScrollTrigger, SplitText, CustomEase, DrawSVG (+ Draggable et Inertia si besoin) |
+| GSAP | `^3.15` | ScrollTrigger, SplitText, CustomEase (+ Draggable et Inertia si besoin ; DrawSVG non utilisé, S09) |
 | Lenis | `^1.3` | Scroll lissé (pointeur fin seulement) |
 | OGL | `^1.0` | WebGL minimal (hero), chargé à la demande |
 | @astrojs/sitemap | `^3.7` | Sitemap avec alternates i18n |
@@ -66,14 +66,15 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   ├── scripts/webgl/   surface.ts (OGL, S07 ; DOM, hors couverture)
 │   ├── scripts/bubbles/ emitter.ts (canvas 2D) · lamps.ts (bulles des CTA) (S08 ; DOM, hors couverture)
 │   ├── i18n/  types.ts · dictionary.ts · fr.ts · en.ts · legal/{fr,en}.ts · index.ts · routes.ts (+ tests)
-│   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
+│   ├── data/  courses.ts · specialties.ts · places.ts · rhone.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
 │   ├── lib/
-│   │   ├── motion/  eases.ts · tokens.ts · waterline.ts · magnetic.ts (logique pure, + tests)
+│   │   ├── motion/  eases.ts · tokens.ts · waterline.ts · magnetic.ts · cascade.ts · track.ts (logique pure, + tests)
+│   │   ├── torch/   torch.ts (+ test)      # lampe des Spécialités : carte éclairée, dérive, particules (S09)
 │   │   ├── depth/   resolve-depth.ts · temperature.ts · profile.ts · ascent.ts · ladder-scale.ts (+ tests)
 │   │   ├── bubbles/ boyle.ts · pool.ts (+ tests)
 │   │   ├── webgl/   capability.ts · viewport.ts · ripples.ts (+ tests) · shaders/{surface.vert,surface.frag,noise.glsl}
 │   │   ├── color/   palette.ts · contrast.ts (+ test)
-│   │   ├── geo.ts (+ test)             # projection des coordonnées des lieux (S09)
+│   │   ├── geo.ts (+ test)             # projection des coordonnées des lieux, position des stations le long du Rhône (S09)
 │   │   ├── form/    validate.ts (+ test) · submit.ts
 │   │   ├── analytics/ consent.ts · events.ts
 │   │   ├── seo/     jsonld.ts (+ test)
@@ -177,7 +178,7 @@ export interface Course {
 
 - **Un prix par cours** : tous les tarifs de `legacy/components/i18n.jsx` sont dans `courses.ts`, spécialités comprises ; un test les compare à l'ancien site, avec les changements décidés en I-10 (D22, D23). `cursusCourses()`, `ladderCourses()`, `courseById()` et `isOnRequest()` servent les sections.
 - `specialties.ts` : les cartes des quatre onglets (SDI 10, TDI 4, PADI 10 avec leur équivalent SDI, FFESSM 7 avec le PTH70) pointent vers le catalogue (`course`, `equivalent`) et portent leur `sub` et leur description.
-- `places.ts` : `id`, `name`, `area`, `coords` (degrés décimaux, libellé DMS calculé par `formatCoordinates`), `description`, `photo` et `facts` : profondeur max du lac et, pour le Léman, quelques sites (I-03). Ordre du Rhône : Sion, Rosel, Léman.
+- `places.ts` : `id`, `name`, `area`, `coords` (degrés décimaux, libellé DMS calculé par `formatCoordinates`), `description`, `photo` et `facts` : profondeur max du lac et, pour le Léman, quelques sites (I-03). Ordre du Rhône : Sion, Rosel, Léman. `mapUrl()` : lien des coordonnées vers Google Maps (URL de recherche, sans clé ni script). `rhone.ts` : cadre et points du tracé schématique (S09).
 - `credentials.ts` : SDI/TDI #35812, PADI MSDT #525399, FFESSM E4, DEJEPS `07425ED0350` (lien vers la carte pro), CAH 2B.
 - `contact.ts` : téléphone, WhatsApp (`41794368112`, `whatsappUrl()`), e-mail, profils publics (Instagram), lien de la fiche Google, **intérêts du formulaire** (valeurs actuelles + `gift`) et leurs libellés. Un test vérifie que ces valeurs sont exactement celles de `ALLOWED_INTERESTS` de `public/api/contact.php`.
 - `gifts.ts` : les trois offres de bons cadeaux (le baptême affiche le prix du catalogue) ; `sections.ts` : le profil de plongée (ancres, marqueurs des sur-titres, profondeurs du HUD, ancres historiques).
@@ -212,7 +213,7 @@ export interface Course {
 
 ## 8. Mouvement
 
-- `gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase)` dans le module de mouvement ; `DrawSVGPlugin` importé et enregistré à la demande par `places.ts` (S09), Draggable/InertiaPlugin seulement s'ils servent (E12). Import nommé depuis `gsap/*` pour le tree-shaking.
+- `gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase)` dans le module de mouvement ; le tracé du Rhône se dessine sans DrawSVG (`pathLength="1"` et `stroke-dashoffset` réglés par `places.ts`, S09), Draggable/InertiaPlugin seulement s'ils servent (E12). Import nommé depuis `gsap/*` pour le tree-shaking.
 - `gsap.matchMedia()` avec les conditions `motion: '(prefers-reduced-motion: no-preference)'`, `desktop: '(min-width: 1024px)'`, `fine: '(hover: hover) and (pointer: fine)'` **et** la classe `motion-ok` (Mode calme).
 - Lenis :
   ```ts

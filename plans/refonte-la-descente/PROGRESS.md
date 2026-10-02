@@ -13,7 +13,7 @@
 - [x] **S06** — Moteur de mouvement — 02.10.2026
 - [x] **S07** — Hero « Surface » en WebGL + immersion — 02.10.2026
 - [x] **S08** — Cursus, échelle de profondeur, interludes, bulles — 02.10.2026
-- [ ] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône)
+- [x] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône) — 02.10.2026
 - [ ] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp
 - [x] **S11** — Consentement, analytics, SEO, CSP — 02.10.2026 (en parallèle de S06)
 - [ ] **S12** — Préproduction & recette — 🛑 Gate 4
@@ -145,6 +145,13 @@
 | 2026-10-02 | S08 | préciser | Interludes : parallaxe, anneau et traînée de bulles sur pointeur fin seulement ; thermoclines d'entrée et de sortie = bords en dégradé vers le ton des sections voisines (props `from` / `to`), dans tous les modes ; citation révélée par le `data-reveal="lines"` commun | « rien de tout cela sur tactile » du brief ; aucun texte sur le dégradé |
 | 2026-10-02 | S08 | préciser | Échelle : seule la scène (règle + marqueur, `[data-ladder-stage]`) est épinglée, l'en-tête défile avant (sinon le titre sortait de l'écran à 768 px de haut) ; 0 → 120 m sur 2,4 écrans pendant un épinglage de 3 écrans ; `refreshPriority: 1` ; HUD masqué par `data-hud="hidden"` (S06), sans appel explicite à `setMode` ; libellé « Remontée · 40 m » sur la thermocline qui suit l'échelle (prop `label` de `Thermocline`) | mise en page à 1024 × 768 ; une source par profondeur (`markerDepth('compare')`) |
 | 2026-10-02 | S08 | corriger | Trace de performance par un script Playwright (CDP, molette, `longtask`) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
+| 2026-10-02 | S09 | préciser | Lampe : au clavier, elle se pose sur l'onglet focalisé ou sur la **première carte du panneau** focalisé (les cartes de spécialité ne sont pas focalisables : 31 arrêts de tabulation sans action seraient une régression) ; opacité simple gardée (même coût que `mix-blend-mode: screen` à la trace) ; particules redessinées seulement si la section change de taille ; brief S09 mis à jour | accessibilité, trace |
+| 2026-10-02 | S09 | ajouter | Lien des coordonnées de chaque lieu vers Google Maps (`mapUrl()`, URL de recherche sans clé ni script, libellé accessible « …, ouvrir dans Google Maps » / « open in Google Maps ») : c'est l'élément focalisable qui permet au clavier d'amener un lieu hors écran dans la fenêtre | brief S09 (« focusin sur une carte hors écran ») ; à valider par Nicholas |
+| 2026-10-02 | S09 | modifier | Tracé du Rhône sans DrawSVG : `pathLength="1"` + `stroke-dashoffset` réglé par `places.ts` (même effet, aucun plugin à charger) ; part de chaque station le long du fleuve calculée au build (`fractionAlong`, `data-fraction`) ; tracé fantôme sous le tracé dessiné ; `02-architecture` §1, §2, §5, §8 et brief S09 mis à jour | budget, simplicité |
+| 2026-10-02 | S09 | préciser | Lieux épinglés : carte fixe à gauche, fenêtre à droite où défilent le panneau d'introduction (en-tête) et les trois lieux, de droite à gauche comme le Rhône vers le lac ; photo des cartes plafonnée selon la hauteur de l'écran ; révélations des photos déclenchées par `containerAnimation` (`data-reveal-defer`, `revealElement()`) ; fenêtre en `overflow: hidden` (axe sait alors que les lieux au-delà sont masqués) avec son défilement propre maintenu à 0 | mise en page à 1024 × 768 ; axe |
+| 2026-10-02 | S09 | préciser | Repli « cartes verticales en `scroll-snap` » : rangée horizontale de cartes portrait sous 64 rem (la suivante dépasse), grille de trois au-delà sans mouvement | brief S09 |
+| 2026-10-02 | S09 | corriger | Défaut de S06 : les masques de ligne de SplitText faisaient grandir un titre de deux lignes de 0,12 em (marges négatives fusionnées), d'où un CLS de 0,15 sur mobile ; défaut de S08 : un changement d'onglet ne rafraîchissait pas ScrollTrigger (épinglages et profondeurs mesurés pour l'ancienne hauteur) | test CLS, revue de code |
+| 2026-10-02 | S09 | corriger | Trace de performance par un script Playwright (molette + pointeur, `longtask`, images) au lieu du MCP `chrome-devtools`, absent de la session | environnement |
 
 ## Mesures
 
@@ -160,6 +167,7 @@
 | 2026-10-02 | S06 + S11 fusionnées (`check:budgets`) | n.m. | n.m. | n.m. | 3,2 / 82,0 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S07 (`check:budgets`) ; trace mobile Playwright + CDP (Pixel 7, CPU ×4, 150 ms / 9 Mbit/s, cache vide, 3 passes) ; Lighthouse 12 local (simulé) : S07 94, base S06 95 dans les mêmes conditions | FCP = LCP ≈ 0,6 s (trace) ; 2,9 s (Lighthouse, S06 : 2,8 s) | 0 | ≈ 120 ms (trace) ; 0 ms (Lighthouse) | 3,2 / 102,9 Ko (WebGL : 18,7 Ko, chargé vers 1,1 s, après le LCP) | 13,1 Ko (accueil) | n.m. | 94/100/100/100 |
 | 2026-10-02 | S08 (`check:budgets`) ; traversée de l'échelle épinglée à la molette, Chromium 1440 px : 0 tâche longue, images p50/p95 16,7 ms (CPU ×1 et ×4) | n.m. | n.m. | 0 tâche longue | 3,2 / 106,2 Ko | 14,1 Ko (accueil) | n.m. | n.m. |
+| 2026-10-02 | S09 (`check:budgets`) ; traversée des Spécialités et des Lieux à la molette avec le pointeur en mouvement, Chromium 1440 px : 0 tâche longue, images p50/p95 16,7 ms (CPU ×1 et ×4, 3 passes) | n.m. | < 0,05 (test E2E, après correctif) | 0 tâche longue | 3,2 / 108,6 Ko | 14,9 Ko (accueil) | n.m. | n.m. |
 
 ## Journal
 
@@ -516,6 +524,26 @@
   - le prototype de bulles du styleguide (`styleguide/bubbles-demo.ts`, point ouvert de S02) n'est pas remplacé : la page est supprimée en S13, son commentaire renvoie au moteur ;
   - Safari réel et Firefox (D21) non vérifiés à la main.
 - **Retour arrière** : `git revert` par sous-fonction (bulles `bb8640d`, Cursus `da98031`, interludes `1e66567`, échelle `d13bea9` + `d4df9c0`, comparatif `e1e0be0`) ; sans le module de mouvement, la page statique de S05 reste complète.
+
+### S09 — 2026-10-02 (Spécialités : lampe torche ; Lieux : parcours du Rhône)
+- **Fait** :
+  - lampe (E8) : `lib/torch/torch.ts` en TDD (`litIndex`, `driftPoint`, `particleField` déterministe) ; `specialties/torch.ts` : faisceau à dégradé radial chaud déplacé en `transform` (`quickTo`, 0,15 s), sous le contenu (`z-index`), particules dessinées une fois au tiers de la résolution et tenues immobiles pendant que le faisceau passe dessus (contre-translation), carte éclairée `is-lit` (bordure et lueur rouge-lampe en pseudo-élément, texte inchangé), clavier (onglet ou première carte du panneau focalisé), toucher, dérive lente après 2,4 s sans geste, seulement quand la section est à l'écran ;
+  - onglets : cascade des lignes plafonnée à 0,6 s (`lib/motion/cascade.ts`), commune au Cursus et aux Spécialités (titre du panneau et cartes de spécialité marqués) ;
+  - Lieux (E10) : `geo.ts` (`fractionAlong`, tests des trois sites : Sion à l'est, Rosel au sud-ouest, Léman au nord-ouest, ordre le long du fleuve), `data/rhone.ts`, `lib/motion/track.ts` (`centredProgress`, `interpolate`, `nearestIndex`) ; sur ordinateur avec mouvement, scène épinglée, carte à gauche dont le tracé se dessine jusqu'à la station du lieu en vue (station allumée), piste horizontale (introduction + 3 lieux), HUD de 32 à 22 m, photos révélées à leur entrée dans la fenêtre, lien focalisé qui amène son lieu dans la fenêtre ; sur mobile, rangée de cartes en `scroll-snap` ; lien des coordonnées vers Google Maps ;
+  - tests : `tests/e2e/abyss.spec.ts` (lieux dans l'ordre FR/EN avec leur lien, lampe au pointeur et au clavier, piste épinglée au clavier avec tracé complet à la fin, épinglage juste après un onglet plus court, mouvement réduit sans lampe ni épinglage, aucun débordement) ; captures `gates/s09/`.
+- **Vérifications** : `npm run build` (+ `check:dist`) ; `astro check` 0 erreur, 0 avertissement (3 indications antérieures à S09) ; Vitest 562 tests (couverture 99,4 % des lignes) ; Playwright e2e 235 réussis (37 sautés), a11y 28/28, `csp` 0 violation, visuels 2/2 ; `format:check` ; budgets : JS initial 3,2 Ko, total 108,6 Ko, CSS 14,9 Ko ; trace : 0 tâche longue, 60 i/s à CPU ×1 et ×4.
+- **Constats** :
+  - un `canvas` hérite du `max-inline-size: 100 %` de la remise à zéro : les particules, plus larges que le faisceau, étaient écrasées en traits ;
+  - un `span.visually-hidden` (position absolue) dans une rangée défilante en sortait et élargissait la page mobile à 923 px : la carte est `position: relative` ;
+  - les deux défauts antérieurs corrigés (CLS des titres découpés, `refresh` après un changement d'onglet) : voir Mutations.
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30) : 0 CRITICAL ; 1 HIGH corrigé (pas de `ScrollTrigger.refresh()` après un changement d'onglet, test RED puis GREEN) ; 4 MEDIUM corrigés (révélation différée aussi sur un saut, particules redessinées au changement de taille, `position: relative` de la piste pour `offsetLeft`, révélations différées dans un `gsap.context` annulé au nettoyage) ; LOW corrigé : point d'extrémité d'un tracé non dessiné ; LOW laissé : `font-size: 25px` des libellés de la carte (unités du `viewBox`, pas des pixels CSS) et `-0.24em` (le double de `0.12em` des masques).
+- **Commits** : `1f277ed`, `b6701a3`, `ce4d720`, `c742989`, `f213bf3`, `a32166c`, `57657af`, puis ce journal.
+- **Points ouverts** :
+  - Nicholas : avis sur la lampe (`gates/s09/torch-1440.jpg`), le parcours du Rhône (`places-1440-*.jpg`, `places-1024-100.jpg`, `places-mobile.jpg`) et le **lien Google Maps** ajouté sur les coordonnées ;
+  - I-03 : températures, visibilité et accès toujours non fournis (rien d'inventé, aucun `TODO` affiché) ;
+  - Safari réel et Firefox (D21) non vérifiés à la main ;
+  - S10 : rien de nouveau ; la couture de la texture des thermoclines (point ouvert de S08) reste à traiter.
+- **Retour arrière** : `git revert` par sous-fonction (lampe `1f277ed`, onglets `b6701a3`, lieux `ce4d720` + `f213bf3`) ; sans le module de mouvement, les Spécialités et les Lieux restent complets et statiques.
 
 ### S11 — 2026-10-02 (consentement, mesure, SEO, CSP ; en parallèle de S06, worktree `refonte/s11`)
 - **Fait** : `consent-default.js` (défauts refusés ou relus dans `cc_cookie`, `ads_data_redaction`, balise Google en production seulement, `bvLoadGoogleTag()`), bandeau vanilla-cookieconsent 3.1.0 (contrôleur `consent`, textes FR/EN, styles chargés à la demande, ton `deep`, « Gérer les cookies » branché, `html[data-consent-open]` masque le HUD et WhatsApp), `events.ts` et `consent-mode.ts` (TDD), conversions formulaire, WhatsApp et téléphone ; tableau des cookies et signaux sans cookie dans Confidentialité (FR/EN) ; OG, Twitter, `theme-color`, JSON-LD `@graph` (TDD, accueil), `robots.txt`, `llms.txt`, alternates `hreflang` de toutes les pages du sitemap ; `ops/nginx/security-headers.conf`, `serve-with-csp.mjs`, projet Playwright `csp`.
