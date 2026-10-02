@@ -14,6 +14,7 @@ HTTP_PORT=8099
 URL="http://127.0.0.1:$HTTP_PORT/api/contact"
 SITE="https://dive.bullesenvalais.ch"
 JSON="application/json"
+QUOTA="$TESTS/.quota-integration" # CONTACT_QUOTA_PATH of router.php
 PASS=0
 FAIL=0
 SMTP_PID=""
@@ -23,6 +24,7 @@ cleanup() {
   [ -n "$SMTP_PID" ] && kill "$SMTP_PID" 2>/dev/null
   [ -n "$PHP_PID" ] && kill "$PHP_PID" 2>/dev/null
   rm -rf "$WORK"
+  rm -f "$QUOTA"
 }
 trap cleanup EXIT
 
@@ -78,6 +80,7 @@ for port in "$SMTP_PORT" "$HTTP_PORT"; do
 done
 python3 "$TESTS/fake_smtp.py" "$SMTP_PORT" "$LOG" "$WORK/smtp.ready" &
 SMTP_PID=$!
+rm -f "$QUOTA"
 php -d log_errors=1 -d error_log="$PHP_ERRORS" -S "127.0.0.1:$HTTP_PORT" "$TESTS/router.php" >"$WORK/php.log" 2>&1 &
 PHP_PID=$!
 wait_for "fake SMTP server" test -f "$WORK/smtp.ready"
@@ -106,15 +109,7 @@ expect "malicious request opened exactly one new session" "$index" 2
 python3 "$TESTS/smtp_log.py" check "$LOG" "$index" malicious
 record "malicious session assertions" $?
 
-echo "client loaded before the S00 deploy (no website, elapsed or locale)"
-post "$SITE" "$JSON" '{"name":"Élodie Martin","email":"elodie@example.com","phone":"","interest":"sdi-owd","message":"Bonjour (ref-l1)"}'
-expect "legacy request → 200" "$STATUS" 200
-index=$(await_session 'ref-l1')
-expect "legacy request is delivered" "$index" 3
-python3 "$TESTS/smtp_log.py" check "$LOG" "$index" legacy
-record "legacy session assertions" $?
-grep -q 'contact: accepted without elapsed' "$PHP_ERRORS"
-record "legacy acceptance is logged (to know when to require elapsed)" $?
+expect "each delivery is counted for the day" "$(cut -d' ' -f2 "$QUOTA")" 2
 
 # --- refusals: none of these may reach the SMTP server -----------------------
 echo "refusals"
@@ -128,6 +123,8 @@ post "$SITE" "$JSON" "$(payload 'Bot' 'bot@example.com' 'x' 'http://spam.example
 expect "honeypot filled → 200 without sending" "$STATUS $BODY" '200 {"ok":true}'
 post "$SITE" "$JSON" "$(payload 'Bot' 'bot@example.com' 'x' '' 1200)"
 expect "elapsed < 3000 ms → 200 without sending" "$STATUS $BODY" '200 {"ok":true}'
+post "$SITE" "$JSON" '{"name":"Bot","email":"bot@example.com","phone":"","interest":"sdi-owd","message":"x","website":""}'
+expect "no elapsed → 200 without sending" "$STATUS $BODY" '200 {"ok":true}'
 python3 -c 'import sys; sys.stdout.write("{\"name\":\"" + "a" * 33000 + "\"}")' >"$WORK/big.json"
 post "$SITE" "$JSON" "@$WORK/big.json"
 expect "body over 32 KB → 413" "$STATUS" 413
@@ -140,7 +137,20 @@ expect "405 advertises the allowed methods" "$(curl -s --max-time 5 -D - -o /dev
 expect "OPTIONS → 204" "$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' -X OPTIONS "$URL")" 204
 post "$SITE" "$JSON" "$(normal 'ref-s1')"
 expect "sentinel request → 200" "$STATUS" 200
-expect "only the sentinel reached SMTP after the refusals" "$(await_session 'ref-s1')" 4
+expect "only the sentinel reached SMTP after the refusals" "$(await_session 'ref-s1')" 3
+
+# --- daily limit ---------------------------------------------------------------
+echo "daily limit"
+TODAY=$(php -r 'echo date("Y-m-d");')
+printf '%s 50' "$TODAY" >"$QUOTA"
+post "$SITE" "$JSON" "$(normal 'ref-q1')"
+expect "limit reached → 503 busy" "$STATUS $BODY" '503 {"ok":false,"error":"busy"}'
+grep -q 'contact: daily limit reached' "$PHP_ERRORS"
+record "limit is logged" $?
+printf '%s 3' "$TODAY" >"$QUOTA"
+post "$SITE" "$JSON" "$(normal 'ref-q2')"
+expect "under the limit again → 200" "$STATUS" 200
+expect "the busy request never reached SMTP" "$(await_session 'ref-q2')" 4
 grep -q 'contact: dropped (honeypot)' "$PHP_ERRORS"
 record "honeypot drop is logged with its reason" $?
 grep -q 'contact: dropped (too_fast)' "$PHP_ERRORS"

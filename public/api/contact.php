@@ -28,6 +28,10 @@ const MAX_EMAIL_CHARS = 254;
 const MAX_MESSAGE_CHARS = 5000;
 const MAX_PHONE_CHARS = 40;
 const MIN_ELAPSED_MS = 3000;
+// Daily cap of e-mails (Gmail quota): a robot with rotating addresses gets past the nginx
+// limit per address. The counter holds no personal data.
+const DAILY_LIMIT = 50;
+const QUOTA_FILE = 'bulles-contact-quota';
 // Unquoted local part only: FILTER_VALIDATE_EMAIL alone accepts quoted parts
 // that smuggle LF or NUL into headers.
 const EMAIL_PATTERN = '/^[A-Za-z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[A-Za-z0-9.-]+$/D';
@@ -122,10 +126,7 @@ function spam_reason(array $data): ?string
     if (!is_string($website) || trim($website) !== '') {
         return 'honeypot';
     }
-    if (!array_key_exists('elapsed', $data)) {
-        return null; // pages loaded before the S00 deploy do not send it
-    }
-    $elapsed = $data['elapsed'];
+    $elapsed = $data['elapsed'] ?? null; // every client sends it since S10
     return is_numeric($elapsed) && (float) $elapsed >= MIN_ELAPSED_MS ? null : 'too_fast';
 }
 
@@ -203,12 +204,11 @@ function validate_payload(array $data): array
 
 /**
  * Outcome of a request: 'send' carries the validated fields to deliver,
- * 'dropped' the reason why a spam submission was silently ignored, 'note'
- * anything else worth logging (never personal data).
+ * 'dropped' the reason why a spam submission was silently ignored.
  */
-function result(int $status, ?array $body, ?array $send = null, ?string $dropped = null, ?string $note = null): array
+function result(int $status, ?array $body, ?array $send = null, ?string $dropped = null): array
 {
-    return ['status' => $status, 'body' => $body, 'send' => $send, 'dropped' => $dropped, 'note' => $note];
+    return ['status' => $status, 'body' => $body, 'send' => $send, 'dropped' => $dropped];
 }
 
 // Checks run in a fixed order.
@@ -238,9 +238,7 @@ function evaluate_request(string $method, string $contentType, string $origin, s
     if ($validation['errors'] !== []) {
         return result(400, ['ok' => false, 'error' => 'validation', 'fields' => $validation['errors']]);
     }
-    // Shows when clients from before the S00 deploy are gone (then require elapsed).
-    $note = array_key_exists('elapsed', $data) ? null : 'accepted without elapsed';
-    return result(200, ['ok' => true], $validation['data'], null, $note);
+    return result(200, ['ok' => true], $validation['data']);
 }
 
 // ---------------------------------------------------------------------------
@@ -481,6 +479,71 @@ function load_mail_config(string $path): ?array
     return normalize_mail_config(is_file($path) ? require $path : null);
 }
 
+// ---------------------------------------------------------------------------
+// Daily limit
+// ---------------------------------------------------------------------------
+
+/** Outside the docroot; CONTACT_QUOTA_PATH is only defined by tests/php/router.php. */
+function quota_path(): string
+{
+    return defined('CONTACT_QUOTA_PATH')
+        ? (string) constant('CONTACT_QUOTA_PATH')
+        : rtrim(sys_get_temp_dir(), '/') . '/' . QUOTA_FILE;
+}
+
+/** E-mails already counted today, from a counter "YYYY-MM-DD count" (0 if it is another day or unreadable). */
+function parse_quota(string $raw, string $today): int
+{
+    if (preg_match('/^(\d{4}-\d{2}-\d{2}) (\d{1,9})\s*$/D', $raw, $match) !== 1) {
+        return 0;
+    }
+    return $match[1] === $today ? (int) $match[2] : 0;
+}
+
+/**
+ * Counts one more e-mail for today, under an exclusive lock: true when it may be sent, false when
+ * the limit is reached (not counted), null when the counter cannot be used (never a symbolic link).
+ */
+function take_daily_quota(string $path, string $today, int $limit): ?bool
+{
+    if (is_link($path)) {
+        return null;
+    }
+    $handle = @fopen($path, 'c+'); // a failure is logged by the caller
+    if ($handle === false) {
+        return null;
+    }
+    try {
+        if (!flock($handle, LOCK_EX)) {
+            return null;
+        }
+        $count = parse_quota((string) stream_get_contents($handle), $today);
+        if ($count >= $limit) {
+            return false;
+        }
+        $written = rewind($handle) && ftruncate($handle, 0)
+            && fwrite($handle, $today . ' ' . ($count + 1)) !== false && fflush($handle);
+        return $written ? true : null;
+    } finally {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+}
+
+/** Sends within the daily limit; a counter that cannot be used never loses a real message. */
+function deliver_within_quota(array $fields, string $quotaPath, string $today): array
+{
+    $allowed = take_daily_quota($quotaPath, $today, DAILY_LIMIT);
+    if ($allowed === false) {
+        error_log('contact: daily limit reached');
+        return result(503, ['ok' => false, 'error' => 'busy']);
+    }
+    if ($allowed === null) {
+        error_log('contact: daily counter unavailable, sent anyway');
+    }
+    return deliver($fields);
+}
+
 function deliver(array $fields): array
 {
     $cfg = load_mail_config(mail_config_path());
@@ -521,10 +584,9 @@ function handle_request(): void
     if ($outcome['dropped'] !== null) {
         error_log('contact: dropped (' . $outcome['dropped'] . ')'); // reason only, to spot false positives
     }
-    if ($outcome['note'] !== null) {
-        error_log('contact: ' . $outcome['note']);
-    }
-    $final = $outcome['send'] !== null ? deliver($outcome['send']) : $outcome;
+    $final = $outcome['send'] !== null
+        ? deliver_within_quota($outcome['send'], quota_path(), date('Y-m-d'))
+        : $outcome;
     respond($final['status'], $final['body']);
 }
 

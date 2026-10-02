@@ -23,6 +23,7 @@ ssh -o BatchMode=yes "$PI" 'php7.4 -l' <"$SOURCE"
 {
   head -n $((define_line - 1)) "$TEST"
   echo "define('CONTACT_NO_AUTORUN', true);"
+  echo "define('CONTACT_TEST_NO_FILES', true); // the daily counter tests write a file"
   tail -n +3 "$SOURCE"
   tail -n +$((require_line + 1)) "$TEST"
 } | ssh -o BatchMode=yes "$PI" 'php7.4 -d error_reporting=-1 -d display_errors=stderr'
