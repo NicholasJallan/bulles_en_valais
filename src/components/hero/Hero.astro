@@ -81,7 +81,12 @@ const teaching = CREDENTIALS.filter((credential) =>
     align-items: end;
     gap: var(--space-l);
     min-block-size: 100svh;
-    padding-block: calc(var(--space-section) + var(--space-xl)) var(--space-m);
+    /* Below the masthead, whose logo shows enlarged over the hero (Nav.astro). */
+    padding-block: max(
+        var(--space-section) + var(--space-xl),
+        var(--space-s) + var(--logo-masthead) * var(--logo-hero-scale) + var(--space-l)
+      )
+      var(--space-m);
     isolation: isolate;
     overflow: hidden;
   }
@@ -129,7 +134,8 @@ const teaching = CREDENTIALS.filter((credential) =>
     display: none;
   }
 
-  /* Dark water rising from the bottom carries the text; a lighter veil at the top, the masthead. */
+  /* Dark water rising from the bottom carries the text; a lighter veil at the top, the masthead,
+     deeper behind the logo so it reads against a bright sky. */
   .hero-scrim {
     position: absolute;
     inset: 0;
@@ -142,19 +148,30 @@ const teaching = CREDENTIALS.filter((credential) =>
         oklch(14% 0.03 245 / 0.2) 72%,
         oklch(14% 0.03 245 / 0) 85%
       ),
+      radial-gradient(
+        ellipse 32rem 24rem at 0 0,
+        oklch(14% 0.03 245 / 0.45),
+        oklch(14% 0.03 245 / 0) 70%
+      ),
       linear-gradient(to bottom, oklch(14% 0.03 245 / 0.55), oklch(14% 0.03 245 / 0) 22%);
   }
 
   /* On a phone the text climbs high on the photo: the dark water rises with it. */
   @media (width < 48rem) {
     .hero-scrim {
-      background: linear-gradient(
-        to top,
-        oklch(14% 0.03 245 / 0.92) 0%,
-        oklch(14% 0.03 245 / 0.8) 60%,
-        oklch(14% 0.03 245 / 0.45) 85%,
-        oklch(14% 0.03 245 / 0.35) 100%
-      );
+      background:
+        linear-gradient(
+          to top,
+          oklch(14% 0.03 245 / 0.92) 0%,
+          oklch(14% 0.03 245 / 0.8) 60%,
+          oklch(14% 0.03 245 / 0.45) 85%,
+          oklch(14% 0.03 245 / 0.35) 100%
+        ),
+        radial-gradient(
+          ellipse 20rem 16rem at 0 0,
+          oklch(14% 0.03 245 / 0.4),
+          oklch(14% 0.03 245 / 0) 70%
+        );
     }
   }
 

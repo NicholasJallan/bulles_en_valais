@@ -85,6 +85,12 @@
   --tap-min: 2.75rem;
   --hud-inline-size: 6.5rem;
 
+  /* Masthead logo: its box in the bar, how much larger it shows over the hero, and the halo that
+     keeps its fine lettering readable against a bright sky. */
+  --logo-masthead: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
+  --logo-hero-scale: 2.2;
+  --logo-halo: color-mix(in oklch, var(--c-abyss) 55%, transparent);
+
   /* Radii: sharp for controls, soft for cards and images, round for bubbles and pills. */
   --radius-sharp: 2px;
   --radius-soft: 14px;

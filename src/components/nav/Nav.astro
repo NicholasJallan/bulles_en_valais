@@ -159,13 +159,14 @@ const links = [
   }
 
   /* Larger over the hero, back to its box in the glass bar: scale only, so the bar keeps its
-     height (--nav-block-size, measured by nav.ts, places the pinned tracks). */
+     height (--nav-block-size, measured by nav.ts, places the pinned tracks). The hero leaves room
+     for it (Hero.astro). */
   .brand :global(.brand-logo) {
-    --hero-logo-scale: 1.6;
     inline-size: auto;
-    block-size: clamp(4rem, 3.4rem + 2.6vw, 5.75rem);
-    scale: var(--hero-logo-scale);
+    block-size: var(--logo-masthead);
+    scale: var(--logo-hero-scale);
     transform-origin: left top;
+    filter: drop-shadow(0 0 0.4rem var(--logo-halo));
     transition: scale var(--dur-base) var(--ease-surface);
   }
 
