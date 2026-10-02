@@ -1,0 +1,5 @@
+# Bulles en Valais: every page may be crawled. The styleguide and the 404 page carry noindex.
+User-agent: *
+Allow: /
+
+Sitemap: https://dive.bullesenvalais.ch/sitemap-index.xml
