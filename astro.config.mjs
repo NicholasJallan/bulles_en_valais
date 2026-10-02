@@ -1,7 +1,8 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-import { DEFAULT_LOCALE, LANG_TAGS, LOCALES } from './src/i18n/types.ts';
+import { alternates, findRoute } from './src/i18n/routes.ts';
+import { DEFAULT_LOCALE, LOCALES } from './src/i18n/types.ts';
 
 // The dev server serves any file of the project: refuse the secrets (Vite 8 defaults first).
 const DEV_SERVER_DENY = [
@@ -21,9 +22,27 @@ const DEV_SERVER_DENY = [
 // forbidden, so its files are used as served and never committed).
 const STYLES = /** @type {['normal', 'italic']} */ (['normal', 'italic']);
 
+const SITE = 'https://dive.bullesenvalais.ch';
+
+/**
+ * hreflang alternates of a sitemap entry, from src/i18n/routes.ts: the integration's own i18n
+ * option only pairs identical paths, so it missed the legal pages (/confidentialite/ ↔
+ * /en/privacy/).
+ * @param {import('@astrojs/sitemap').SitemapItem} item
+ */
+function withAlternates(item) {
+  const match = findRoute(new URL(item.url).pathname);
+  if (match === undefined) return item;
+  const links = alternates(match.route).map(({ hreflang, path }) => ({
+    lang: hreflang,
+    url: new URL(path, SITE).href,
+  }));
+  return { ...item, links };
+}
+
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://dive.bullesenvalais.ch',
+  site: SITE,
   trailingSlash: 'always',
   build: { format: 'directory', inlineStylesheets: 'never' },
   vite: {
@@ -58,8 +77,8 @@ export default defineConfig({
   ],
   integrations: [
     sitemap({
-      i18n: { defaultLocale: DEFAULT_LOCALE, locales: { ...LANG_TAGS } },
       filter: (page) => !page.includes('/styleguide/'),
+      serialize: withAlternates,
     }),
   ],
 });

@@ -48,10 +48,18 @@ export interface Testimonial {
   readonly translated: boolean;
 }
 
+export interface LegalTable {
+  readonly caption: string;
+  readonly headers: readonly string[];
+  /** One row per item; its first cell names it (row header). */
+  readonly rows: readonly (readonly string[])[];
+}
+
 export interface LegalSection {
   readonly heading: string;
   readonly paragraphs: readonly Rich[];
   readonly list?: readonly string[];
+  readonly table?: LegalTable;
 }
 
 export interface LegalPage {
@@ -67,6 +75,8 @@ export interface Dictionary {
     readonly ogTitle: string;
     readonly ogDescription: string;
     readonly ogImageAlt: string;
+    /** Labels of the JSON-LD (src/lib/seo/jsonld.ts), read by search engines only. */
+    readonly structuredData: { readonly jobTitle: string; readonly catalogName: string };
   };
   readonly a11y: {
     readonly skipLink: string;
@@ -262,6 +272,32 @@ export interface Dictionary {
     /** Title of the links to the public profiles (src/data/contact.ts). */
     readonly social: string;
     readonly backToSurface: string;
+  };
+  /** Consent banner and preferences (vanilla-cookieconsent, S11): plain text, no HTML. */
+  readonly consent: {
+    /** Accessible name of the banner. */
+    readonly label: string;
+    readonly title: string;
+    readonly description: string;
+    readonly acceptAll: string;
+    readonly rejectAll: string;
+    readonly showPreferences: string;
+    readonly preferences: {
+      readonly title: string;
+      readonly intro: string;
+      readonly save: string;
+      readonly close: string;
+      readonly categories: Readonly<
+        Record<
+          'necessary' | 'analytics' | 'marketing',
+          { readonly title: string; readonly description: string }
+        >
+      >;
+      readonly moreTitle: string;
+      readonly moreDescription: string;
+    };
+    /** Label of the link to the privacy page, in the banner and the preferences. */
+    readonly privacyLink: string;
   };
   readonly notFound: {
     readonly meta: PageMeta;

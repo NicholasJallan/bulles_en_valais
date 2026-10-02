@@ -30,7 +30,8 @@ La préproduction est validée. On bascule `dive.bullesenvalais.ch` sur la nouve
    - PHP : `fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;` et `fastcgi_param DOCUMENT_ROOT $realpath_root;` ; correspondance `/api/contact` → `contact.php` conservée ; seul `contact.php` exécute du PHP (`location = /api/contact.php` avec sa limite de débit, tout autre `.php` → 404, comme depuis S00) ;
    - `try_files $uri $uri/ =404;` et `error_page 404 /404.html;` (fin du repli SPA) ;
    - cache : `/_astro/` 1 an `immutable`, images et polices 30 jours, HTML `no-cache` ; `gzip` pour les types texte ;
-   - `include` de `ops/nginx/security-headers.conf` (CSP finale **sans** `unsafe-eval`, **sans** unpkg, **sans** script inline) ; limite de débit de `/api/contact` conservée ;
+   - `include` de `ops/nginx/security-headers.conf` (CSP finale **sans** `unsafe-eval`, **sans** unpkg, **sans** script inline) dans le bloc `server` **et** dans chaque `location` qui pose ses propres `add_header` (nginx ne les hérite pas) ; limite de débit de `/api/contact` conservée ;
+   - rapports CSP (reporté de S11) : soit `public/api/csp-report.php` (JSON ≤ 8 Ko, journal hors docroot, sa propre `location` exacte limitée en débit, `check:dist` à étendre), soit pas de `report-uri` du tout ; trancher avec Nicholas ;
    - `sudo nginx -t && sudo systemctl reload nginx`.
 5. **Vérifications immédiates** :
    - `curl -sI` : 200 sur `/` et `/en/`, en-têtes attendus, 404 réelle sur une URL inconnue, `robots.txt` et `sitemap-index.xml` servis en texte ou XML, 301 conservées depuis `bullesenvalais.ch` et `www.` ;

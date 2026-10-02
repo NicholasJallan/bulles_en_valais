@@ -10,6 +10,8 @@ const CONTROLLERS: ControllerRegistry = {
   whatsapp: () => import('@/components/whatsapp/whatsapp.ts'),
   'calm-mode': () => import('@/components/footer/calm-mode.ts'),
   hud: () => import('@/components/hud/hud.ts'),
+  // Consent banner and conversion clicks (S11): the library is loaded with the controller.
+  consent: () => import('@/components/consent/consent.ts'),
   // Styleguide only (S02): removed with it in S13.
   'styleguide-switch': () => import('@/components/styleguide/switch.ts'),
   'styleguide-motion': () => import('@/components/styleguide/motion.ts'),

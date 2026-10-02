@@ -15,6 +15,10 @@ export const fr: Dictionary = {
       'Formation plongée en Valais avec Nicholas Jallan, instructeur SDI/TDI, PADI et FFESSM. Du baptême au trimix, à votre rythme.',
     ogImageAlt:
       'Bulles en Valais : le lac du Rosel et le titre « Descendre, lentement, vers le silence ».',
+    structuredData: {
+      jobTitle: 'Instructeur de plongée SDI/TDI, PADI et FFESSM',
+      catalogName: 'Cours de plongée',
+    },
   },
   a11y: {
     skipLink: 'Aller au contenu',
@@ -576,6 +580,43 @@ export const fr: Dictionary = {
     cookies: 'Gérer les cookies',
     social: 'Réseaux',
     backToSurface: 'Remonter à la surface',
+  },
+  consent: {
+    label: 'Consentement aux cookies',
+    title: 'Quelques cookies, avec votre accord',
+    description:
+      "J'utilise Google Analytics pour savoir comment le site est lu, et Google Ads pour mesurer les demandes venues de mes annonces. Aucun de leurs cookies n'est déposé sans votre accord, et vous pouvez changer d'avis à tout moment avec « Gérer les cookies », en bas de page.",
+    acceptAll: 'Tout accepter',
+    rejectAll: 'Tout refuser',
+    showPreferences: 'Choisir',
+    preferences: {
+      title: 'Gérer les cookies',
+      intro:
+        'Choisissez ce que vous acceptez. Sans votre accord, Google ne reçoit que des signaux anonymes, sans cookie ni identifiant.',
+      save: 'Enregistrer mes choix',
+      close: 'Fermer',
+      categories: {
+        necessary: {
+          title: 'Nécessaires',
+          description:
+            "Toujours actifs : ils mémorisent seulement votre choix de consentement et, si vous l'activez, le Mode calme.",
+        },
+        analytics: {
+          title: "Mesure d'audience",
+          description:
+            'Google Analytics : pages vues et parcours, de façon agrégée, pour améliorer le site.',
+        },
+        marketing: {
+          title: 'Publicité',
+          description:
+            "Google Ads : mesurer les demandes venues de mes annonces. Aucune publicité n'est affichée sur ce site.",
+        },
+      },
+      moreTitle: 'En savoir plus',
+      moreDescription:
+        'Le nom, le fournisseur et la durée de chaque cookie, ainsi que vos droits, sont détaillés dans la politique de confidentialité.',
+    },
+    privacyLink: 'Politique de confidentialité',
   },
   notFound: {
     meta: {

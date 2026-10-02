@@ -49,7 +49,14 @@ function handleAnchors(lenis: Lenis): Cleanup {
 }
 
 export function startLenis(): Cleanup {
-  const lenis = new Lenis({ autoRaf: false, lerp: 0.09, smoothWheel: true, syncTouch: false });
+  const lenis = new Lenis({
+    autoRaf: false,
+    lerp: 0.09,
+    smoothWheel: true,
+    syncTouch: false,
+    // The cookie preferences (vanilla-cookieconsent, S11) scroll natively, like data-lenis-prevent.
+    prevent: (node) => node.closest('#cc-main') !== null,
+  });
   lenis.on('scroll', ScrollTrigger.update);
   const raf = (time: number): void => lenis.raf(time * 1000);
   gsap.ticker.add(raf);

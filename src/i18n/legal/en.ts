@@ -1,6 +1,7 @@
 import type { Dictionary } from '../dictionary.ts';
 
-// Texts to be reviewed by Nicholas: this is not legal advice. The cookie table comes in S11.
+// Texts to be reviewed by Nicholas: this is not legal advice. Cookie table (S11): names and
+// durations from Google's documentation, to be checked in the browser once in production (S13).
 
 export const legalEn: Dictionary['legal'] = {
   privacy: {
@@ -10,7 +11,7 @@ export const legalEn: Dictionary['legal'] = {
         'What personal data Bulles en Valais processes, why, for how long, and how to exercise your rights (Swiss FADP and GDPR).',
     },
     title: 'Privacy policy',
-    updated: 'Last updated: 1 October 2026',
+    updated: 'Last updated: 2 October 2026',
     intro:
       'This page explains which personal data is processed when you visit this website or contact me, why, for how long, and what your rights are. It is based on the Swiss Federal Act on Data Protection (FADP) and, for visitors from the European Union, on the General Data Protection Regulation (GDPR).',
     sections: [
@@ -123,12 +124,38 @@ export const legalEn: Dictionary['legal'] = {
               text: 'No audience or advertising cookie is set without your consent. The consent banner lets you accept or refuse each category, and the “Manage cookies” link at the bottom of every page lets you change your mind at any time.',
             },
           ],
+          [
+            {
+              text: "Until you accept, the Google tag only sends anonymous signals, with no cookie or identifier, used to estimate traffic as a whole (Google's consent mode).",
+            },
+          ],
         ],
         list: [
           'Necessary, always active: your consent choice and, if you turn it on, the Calm mode preference.',
           'Audience measurement (Google Analytics): only with your consent.',
           'Advertising (Google Ads): only with your consent, to measure the requests that come from ads.',
         ],
+        table: {
+          caption: 'Cookies and local storage used by the website',
+          headers: ['Name', 'Provider', 'Purpose', 'Duration'],
+          rows: [
+            ['cc_cookie', 'Bulles en Valais', 'Remember your consent choice', '6 months'],
+            [
+              'bv-calm (local storage)',
+              'Bulles en Valais',
+              'Remember Calm mode, if you turn it on',
+              'Until you turn it off',
+            ],
+            ['_ga', 'Google Analytics', 'Tell visitors apart (audience measurement)', '2 years'],
+            ['_ga_QG5ZCVY1Z7', 'Google Analytics', 'Keep the state of the visit', '2 years'],
+            [
+              '_gcl_au, _gcl_aw',
+              'Google Ads',
+              'Link an enquiry to the ad that brought it',
+              '90 days',
+            ],
+          ],
+        },
       },
       {
         heading: 'Security',

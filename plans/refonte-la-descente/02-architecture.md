@@ -250,33 +250,33 @@ export interface Course {
 ## 12. Consentement et mesure (S11)
 
 - Ordre dans `<head>` : `boot.js` → `consent-default.js` (synchrone). C'est `consent-default.js` qui injecte `gtag/js?id=AW-10798308119` (async), **uniquement sur le nom d'hôte de production** (`dive.bullesenvalais.ch`) : le développement et la préproduction n'envoient ainsi aucune donnée. En mode basique, l'injection attend le consentement.
-- `consent-default.js` : `gtag('consent','default',{ ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied', wait_for_update:500 })`, puis `gtag('js', new Date())` et `gtag('config','AW-10798308119')`. GA4 `G-QG5ZCVY1Z7` : vérifier dans l'assistant de balises s'il est déjà une destination de la balise Google ; sinon ajouter `gtag('config','G-QG5ZCVY1Z7')`.
+- `consent-default.js` : `gtag('consent','default',{ ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied', wait_for_update:500 })` — ou, pour un visiteur qui a déjà choisi, les valeurs lues dans le cookie `cc_cookie` du bandeau (S11), puis `gtag('set','ads_data_redaction',true)`, `gtag('js', new Date())` et `gtag('config','AW-10798308119')`. Drapeaux en tête du fichier : `MODE` (I-07) et `GA4_ID` (I-06). Il expose `window.bvLoadGoogleTag()` (idempotent, gardé par le nom d'hôte), que le bandeau rappelle quand un consentement est accordé (mode basique). GA4 `G-QG5ZCVY1Z7` : vérifier dans l'assistant de balises s'il est déjà une destination de la balise Google ; sinon ajouter `gtag('config','G-QG5ZCVY1Z7')`.
 - Mode **avancé** (balise chargée, pings sans cookies tant que le consentement est refusé) par défaut ; mode **basique** (balise chargée seulement après consentement) si Nicholas le préfère (📥 I-07).
-- vanilla-cookieconsent : catégories `necessary` (toujours), `analytics` (→ `analytics_storage`), `marketing` (→ `ad_storage`, `ad_user_data`, `ad_personalization`). `onConsent` et `onChange` → `gtag('consent','update', …)`. Textes FR/EN dans le dictionnaire, styles via les variables CSS de la librairie reliées à nos tokens. Lien « Gérer les cookies » dans le pied de page.
-- Conversions (après consentement) : succès du formulaire, clic WhatsApp, clic téléphone → `gtag('event','conversion',{ send_to:'AW-10798308119/<libellé>' })` (📥 I-06), plus `generate_lead` pour GA4.
+- vanilla-cookieconsent : catégories `necessary` (toujours), `analytics` (→ `analytics_storage`), `marketing` (→ `ad_storage`, `ad_user_data`, `ad_personalization`). `onConsent` et `onChange` → `gtag('consent','update', …)` (`src/lib/analytics/consent-mode.ts`). Textes FR/EN dans le dictionnaire (`consent`), transmis au contrôleur `consent` par `data-consent-texts` sur le bouton « Gérer les cookies » du pied de page ; la librairie et sa feuille de style arrivent avec ce contrôleur (hors du bundle initial) ; styles reliés aux tokens (ton `deep`). Tant qu'une fenêtre du bandeau est ouverte, `html[data-consent-open]` masque la pastille du HUD (`[data-hud-gauge]`) et le bouton WhatsApp. La librairie ne s'affiche pas aux robots (`navigator.webdriver` compris) : les tests E2E se présentent comme un visiteur.
+- Conversions (`src/lib/analytics/events.ts`) : succès du formulaire, clic vers WhatsApp (lien `wa.me` qui n'ouvre pas seulement le dialogue), clic téléphone → `gtag('event','conversion',{ send_to:'AW-10798308119/<libellé>' })` si le libellé est connu (`CONVERSION_LABELS`, `null` tant qu'I-06 manque), plus un évènement GA4 (`generate_lead`, `whatsapp_click`, `phone_click`). Consent Mode décide de ce que Google peut stocker.
 
 ## 13. SEO
 
 - `<head>` par locale : `title`, `meta description` (≤ 155 caractères), `canonical` absolu avec barre finale, `hreflang` (fr-CH, en, x-default), Open Graph (`og:image` 1200×630 JPG par langue, `og:locale` `fr_CH` / `en_GB`), `twitter:card=summary_large_image`, `theme-color`.
 - JSON-LD (`src/lib/seo/jsonld.ts`, testé), un `@graph` : `WebSite`, `LocalBusiness` (nom, URL, logo, image, téléphone, e-mail, `areaServed` Valais et Vaud, `sameAs` si fourni), `Person` (Nicholas, `jobTitle`, `hasCredential`), `OfferCatalog` (cours avec prix en CHF). **Pas** d'`AggregateRating` fabriqué à partir de nos propres témoignages (règle Google sur les avis autopromotionnels). Pas d'adresse postale sans accord (📥 I-08).
 - Titres : un seul `h1` (hero), un `h2` par section, des `h3` pour les éléments.
-- `sitemap-index.xml` (intégration), `robots.txt` réel, `llms.txt` court, vraie `404.html`. Côté serveur : plus de repli SPA (S13).
+- `sitemap-index.xml` (intégration ; ses alternates `hreflang` viennent de `routes.ts` par `serialize`, l'option `i18n` de l'intégration n'appariant que des chemins identiques), `robots.txt` réel, `llms.txt` court, vraie `404.html`. Côté serveur : plus de repli SPA (S13). JSON-LD sur l'accueil seulement (FR et EN).
 - Ancres historiques conservées (liens existants et extensions d'annonces Google Ads) : `#top #about #agencies #compare #specialties #places #gear #insurance #testimonials #faq #contact`.
 
 ## 14. Sécurité
 
-- **CSP cible** (en-tête nginx, affinée en S11 avec le [guide de Google](https://developers.google.com/tag-platform/security/guides/csp), appliquée en S13) :
+- **CSP finale** (S11) : `ops/nginx/security-headers.conf`, vérifiée le 02.10.2026 sur le [guide de Google](https://developers.google.com/tag-platform/security/guides/csp) (page du 18.09.2026, balise Google + GA4 + conversions Ads), appliquée en S13 :
   ```
   default-src 'self';
-  script-src 'self' https://*.googletagmanager.com;
+  script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.google.ch;
-  connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.google.ch https://pagead2.googlesyndication.com;
-  font-src 'self'; frame-src https://td.doubleclick.net https://www.googletagmanager.com;
+  img-src 'self' data: blob: https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://*.g.doubleclick.net https://pagead2.googlesyndication.com https://*.google.com https://*.google.ch https://*.google.fr;
+  connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://*.g.doubleclick.net https://ad.doubleclick.net https://pagead2.googlesyndication.com https://*.google.com https://*.google.ch https://*.google.fr;
+  font-src 'self'; frame-src https://www.googletagmanager.com;
   worker-src 'self' blob:; manifest-src 'self';
   frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests;
   ```
-  `style-src 'unsafe-inline'` est conservé (attributs `style` pour les variables CSS, injections de la librairie de consentement) ; c'est un compromis accepté. **Aucun script inline** : tout est dans des fichiers `'self'`. `security.csp` d'Astro (balise `<meta>`) n'est pas utilisé : l'en-tête nginx reste la seule source de vérité.
+  Google demande chaque domaine national `google.<TLD>` : `.ch` et `.fr` (visiteurs du Léman) ; une violation sur un autre TLD ne ferait perdre qu'un signal publicitaire. `*.analytics.google.com` est couvert par `*.google.com` ; `td.doubleclick.net` ne figure plus dans le guide. Pas de `report-uri` pour l'instant (`/api/csp/report` n'existe pas ; reporté en S13). `style-src 'unsafe-inline'` est conservé (attributs `style` pour les variables CSS, injections de la librairie de consentement) ; c'est un compromis accepté. **Aucun script inline** : tout est dans des fichiers `'self'`. `security.csp` d'Astro (balise `<meta>`) n'est pas utilisé : l'en-tête nginx reste la seule source de vérité. `Permissions-Policy` : `geolocation=()` (au lieu de `(self)`, inutile au nouveau site).
 - Conserver HSTS, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`.
 - nginx (en place depuis S00) : seul `contact.php` exécute du PHP, dans `location = /api/contact.php` (atteinte aussi par la redirection interne de `/api/contact`) avec `limit_req` (5 requêtes/min par IP, rafale de 3, statut 429) et `client_max_body_size 32k` ; tout autre `.php` répond 404. Tout nouveau script PHP (ex. `csp-report.php`, S11) doit recevoir sa propre `location` exacte.
 
@@ -292,7 +292,7 @@ export interface Course {
 | Performance | chrome-devtools MCP + `scripts/check-budgets.mjs` | Lighthouse mobile, trace (LCP/CLS/TBT), tailles gzip | `npm run check:budgets` |
 | `dist/` | `scripts/check-dist.mjs` | Aucun script inline (JSON-LD excepté), gestionnaire `on*`, URL `javascript:` ni script ou feuille de style d'une autre origine ; aucun fichier caché (hors `.well-known/`), clé, certificat ni `settings.json` ; sous `api/` et en PHP, seulement `api/contact.php`, qui doit être présent | enchaîné par `npm run build` (un `postbuild` sauterait avec `--ignore-scripts`) |
 
-Projets Playwright : `chromium`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15) ; `firefox` est retiré tant que le Firefox de Playwright ne démarre pas sur macOS 27 (D21). `webServer` : `npm run build && npm run preview -- --port 4321 --ignore-lock`, avec `reuseExistingServer: false` (le port 4321 doit être libre ; voir `00-contexte` §3 pour l'arrière-plan automatique d'Astro 7 et le Firefox de Playwright sur macOS 27).
+Projets Playwright : `chromium`, `webkit` (desktop 1440×900) et `mobile-chrome` (Pixel 7), `mobile-safari` (iPhone 15), plus `csp` (S11 : `tests/csp/`, Chrome desktop, sur `scripts/serve-with-csp.mjs`, qui sert `dist/` avec les en-têtes de `ops/nginx/security-headers.conf` sans HSTS ni `upgrade-insecure-requests`, au port `PW_PORT + 10`) ; `firefox` est retiré tant que le Firefox de Playwright ne démarre pas sur macOS 27 (D21). `webServer` : `npm run build && npm run preview -- --port 4321 --ignore-lock`, avec `reuseExistingServer: false` (le port 4321 doit être libre ; voir `00-contexte` §3 pour l'arrière-plan automatique d'Astro 7 et le Firefox de Playwright sur macOS 27).
 
 ## 16. Déploiement (S12–S13)
 

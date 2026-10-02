@@ -1,5 +1,8 @@
 import type { Localized } from '../i18n/types.ts';
 
+/** Who runs the site (legal notice, I-08): for the JSON-LD; visible texts live in src/i18n. */
+export const BUSINESS = { name: 'Bulles en Valais', owner: 'Nicholas Jallan' } as const;
+
 /** Public contact details of Nicholas. */
 export const PHONE = { href: 'tel:+41794368112', display: '+41 79 436 81 12' } as const;
 /** E.164 without the `+`, as wa.me expects it. */

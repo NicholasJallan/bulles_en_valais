@@ -22,6 +22,7 @@ import WhatsAppDialog from '@/components/whatsapp/WhatsAppDialog.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getDictionary } from '@/i18n/index.ts';
 import type { Locale } from '@/i18n/types.ts';
+import { buildJsonLd, serializeJsonLd } from '@/lib/seo/jsonld.ts';
 
 /** The one page, in the order of the dive profile (01-direction-artistique.md §2). */
 interface Props {
@@ -30,9 +31,26 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getDictionary(locale);
+const jsonLd = serializeJsonLd(
+  buildJsonLd({
+    locale,
+    site: new URL(Astro.site ?? '').origin,
+    description: t.meta.description,
+    labels: t.meta.structuredData,
+  }),
+);
 ---
 
-<BaseLayout locale={locale} route="home" title={t.meta.title} description={t.meta.description}>
+<BaseLayout
+  locale={locale}
+  route="home"
+  title={t.meta.title}
+  description={t.meta.description}
+  ogTitle={t.meta.ogTitle}
+  ogDescription={t.meta.ogDescription}
+>
+  {/* Structured data, the only inline script allowed (JSON, not code; escaped by serializeJsonLd). */}
+  <script type="application/ld+json" is:inline slot="head" set:html={jsonLd} />
   <WaterColumn />
   <Nav locale={locale} />
   <main id="content">
