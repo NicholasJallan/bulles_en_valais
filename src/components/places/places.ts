@@ -1,8 +1,8 @@
-// The route of the Rhône in motion (E10, S09): on a desktop with motion, the stage of Places is
-// pinned while the header and the three sites slide to the left, like the river towards the lake;
+// The route of the Rhône in motion (E10, S09): with motion (phones included), the stage of Places
+// is pinned while the header and the three sites slide to the left, like the river towards the lake;
 // the map beside them draws the river as far as the site in view and marks its station. The HUD
 // runs from 32 to 22 m over the section, pin included (data-depth-*, depth.ts). A link focused in
-// a site out of view brings that site into the window. Elsewhere, Places stays static.
+// a site out of view brings that site into the window. Without motion, Places stays static.
 import type { Cleanup } from '@/lib/controllers.ts';
 import { centredProgress, interpolate, nearestIndex, type Knot } from '@/lib/motion/track.ts';
 import { gsap, ScrollTrigger } from '@/scripts/motion/gsap.ts';
@@ -128,7 +128,12 @@ function followFocus(parts: Parts, route: Route, trigger: ScrollTrigger): Cleanu
     const centre = route.centres[index];
     if (centre === undefined) return;
     const top = trigger.start + centre * (trigger.end - trigger.start);
-    if (Math.abs(window.scrollY - top) > 1) window.scrollTo({ top, behavior: 'instant' });
+    const go = (): void => {
+      if (Math.abs(window.scrollY - top) > 1) window.scrollTo({ top, behavior: 'instant' });
+    };
+    go();
+    // WebKit brings the focused link into view after focusin, over this scroll: again next frame.
+    requestAnimationFrame(go);
   };
   parts.track.addEventListener('focusin', onFocus);
   parts.window.addEventListener('scroll', keepWindowStill, { passive: true });

@@ -10,8 +10,8 @@ import RhoneMap from './RhoneMap.astro';
 
 /**
  * Places (E10). Static: the header and the map side by side, then the three sites (a row of
- * cards that snaps on a narrow screen). On a desktop with motion, places.ts pins the stage: the
- * header and the sites slide by like the river, and the map draws the route beside them.
+ * cards that snaps on a narrow screen). With motion, places.ts pins the stage: the header and the
+ * sites slide by like the river, and the map beside them (above them on a phone) draws the route.
  */
 interface Props {
   locale: Locale;
@@ -126,7 +126,7 @@ const t = getDictionary(locale).places;
     }
   }
 
-  /* ——— Pinned (places.ts, desktop with motion): a stage of one screen, the map on the left,
+  /* ——— Pinned (places.ts, with motion): a stage of one screen, the map on the left,
      the header and the sites sliding to it in a window on the right. ——— */
   .places[data-pinned] .places-stage {
     --map-size: clamp(17rem, 6rem + 20vw, 28rem);
@@ -193,5 +193,52 @@ const t = getDictionary(locale).places;
   /* The photo gives way on short screens: the text of the card always fits the stage. */
   .places[data-pinned] .places-list :global(.place-photo) {
     max-block-size: clamp(9rem, 100svh - var(--nav-block-size, 0px) - 30rem, 46svh);
+  }
+
+  /* ——— Pinned on a phone or a tablet: the map on top, the window of the sites below it, room
+     left at the bottom for the HUD. ——— */
+  @media (width < 64rem) {
+    .places[data-pinned] .places-stage {
+      --map-size: min(26svh, 14rem);
+      --place-size: min(78vw, 22rem);
+
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--map-size) minmax(0, 1fr);
+      grid-template-areas: 'map' 'window';
+      gap: var(--space-xs);
+      padding-block: calc(var(--nav-block-size, 0px) + var(--space-xs)) var(--space-2xl);
+    }
+
+    .places[data-pinned] .places-map {
+      display: flex;
+      justify-content: center;
+      block-size: 100%;
+    }
+
+    .places[data-pinned] :global(.rhone-map) {
+      inline-size: auto;
+      block-size: 100%;
+    }
+
+    .places[data-pinned] .places-intro {
+      flex-basis: min(80vw, 24rem);
+    }
+
+    /* Not the row that snaps: the track moves the cards. */
+    .places[data-pinned] .places-list {
+      overflow: visible;
+      margin-inline: 0;
+      padding: 0;
+      scroll-snap-type: none;
+      gap: var(--space-xl);
+    }
+
+    .places[data-pinned] .places-list :global(.place-photo) {
+      max-block-size: clamp(
+        6rem,
+        100svh - var(--nav-block-size, 0px) - var(--map-size) - 27rem,
+        32svh
+      );
+    }
   }
 </style>

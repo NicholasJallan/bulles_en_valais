@@ -2,7 +2,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gotoReady } from './ready.ts';
 
-const isDesktop = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024;
 /** The depths of the ladder (I-04, D24), shallowest first. */
 const LADDER_DEPTHS = ['6', '18', '20', '30', '40', '45', '60', '70', '120'];
 
@@ -29,15 +28,11 @@ const requestBubbles = (page: Page) =>
   );
 
 test.describe('descent with motion', () => {
-  test('every rung of the ladder is in the page, pinned on a desktop only', async ({ page }) => {
+  test('every rung of the ladder is in the page, pinned on every screen', async ({ page }) => {
     await gotoMoving(page);
     await expectEveryRung(page);
-    const pinned = page.locator('#depth[data-pinned]');
-    if (!isDesktop(page)) {
-      await expect(pinned).toHaveCount(0);
-      return;
-    }
-    await expect(pinned).toHaveCount(1);
+    // On a phone too since S09, in one column.
+    await expect(page.locator('#depth[data-pinned]')).toHaveCount(1);
     // Halfway through the pin, the ruler reads a depth between the surface and 120 m, and the
     // HUD steps aside.
     const top = await page.locator('[data-ladder-stage]').evaluate((stage) => {

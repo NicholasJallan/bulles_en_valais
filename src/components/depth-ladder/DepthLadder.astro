@@ -11,8 +11,8 @@ import { formatDecimal, formatDepth } from '@/lib/format.ts';
 /**
  * Depth ladder (E9): each certification at its real maximum depth. Static, a list whose rungs
  * are spaced by the scale (real to 40 m, compressed below), with a minimum so that close depths
- * stay readable. On a desktop with motion, ladder.ts pins the section (data-pinned): the ruler
- * scrolls under the « you are here » marker and the rungs light up at their depth. The ruler and
+ * stay readable. With motion, ladder.ts pins the section (data-pinned; on a phone too, in one
+ * column, since S09): the ruler scrolls under the « you are here » marker and the rungs light up at their depth. The ruler and
  * the marker are decoration (aria-hidden): the list holds the information in every mode.
  */
 interface Props {
@@ -178,7 +178,7 @@ const ticks = ladderTicks();
     display: none;
   }
 
-  /* ——— Pinned (ladder.ts, desktop with motion): the header scrolls by, then the stage is
+  /* ——— Pinned (ladder.ts, with motion): the header scrolls by, then the stage is
      pinned and the ruler scrolls under a fixed marker. ——— */
   .ladder-section[data-pinned] {
     /* 0 → 120 m over 2.4 screens, scrolled during a pin of 3 screens (PIN_SCREENS in
@@ -376,5 +376,62 @@ const ticks = ladderTicks();
   .ladder-unit {
     font-size: var(--step-3);
     color: var(--fg-soft);
+  }
+
+  /* ——— Pinned on a phone or a tablet: one column, the marker on top, the ruler on the left and
+     every rung on its right. ——— */
+  @media (width < 64rem) {
+    .ladder-section[data-pinned] {
+      --ruler-inset: 2.75rem;
+      --rung-offset: 1.25rem;
+    }
+
+    [data-pinned] .ladder-stage {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: var(--space-xs);
+      padding-block-start: calc(var(--nav-block-size, 0px) + var(--space-s));
+    }
+
+    [data-pinned] .ladder-marker {
+      grid-column: 1;
+      grid-row: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 var(--space-s);
+    }
+
+    [data-pinned] .ladder-figure {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .ladder-section[data-pinned] .ladder-reading {
+      font-size: var(--step-5);
+    }
+
+    [data-pinned] .ladder-ruler {
+      inset-inline-start: var(--ruler-inset);
+    }
+
+    [data-pinned] .rung,
+    [data-pinned] .rung:nth-child(odd),
+    [data-pinned] .rung:nth-child(even) {
+      inset-inline: calc(var(--ruler-inset) + var(--rung-offset)) 0;
+      inline-size: auto;
+      max-inline-size: 24rem;
+      grid-template-columns: auto minmax(0, 1fr);
+      text-align: start;
+    }
+
+    [data-pinned] .rung:nth-child(odd) .rung-depth {
+      order: 0;
+    }
+
+    .ladder-section[data-pinned] .rung:nth-child(odd)::after,
+    .ladder-section[data-pinned] .rung:nth-child(even)::after {
+      inset-inline: calc(-1 * var(--rung-offset) - 0.25rem) auto;
+    }
   }
 </style>

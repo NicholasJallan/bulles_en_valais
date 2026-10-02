@@ -3,7 +3,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gotoReady } from './ready.ts';
 
-const isDesktop = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024;
 const isFine = (page: Page) =>
   page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches);
 const PLACES = {
@@ -14,6 +13,19 @@ const PLACES = {
 async function gotoMoving(page: Page, path = '/'): Promise<void> {
   await gotoReady(page, path);
   await expect(page.locator('html')).toHaveClass(/\bmotion-ready\b/);
+}
+
+/** The page has stopped scrolling (Lenis may still glide after a jump). */
+async function scrollSettled(page: Page): Promise<void> {
+  await expect
+    .poll(async () => {
+      const before = await page.evaluate(() => window.scrollY);
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      return before === (await page.evaluate(() => window.scrollY));
+    })
+    .toBe(true);
 }
 
 /** No page wider than the screen. */
@@ -60,6 +72,7 @@ test.describe('specialties and places with motion', () => {
     const cards = page.locator('#specialties [data-active] [data-torch-card]');
     if (await isFine(page)) {
       await cards.nth(2).scrollIntoViewIfNeeded();
+      await scrollSettled(page);
       const box = await cards.nth(2).boundingBox();
       if (box === null) throw new Error('no card');
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 4 });
@@ -73,18 +86,12 @@ test.describe('specialties and places with motion', () => {
     await expect(cards.first()).toHaveClass(/\bis-lit\b/);
   });
 
-  test('on a desktop the places are pinned, the river is drawn and the keyboard brings each site into view', async ({
+  test('the places are pinned, the river is drawn and the keyboard brings each site into view', async ({
     page,
   }) => {
     await gotoMoving(page);
-    const pinned = page.locator('#places[data-pinned]');
-    if (!isDesktop(page)) {
-      await expect(pinned).toHaveCount(0);
-      // A row of cards that scrolls on its own: the page itself stays as wide as the screen.
-      await expectNoOverflow(page);
-      return;
-    }
-    await expect(pinned).toHaveCount(1);
+    // On every screen since S09: the map above the sites on a phone.
+    await expect(page.locator('#places[data-pinned]')).toHaveCount(1);
     const drawn = () =>
       page
         .locator('[data-rhone-river]')
@@ -117,7 +124,6 @@ test.describe('specialties and places with motion', () => {
 test('after a shorter specialties tab, the places still pin at the top of the screen', async ({
   page,
 }) => {
-  test.skip(!isDesktop(page), 'pinned on a desktop only');
   await gotoMoving(page);
   // TDI has 4 cards, SDI 10: the page above Places gets shorter.
   await page.locator('#specialties [role="tab"]').nth(1).click();

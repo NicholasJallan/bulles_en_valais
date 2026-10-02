@@ -1,5 +1,5 @@
-// The depth ladder in motion (E9, S08): on a desktop with motion, once its header has scrolled
-// by, the stage of the ladder is pinned for three screens; scrolling runs a scrubbed timeline that slides the ruler under the « you are
+// The depth ladder in motion (E9, S08): with motion (on a phone too since S09, in one column),
+// once its header has scrolled by, the stage of the ladder is pinned for three screens; scrolling runs a scrubbed timeline that slides the ruler under the « you are
 // here » marker, writes the depth in large figures, and lights each rung at its depth while the
 // ones above fade. The HUD hides itself in the section (data-hud="hidden", hud.ts).
 import type { Cleanup } from '@/lib/controllers.ts';
@@ -20,10 +20,15 @@ const SLIDE_PX = 24;
 const pageLocale = (): Locale =>
   LOCALES.find((locale) => locale === document.documentElement.lang) ?? 'fr';
 
-function lightRungs(timeline: gsap.core.Timeline, rungs: readonly HTMLElement[]): void {
+/** Rungs alternate around the ruler on a desktop; in one column they all come from the right. */
+function lightRungs(
+  timeline: gsap.core.Timeline,
+  rungs: readonly HTMLElement[],
+  alternate: boolean,
+): void {
   rungs.forEach((rung, index) => {
     const position = Number(rung.dataset.position);
-    const side = index % 2 === 0 ? -1 : 1;
+    const side = alternate && index % 2 === 0 ? -1 : 1;
     timeline.fromTo(
       rung,
       { opacity: 0, x: side * SLIDE_PX },
@@ -47,7 +52,7 @@ function hashTarget(): HTMLElement | null {
   }
 }
 
-export function pinLadder(): Cleanup {
+export function pinLadder({ desktop }: { desktop: boolean }): Cleanup {
   const section = document.getElementById('depth');
   const stage = section?.querySelector<HTMLElement>('[data-ladder-stage]');
   const track = section?.querySelector<HTMLElement>('[data-ladder-track]');
@@ -86,7 +91,7 @@ export function pinLadder(): Cleanup {
     },
   });
   timeline.to(track, { yPercent: -100, duration: 1 }, 0);
-  lightRungs(timeline, rungs);
+  lightRungs(timeline, rungs, desktop);
   write(0);
   // The browser jumped to the anchor before the pin added three screens above it: follow it once
   // the pin has taken its room (the first refresh).
