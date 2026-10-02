@@ -141,8 +141,8 @@ export const en: Dictionary = {
     light: {
       quote: 'At forty metres, red is gone. Only the torch remembers colour.',
       imageAlt:
-        'Illustration: rebreather divers explore a wreck, their red torches cutting through dark water.',
-      credit: 'AI-generated image',
+        'Rebreather divers explore the wreck of the Hirondelle in Lake Geneva, their red torches cutting through dark water.',
+      credit: 'The Hirondelle, in Lake Geneva',
     },
   },
   depthLadder: {
@@ -576,7 +576,6 @@ export const en: Dictionary = {
     creditsTitle: 'Credits',
     credits: {
       photos: 'Photos: © Nicholas Jallan',
-      ai: '“Light” interlude: AI-generated image',
     },
     legalLinks: { privacy: 'Privacy', legalNotice: 'Legal notice' },
     calmMode: {

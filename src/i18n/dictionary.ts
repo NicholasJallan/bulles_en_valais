@@ -264,7 +264,7 @@ export interface Dictionary {
     /** After « © <year> ». */
     readonly copyright: string;
     readonly creditsTitle: string;
-    readonly credits: { readonly photos: string; readonly ai: string };
+    readonly credits: { readonly photos: string };
     readonly legalLinks: { readonly privacy: string; readonly legalNotice: string };
     readonly calmMode: {
       readonly label: string;

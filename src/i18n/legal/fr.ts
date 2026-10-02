@@ -245,10 +245,7 @@ export const legalFr: Dictionary['legal'] = {
       {
         heading: 'Crédits',
         paragraphs: [],
-        list: [
-          'Photographies : © Nicholas Jallan.',
-          'Interlude « Lumière » : visuel généré par intelligence artificielle ; il ne représente ni un lieu ni une personne réels.',
-        ],
+        list: ['Photographies : © Nicholas Jallan.'],
       },
       {
         heading: 'Responsabilité',

@@ -143,8 +143,8 @@ export const fr: Dictionary = {
     light: {
       quote: 'À quarante mètres, le rouge a disparu. Seule la lampe se souvient des couleurs.',
       imageAlt:
-        "Illustration : des plongeurs en recycleur explorent une épave, leurs lampes rouges percent l'eau sombre.",
-      credit: 'Visuel généré par IA',
+        "Des plongeurs en recycleur explorent l'épave de l'Hirondelle, dans le Léman ; leurs lampes rouges percent l'eau sombre.",
+      credit: "L'Hirondelle, dans le Léman",
     },
   },
   depthLadder: {
@@ -574,7 +574,6 @@ export const fr: Dictionary = {
     creditsTitle: 'Crédits',
     credits: {
       photos: 'Photos : © Nicholas Jallan',
-      ai: 'Interlude « Lumière » : visuel généré par IA',
     },
     legalLinks: { privacy: 'Confidentialité', legalNotice: 'Mentions légales' },
     calmMode: {
