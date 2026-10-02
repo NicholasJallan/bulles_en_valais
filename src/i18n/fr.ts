@@ -99,7 +99,7 @@ export const fr: Dictionary = {
         highlights: [
           'Un seul système, du baptême à la plongée technique complète',
           'Progression loisir : Open Water → Advanced → Rescue → Divemaster',
-          'Filière TDI : Nitrox avancé, décompression, Trimix, recycleur',
+          'Filière TDI : Nitrox, Nitrox avancé, décompression, Trimix, recycleur',
           "Prérogatives reconnues comme n'importe quelle certification RSTC internationale",
           'Accompagnement sur mesure, cross-over simple depuis une autre certification',
         ],

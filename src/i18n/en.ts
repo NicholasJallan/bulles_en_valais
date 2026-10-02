@@ -97,7 +97,7 @@ export const en: Dictionary = {
         highlights: [
           'One single system, from try-dive to full technical diving',
           'Recreational progression: Open Water → Advanced → Rescue → Divemaster',
-          'TDI technical path: advanced Nitrox, decompression, Trimix, rebreather',
+          'TDI technical path: Nitrox, advanced Nitrox, decompression, Trimix, rebreather',
           'Prerogatives recognised the same as any international RSTC certification',
           'Tailored support, simple cross-over from another certification',
         ],

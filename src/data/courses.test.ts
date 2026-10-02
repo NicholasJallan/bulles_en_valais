@@ -106,6 +106,7 @@ describe('cursusCourses', () => {
       'sdi-aad',
       'sdi-rescue',
       'sdi-dm',
+      'tdi-nitrox',
       'tdi-advanced-nitrox',
       'tdi-deco',
     ]);
