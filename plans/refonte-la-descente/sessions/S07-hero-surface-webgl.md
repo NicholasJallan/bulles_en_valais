@@ -27,7 +27,7 @@ Le hero est la première impression et **l'effet signature** du site : la photo 
    - `surface.vert` : triangle plein écran ;
    - `surface.frag` : échantillonnage de l'image avec déplacement par bruit **limité au masque d'eau** ; caustiques additives (fonction maison, par exemple bruit déformé ou Voronoï), plus fortes avec `uImmersion` ; ondulations (`uRipples[8]` : anneau sinusoïdal amorti par l'âge) ; ligne d'eau ondulée qui monte avec `uImmersion` ; sous la ligne : étalonnage sous-marin (teinte bleu-vert, contraste réduit), rayons de lumière descendants, particules en suspension (hash) ;
    - uniforms de `02-architecture.md` §9 ; `highp` si disponible, sinon `mediump`.
-3. **`surface.ts`** (OGL : Renderer, Program, Mesh, Triangle, Texture) : `createSurface({ canvas, image, mask })` → `setImmersion`, `addRipple`, `start`, `stop`, `destroy` ; boucle sur `gsap.ticker` ; IntersectionObserver (arrêt hors écran), `visibilitychange`, `ResizeObserver`, DPR ≤ 1,5 (×0,75 de résolution sur mobile), `webglcontextlost` → retour à l'image fixe.
+3. **`surface.ts`** (`src/scripts/webgl/`, mutation S07 ; OGL : Renderer, Program, Mesh, Triangle, Texture) : `createSurface({ canvas, image, mask })` → `setImmersion`, `addRipple`, `start`, `stop`, `destroy` ; boucle sur `gsap.ticker` ; IntersectionObserver (arrêt hors écran), `visibilitychange`, `ResizeObserver`, DPR ≤ 1,5 (×0,75 de résolution sur mobile), `webglcontextlost` → retour à l'image fixe.
 
    > 🔁 Point de sortie possible : shader validé seul, sur une page de test (retirée ensuite).
 4. **`hero.ts`** :
@@ -41,12 +41,12 @@ Le hero est la première impression et **l'effet signature** du site : la photo 
    > 🔁 Point de sortie possible.
 6. **Intro E15** (≤ 1,2 s, jamais bloquante) : les lignes du titre se posent (le logo n'est pas animé, D35), le HUD s'allume à 0,0 m. **L'image hero reste visible dès le premier affichage.**
 7. **Performance** :
-   - trace mobile (CPU ×4, Fast 4G, cache vide) : **LCP ≤ 2,0 s** et élément LCP = `<img>` du hero ;
+   - trace mobile (CPU ×4, Fast 4G, cache vide) : **LCP ≤ 2,0 s**, élément LCP dans le hero et peint avec la première image (D41 : Chromium écarte du LCP une image plein écran) ;
    - morceau WebGL ≤ 30 Ko gzip, chargé après le LCP ;
    - temps de rendu GPU stable, aucune boucle quand le hero est hors écran (vérifier dans la trace).
 8. **Tests** :
    - unitaires : `capability.ts` ;
-   - E2E : canvas présent (Chromium desktop, mouvement autorisé) ; absent avec mouvement réduit ; l'entrée `largest-contentful-paint` pointe sur l'`IMG` du hero ; aucune erreur console ; le scroll tactile n'est pas bloqué (projet mobile) ;
+   - E2E : canvas présent (Chromium desktop, mouvement autorisé) ; absent avec mouvement réduit ; l'entrée `largest-contentful-paint` est dans le hero, au plus tard 100 ms après le FCP (D41) ; aucune erreur console ; le scroll tactile n'est pas bloqué (projet mobile) ;
    - visuel : capture du hero avec WebGL désactivé (image de référence stable).
 
 ## Vérifications

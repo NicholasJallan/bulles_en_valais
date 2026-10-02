@@ -21,7 +21,7 @@ npm run check           # astro check (types)
 npm test                # Vitest: src/**/*.test.ts, scripts/**/*.test.mjs (includes the FR/EN parity test)
 npm run coverage        # + v8 coverage, ≥ 80 % on src/lib, src/data, src/i18n
 npm run test:e2e        # Playwright: builds, then tests the preview server (tests/e2e)
-npm run test:visual     # Playwright screenshots (tests/visual, from S05)
+npm run test:visual     # Playwright screenshots (tests/visual, from S07: hero without WebGL)
 npm run test:a11y       # axe (tests/a11y, from S05)
 npm run format          # Prettier (format:check to verify)
 npm run check:budgets   # gzip budgets of dist/: initial JS ≤ 90 KB per page, total JS ≤ 150 KB, CSS ≤ 30 KB
@@ -54,9 +54,9 @@ src/
 ├── components/<feature>/  one folder per section; page/HomePage.astro assembles the page for a locale
 ├── i18n/                  types.ts · dictionary.ts · fr.ts · en.ts · legal/ · index.ts · routes.ts (+ tests)
 ├── data/                  courses · specialties · places · credentials · contact · gifts · sections (+ tests)
-├── lib/                   pure logic, tested with Vitest (TDD): color/, motion/, depth/, css/, format, typography
+├── lib/                   pure logic, tested with Vitest (TDD): color/, motion/, depth/, webgl/, css/, format, typography
 ├── test/                  content-checks.ts: generic checks shared by the dictionary and data tests
-├── scripts/app.ts         single client entry point; scripts/motion/ = motion module (DOM glue, not covered)
+├── scripts/app.ts         single client entry point; scripts/motion/ = motion module, scripts/webgl/ = hero surface (DOM glue, not covered)
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
 public/                    copied as is: api/contact.php, js/boot.js, js/consent-default.js, robots.txt, llms.txt
@@ -80,6 +80,7 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 - `src/scripts/app.ts`: the only module of the page. Elements declare their controllers with `data-controller="name"` (several names separated by spaces); the `CONTROLLERS` registry maps each name to a dynamic `import()` of a module exporting `init(element)`, which returns a cleanup function (`src/lib/controllers.ts`).
 - Once every controller has started, `app.ts` sets `html[data-controllers="ready"]` (the E2E tests wait for it: `tests/e2e/ready.ts`); if one fails, it removes `html.js` so the page falls back to its no-JS version. Elements shown only with or without JavaScript use `.js-only` / `.no-js-only` (`utilities.css`).
 - **Motion module** (`src/scripts/motion/index.ts`, S06): `app.ts` imports it dynamically under `html.motion-ok` and starts it once the controllers are ready; it adds `motion-ready`. `gsap.matchMedia` (`reduced-motion.ts`) undoes everything if reduced motion is asked meanwhile. Lenis on fine pointers only (same-page links scroll through it and focus their section's heading; modal `<dialog>`s stop it; scrollable panels need `data-lenis-prevent`). Reveals: `data-reveal="lines|fade|image|stagger"`, hidden by `motion.css` under `html.motion-ok` until marked `data-revealed`. Lamp buttons (`.button-primary`) emit `bv:lamp` (hover, press) for the bubbles.
+- **Hero « Surface »** (`components/hero/hero.ts`, S07): started by the motion module. Intro E15 (`motion.css` hides the hero title and the HUD figures under `motion-ok` until `html[data-intro]`), immersion E2 scrubbed by the hero scroll, WebGL surface (`hero-surface.ts` → `scripts/webgl/surface.ts`, OGL, shaders in `lib/webgl/shaders/`) loaded after `load` + idle if `canUseWebGL()`, else a CSS water line. Rollback: `WEBGL_SURFACE = false`. The full-viewport photo is never Chromium's LCP element: the hero text is (D41).
 - **HUD** (`components/hud/hud.ts`, essential controller): coarse depth from an IntersectionObserver, precise readings from `scripts/motion/depth.ts`; `setMode('normal'|'hidden'|'safety-stop')` for S08/S10; emits `bv:section` (the nav marks its links `aria-current`). Depths of every section, hidden ones included, come from `HUD_PROFILE` (`data/sections.ts`). On desktop the `.wrap` keeps a lane for the HUD (`utilities.css`).
 - **Water** (`components/water/`): sections paint their own tone; the fixed water column only shows through the thermoclines (no text on a gradient).
 - Shared UI: `ui/Section.astro` (anchor, tone, HUD depths from `sections.ts`; it forwards the parent's `data-astro-cid-*`, otherwise the parent's scoped styles miss it), `ui/TabList.astro` + `ui/tabs.ts` (APG tabs, panels stacked without JS), `ui/ArtPicture.astro` (one crop per media query).

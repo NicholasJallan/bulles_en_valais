@@ -11,7 +11,7 @@
 - [x] **S04** — Visuels : retouches, IA, logo, favicons, OG — 01.10.2026 (Gate 3 validée)
 - [x] **S05** — Page statique complète — 01.10.2026
 - [x] **S06** — Moteur de mouvement — 02.10.2026
-- [ ] **S07** — Hero « Surface » en WebGL + immersion
+- [x] **S07** — Hero « Surface » en WebGL + immersion — 02.10.2026
 - [ ] **S08** — Cursus, échelle de profondeur, interludes, bulles
 - [ ] **S09** — Spécialités (lampe torche) & Lieux (parcours du Rhône)
 - [ ] **S10** — Remontée : Préparer, Bons cadeaux, Témoignages, Palier FAQ, Contact, WhatsApp
@@ -72,6 +72,7 @@
 | 2026-10-02 | D38 | Risques acceptés de la CSP finale (revue S11) : `www.google.com` en `script-src` (exigé par le guide Google pour Ads) et jokers `*.google.*` en `img-src` / `connect-src` ; à resserrer en S13 d'après les requêtes réellement vues en production | S11 (revue de sécurité) |
 | 2026-10-02 | D39 | I-07 : Consent Mode **avancé** confirmé (`MODE = 'advanced'` dans `consent-default.js`, phrase sur les signaux sans cookie gardée dans Confidentialité) ; le MEDIUM de la revue S11 est donc un choix assumé | Nicholas (après S11) |
 | 2026-10-02 | D40 | I-06 : identifiants `AW-10798308119` et `G-QG5ZCVY1Z7` confirmés ; **aucune campagne payante**, simple suivi de l'activité ; GA4 est déjà une destination de la balise (lu dans le `gtag.js` public), donc `GA4_ID` reste `null` ; conversions Ads, événements clés GA4 et resserrement de la CSP sortis du chemin critique vers le plan dédié `plans/mesure-google/`, à lancer après S13 | Nicholas (après S11) |
+| 2026-10-02 | D41 | **Élément LCP = texte du hero**, pas sa photo : Chromium exclut du LCP une image qui couvre tout le viewport (heuristique « fond » ; à 80 % de hauteur, la photo redevient LCP). Critère retenu : le LCP est dans le hero, peint avec la première image (accroche sous le mouvement, titre `h1` sous mouvement réduit), jamais après le module de mouvement ni le WebGL ; la photo reste `eager` + `fetchpriority="high"` et n'est jamais masquée | S07 (constat) |
 
 ## Mutations du plan
 
@@ -131,6 +132,13 @@
 | 2026-10-02 | S11 | ajouter | `consent-default.js` relit `cc_cookie` ; projet Playwright `csp` sur `serve-with-csp.mjs` (2ᵉ `webServer`, port `PW_PORT + 10`) ; alternates du sitemap par `serialize` depuis `routes.ts` (`localePath` déplacé dans `routes.ts`) ; `02-architecture` §12, §13 et §15 mis à jour | revenir sur la page sans attendre la librairie ; tester sous la CSP ; pages légales sans alternates |
 | 2026-10-02 | S11 | modifier | Revue de sécurité faite à la fusion (Sonnet, une passe, D30) : l'agent du worktree ne pouvait pas lancer de sous-agent | parallélisation |
 | 2026-10-02 | S11 → hors refonte | extraire | Paramétrage Google (GA4, conversions Ads, CSP resserrée) déplacé dans `plans/mesure-google/README.md` (phases A à D, après S13) ; plus de prérequis I-06 pour S12 et S13 | D40 |
+| 2026-10-02 | S07 | déplacer | `surface.ts` (colle OGL) dans `src/scripts/webgl/` et non `src/lib/webgl/` ; logique pure testée dans `src/lib/webgl/` (`capability`, `viewport` : cadrage `cover`, DPR, `object-position` ; `ripples` : réserve de 8 ondes, gestes) ; `hero-surface.ts` (chargement après `load` + idle, ondes au pointeur) à côté de `hero.ts` ; `02-architecture` §2 et §9 mis à jour | même règle qu'en S06 (couverture ≥ 80 % sur `src/lib`) |
+| 2026-10-02 | S07 | préciser | Le WebGL du hero est chargé par `hero.ts` (démarré par le module de mouvement, dans `whileMotion`), et non directement par `app.ts` : il suit ainsi `gsap.matchMedia` (mouvement réduit demandé en cours de route → tout est défait) | cycle de vie unique |
+| 2026-10-02 | S07 | modifier | Uniforms : en plus de ceux de §9, `uCoverScale` / `uCoverOffset` (cadrage identique à l'`<img>`) et `uTint`, `uDeep`, `uLight` (couleurs de `palette.ts`, aucune valeur en dur) ; `uPointer` abandonné (les ondes suffisent) ; `uRipples` passé en tableau JS (OGL ne résout `uRipples[0]` que sur un `Array`) | shader |
+| 2026-10-02 | S07 | modifier | Critère « élément LCP = `<img>` du hero » remplacé par D41 ; test E2E : LCP dans `#top` et à moins de 100 ms du FCP ; brief S07 mis à jour | heuristique de Chromium |
+| 2026-10-02 | S07 | ajouter | Intro E15 : `motion.css` masque le titre du hero et les chiffres du HUD sous `html.motion-ok` jusqu'à `html[data-intro]` (posé par `hero.ts`, même en cas d'échec ; garde-fou de 3 s de `boot.js` sinon) ; voile du hero allégé de 35 % pendant l'immersion ; rendu plafonné à 60 i/s | E15, lisibilité sous l'eau, écrans 120 Hz |
+| 2026-10-02 | S07 | corriger | Tâche 7 : trace par un script Playwright + CDP (Pixel 7, CPU ×4, 150 ms / 9 Mbit/s, cache vide) et Lighthouse 12 local, au lieu du MCP `chrome-devtools`, absent de la session | environnement |
+| 2026-10-02 | S07 | ajouter | `tests/visual/` créé (référence du hero sans WebGL, chromium et mobile-chrome) | tâche 8 |
 
 ## Mesures
 
@@ -144,6 +152,7 @@
 | 2026-10-02 | S06 seule (`check:budgets`) ; scroll à la molette, Chromium 1440 px, CPU ×1 et ×4 : 0 tâche longue, images p50/p95 16,7 ms ; CLS chargement + scroll complet < 0,05 (test E2E) | n.m. | < 0,05 | n.m. | 1,7 / 70,1 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S11 seule (`check:budgets`) | n.m. | n.m. | n.m. | 3,0 / 53,9 Ko | 11,3 Ko (accueil) | n.m. | n.m. |
 | 2026-10-02 | S06 + S11 fusionnées (`check:budgets`) | n.m. | n.m. | n.m. | 3,2 / 82,0 Ko | 12,9 Ko (accueil) | n.m. | n.m. |
+| 2026-10-02 | S07 (`check:budgets`) ; trace mobile Playwright + CDP (Pixel 7, CPU ×4, 150 ms / 9 Mbit/s, cache vide, 3 passes) ; Lighthouse 12 local (simulé) : S07 94, base S06 95 dans les mêmes conditions | FCP = LCP ≈ 0,6 s (trace) ; 2,9 s (Lighthouse, S06 : 2,8 s) | 0 | ≈ 120 ms (trace) ; 0 ms (Lighthouse) | 3,2 / 102,9 Ko (WebGL : 18,7 Ko, chargé vers 1,1 s, après le LCP) | 13,1 Ko (accueil) | n.m. | 94/100/100/100 |
 
 ## Journal
 
@@ -453,6 +462,27 @@
   - S10 : `setMode('safety-stop')` au palier FAQ ; Mode calme sans rechargement possible (`whileMotion` sait tout défaire) ;
   - Firefox (D21) et Safari réel non vérifiés à la main ; les transitions de vue E18 seulement là où elles existent.
 - **Retour arrière** : `git revert` des commits S06 ; la page statique de S05 reste fonctionnelle.
+
+### S07 — 2026-10-02 (hero « Surface » en WebGL, immersion, intro)
+- **Fait** :
+  - TDD : `lib/webgl/capability.ts` (`canUseWebGL`, environnement injectable, contexte d'essai rendu aussitôt), `viewport.ts` (cadrage `object-fit: cover` en coordonnées GL, `object-position`, DPR ≤ 1,5 et ×0,75 sur téléphone), `ripples.ts` (8 ondes, âge, gestes : survol limité en fréquence, toucher bref seulement) ;
+  - shaders écrits pour le site (`surface.vert`, `surface.frag`, bruit `webgl-noise` MIT crédité dans `noise.glsl`) : eau déplacée par le bruit et les ondes dans le masque d'eau, perspective du lac, caustiques maison sur les hauts-fonds, ligne d'eau ondulée et ménisque qui montent avec `uImmersion`, sous l'eau : réfraction, flou léger, couleurs lavées, teinte `lagoon-ink`, assombrissement `deep`, rayons obliques, caustiques, particules ;
+  - `scripts/webgl/surface.ts` (OGL : Renderer, Program, Mesh, Triangle, Texture) : boucle `gsap.ticker` seulement à l'écran et onglet visible, 60 i/s au plus, `ResizeObserver`, contexte perdu → retour à l'image, contexte rendu si la création échoue ;
+  - `hero.ts` : intro E15 (lignes du titre en 0,9 s + décalage, HUD qui « s'allume » à 0,0 m, une fois par page, sautée sur une ancre), immersion E2 (ScrollTrigger du hero, titre et accroche qui dérivent et s'effacent), repli sans WebGL (ligne d'eau en `clip-path` + voile sous-marin), drapeau de retour arrière `WEBGL_SURFACE` ; `hero-surface.ts` : après `load` + idle, `import()`, `decode()`, fondu du canvas au-dessus de l'image ;
+  - tests : `tests/e2e/hero.spec.ts` (canvas sous Chromium, aucun rendu hors écran, LCP, intro, repli CSS, glisser tactile sur le hero, mouvement réduit), `tests/visual/hero.spec.ts` ; captures `gates/s07/`.
+- **Vérifications** : `npm run build` (+ `check:dist`) ; `astro check` 0/0/0 ; Vitest 516 tests (99,6 % des lignes) ; Playwright 220 réussis, 37 sautés (tous projets, a11y et `csp` compris) ; `format:check` ; budgets : JS initial 3,2 Ko, total 102,9 Ko, CSS 13,1 Ko ; morceau WebGL 18,7 Ko gzip (≤ 30) ; trace mobile : FCP = LCP ≈ 0,6 s, CLS 0, TBT ≈ 120 ms, WebGL chargé après le LCP ; Lighthouse local 94 / 100 / 100 / 100 (base S06 : 95).
+- **Constats** :
+  - Chromium écarte du LCP une image qui couvre tout le viewport (D41) ; le texte masqué à la première peinture (titre sous l'intro) n'est jamais repris comme candidat, d'où l'accroche comme LCP sous le mouvement ;
+  - OGL ne résout un tableau d'uniforms (`uRipples[0]`) que si la valeur est un `Array` (un `Float32Array` donnait un avertissement par image) ; `Renderer.setSize` écrit la taille en ligne sur le canvas, d'où l'observation de la taille du hero et non du canvas ;
+  - le Chromium et le WebKit de Playwright ont WebGL 2 sans drapeau ;
+  - un premier Lighthouse à 77 venait d'une tâche de Lighthouse lui-même (`_lighthouse-eval.js`, 651 ms) : mesures répétées et comparées à la base S06 dans un worktree temporaire.
+- **Revue** (`code-reviewer`, Sonnet, une passe, D30) : 0 CRITICAL ; 1 HIGH corrigé (titre et HUD restés masqués si l'intro échoue : `data-intro` posé dans un `finally`, et sans hero) ; 3 MEDIUM corrigés (contexte WebGL rendu si la création échoue, surface libérée même si son démarrage lève, caustiques limitées aux hauts-fonds + 60 i/s au plus) ; LOW corrigés : nettoyage complet à la perte de contexte, intro jouée une seule fois ; LOW laissés : DPR figé à la création (changement d'écran), `console.warn` si la surface est indisponible (voulu).
+- **Commits** : `e3e544e`, `854300e`, `ee42ee8`, `80ae5a1`, `0cf5adf`, puis ce journal.
+- **Points ouverts** :
+  - S12 : LCP Lighthouse simulé à 2,8–2,9 s (déjà en S06, rendu retardé du texte : polices et CSS sur le chemin critique) à mesurer en préproduction contre la cible de 2,0 s ; Safari réel (iOS) et un mobile milieu de gamme à juger à la main (fluidité du shader) ;
+  - S08 : bulles sur `bv:lamp` ; l'intro E15 n'anime pas le logo (D35) ;
+  - Nicholas : avis sur l'intensité de l'effet (captures `gates/s07/`) ; réglages simples dans `surface.frag` (amplitude des ondes, force des caustiques, teinte sous l'eau).
+- **Retour arrière** : `WEBGL_SURFACE = false` dans `src/components/hero/hero.ts` (ligne d'eau CSS seule) ; ou `git revert` des commits S07 (hero statique de S05).
 
 ### S11 — 2026-10-02 (consentement, mesure, SEO, CSP ; en parallèle de S06, worktree `refonte/s11`)
 - **Fait** : `consent-default.js` (défauts refusés ou relus dans `cc_cookie`, `ads_data_redaction`, balise Google en production seulement, `bvLoadGoogleTag()`), bandeau vanilla-cookieconsent 3.1.0 (contrôleur `consent`, textes FR/EN, styles chargés à la demande, ton `deep`, « Gérer les cookies » branché, `html[data-consent-open]` masque le HUD et WhatsApp), `events.ts` et `consent-mode.ts` (TDD), conversions formulaire, WhatsApp et téléphone ; tableau des cookies et signaux sans cookie dans Confidentialité (FR/EN) ; OG, Twitter, `theme-color`, JSON-LD `@graph` (TDD, accueil), `robots.txt`, `llms.txt`, alternates `hreflang` de toutes les pages du sitemap ; `ops/nginx/security-headers.conf`, `serve-with-csp.mjs`, projet Playwright `csp`.

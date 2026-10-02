@@ -44,7 +44,7 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── nav/        Nav · MobileMenu · LanguageSwitch · nav.ts
 │   │   ├── hud/        DepthGauge · DiveProfile · ProfileLine · hud.ts · events.ts · profile-geometry.ts
 │   │   ├── water/      WaterColumn · Thermocline · water.ts (couches vues à travers les thermoclines)
-│   │   ├── hero/       Hero · hero.ts
+│   │   ├── hero/       Hero · hero.ts · hero-surface.ts (WebGL après load + idle)
 │   │   ├── manifesto/  Manifesto
 │   │   ├── instructor/ Instructor
 │   │   ├── courses/    Courses · AgencyPanel · PriceList · tabs.ts
@@ -62,14 +62,15 @@ Pas de React ni de Preact : composants `.astro` et contrôleurs TypeScript. Tout
 │   │   ├── footer/     Footer · calm-mode.ts
 │   │   └── ui/         Button · Eyebrow · SectionHeader · ArtPicture (prop `reveal`) · RichText · Icon
 │   ├── scripts/app.ts                 # point d'entrée unique, orchestre l'initialisation (§7)
-│   ├── scripts/motion/  index · gsap · reduced-motion · lenis · reveal · split · magnetic · depth · nav (DOM, hors couverture)
+│   ├── scripts/motion/  index · gsap · reduced-motion · lenis · reveal · split · fonts · magnetic · depth · nav (DOM, hors couverture)
+│   ├── scripts/webgl/   surface.ts (OGL, S07 ; DOM, hors couverture)
 │   ├── i18n/  types.ts · dictionary.ts · fr.ts · en.ts · legal/{fr,en}.ts · index.ts · routes.ts (+ tests)
 │   ├── data/  courses.ts · specialties.ts · places.ts · credentials.ts · contact.ts · gifts.ts · sections.ts · *.test.ts
 │   ├── lib/
 │   │   ├── motion/  eases.ts · tokens.ts · waterline.ts · magnetic.ts (logique pure, + tests)
 │   │   ├── depth/   resolve-depth.ts · temperature.ts · profile.ts · ascent.ts · ladder-scale.ts (+ tests)
 │   │   ├── bubbles/ boyle.ts (+ test) · emitter.ts
-│   │   ├── webgl/   capability.ts (+ test) · surface.ts · shaders/{surface.vert,surface.frag,noise.glsl}
+│   │   ├── webgl/   capability.ts · viewport.ts · ripples.ts (+ tests) · shaders/{surface.vert,surface.frag,noise.glsl}
 │   │   ├── color/   palette.ts · contrast.ts (+ test)
 │   │   ├── geo.ts (+ test)             # projection des coordonnées des lieux (S09)
 │   │   ├── form/    validate.ts (+ test) · submit.ts
@@ -227,10 +228,12 @@ export interface Course {
 ## 9. WebGL (hero)
 
 - `capability.ts` → `canUseWebGL(env)` : `motion-ok`, contexte `webgl2` obtenu, `saveData` absent, `deviceMemory` ≥ 4 si connu, `hardwareConcurrency` ≥ 4. Environnement injectable pour les tests.
-- `surface.ts` → `createSurface({ canvas, image, mask })` retourne `{ setImmersion, addRipple, start, stop, destroy }`. Boucle sur `gsap.ticker`, arrêtée hors écran (IntersectionObserver) et sur `visibilitychange` ; DPR ≤ 1,5 ; `webglcontextlost` → retour à l'image fixe.
+- `src/scripts/webgl/surface.ts` → `createSurface({ canvas, image, mask, focal, mobile, onContextLost })` retourne `{ setImmersion, addRipple, start, stop, destroy }`. Boucle sur `gsap.ticker`, arrêtée hors écran (IntersectionObserver) et sur `visibilitychange` ; DPR ≤ 1,5 ; `webglcontextlost` → retour à l'image fixe.
 - Textures : l'image du hero (via `currentSrc`, même origine) et `water-mask.png` (512 px, niveaux de gris, blanc = eau).
 - Shaders écrits par nous. Bruit : `webgl-noise` (MIT, Ashima Arts / Stefan Gustavson), crédité en tête du fichier. **Rien de Shadertoy.**
-- Uniforms : `uTime`, `uImage`, `uMask`, `uResolution`, `uImmersion` (0 → 1), `uRipples[8]` (`vec3` : x, y, âge), `uPointer`.
+- Uniforms : `uTime`, `uImage`, `uMask`, `uResolution`, `uImmersion` (0 → 1), `uRipples[8]` (`vec3` : x, y, âge ; tableau JS pour OGL), `uCoverScale` / `uCoverOffset` (cadrage de l'`<img>`), `uTint`, `uDeep`, `uLight` (couleurs de `palette.ts`). `uPointer` abandonné en S07.
+- Chargement : `hero.ts` (démarré par le module de mouvement dans `whileMotion`) appelle `hero-surface.ts`, qui attend `load` puis l'idle, vérifie `canUseWebGL()`, importe `surface.ts`, décode l'image et le masque, puis fond le canvas au-dessus de l'`<img>`. Sans WebGL : ligne d'eau CSS (`clip-path`) et voile. Drapeau de retour arrière : `WEBGL_SURFACE` dans `hero.ts`.
+- LCP : la photo plein écran n'est pas candidate pour Chromium (D41) ; l'élément LCP est le texte du hero, peint avec la première image.
 
 ## 10. Bulles
 
