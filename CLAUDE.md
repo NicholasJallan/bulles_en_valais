@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-- **`main` is the live site until S13** (React + Babel compiled in the browser, deployed file by file: see [Live site](#live-site-main--until-s13)). Urgent fixes to the live site go on `main`. No redesign commit on `main` before S13.
-- **Branch `refonte/la-descente`**: the redesign "La Descente", a static Astro 7 site. Plan, session protocol and progress: `plans/refonte-la-descente/` (start with `README.md`; the decisions and mutations in `PROGRESS.md` override the specs). One session at a time, each ends at its own boundary.
-- `legacy/`: the old site, read-only, source of the content migrated in S03 (texts and prices: `legacy/components/i18n.jsx`). Deleted in S13. To run the old site, use `main` (`git worktree add ../bev-legacy main`).
+- **`main` is the live site**: the static Astro 7 build of the redesign "La Descente", served on the Pi from atomic releases (see [Production](#production-raspberry-pi)). Released as `v2.0.0` on 2026-10-02 (S13).
+- The redesign plan, its decisions (D1–D56) and journal stay in `plans/refonte-la-descente/` (`PROGRESS.md`): read them before changing a choice made there. Follow-up plan: `plans/mesure-google/` (GA4, Ads conversions, tighter CSP).
+- The old React site lives only in git history (tag `v1-legacy`, before the merge of the redesign).
 
 ## Development
 
@@ -24,7 +24,7 @@ npm run test:e2e        # Playwright: builds, then tests the preview server (tes
 npm run test:visual     # Playwright screenshots (tests/visual, from S07: hero without WebGL)
 npm run test:a11y       # axe (tests/a11y, from S05)
 npm run format          # Prettier (format:check to verify)
-npm run preview:pi      # publishes dist/ on the Pi under /preview/ (dry run; -- --apply to send): see below
+npm run test:csp        # full visit under the production headers of ops/nginx/security-headers.conf
 npm run check:budgets   # gzip budgets of dist/: initial JS ≤ 90 KB per page, total JS ≤ 150 KB, CSS ≤ 30 KB
 npm run check:dist      # run by every build: no inline JavaScript nor resource of another origin, no hidden,
                         # secret or stray PHP file (api/contact.php only, and present)
@@ -46,7 +46,7 @@ bash tests/php/run_unit_php74.sh    # unit tests with the production PHP 7.4, pi
 
 Production runs **PHP-FPM 7.4**: keep `public/api/contact.php` compatible with PHP 7.4 (no `str_starts_with`, `match`, union types, named arguments…). `php7.4 -l` only checks the syntax; `run_unit_php74.sh` runs the unit tests, which call every function including the entry points, under 7.4 without writing anything on the Pi.
 
-## Architecture (branch `refonte/la-descente`)
+## Architecture
 
 ```
 src/
@@ -61,8 +61,8 @@ src/
 ├── styles/                tokens.css · global.css · typography.css · motion.css · utilities.css
 └── assets/images/         images for astro:assets
 public/                    copied as is: api/contact.php, js/boot.js, js/consent-default.js, robots.txt, llms.txt
-ops/                       deploy.sh · rollback.sh (releases on the Pi, S12) · lib/common.sh
-ops/nginx/                 security-headers.conf: final CSP and headers (S11), applied by nginx in S13 · dive.conf: reference copy of the live config
+ops/                       deploy.sh · rollback.sh (releases on the Pi) · lib/common.sh
+ops/nginx/                 dive.conf: reference copy of the live nginx blocks · security-headers.conf: CSP and headers (snippet on the Pi)
 scripts/                   check-budgets.mjs · check-dist.mjs (+ lib/, tested)
 tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contact endpoint)
 ```
@@ -94,74 +94,52 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 
 - **No inline script** (the target CSP forbids them): `is:inline` only on a `<script src>` pointing to a file of `public/` (boot.js, consent-default.js) and on JSON-LD. `npx playwright test --project=csp` runs a full visit under the headers of `ops/nginx/security-headers.conf` and fails on any CSP violation. `vite.build.assetsInlineLimit: 0` stops Astro from inlining small scripts and Vite from producing `data:` URIs. `check:dist` fails the build on an inline script, an inline event handler, a `javascript:` URL, or a script or stylesheet of another origin (everything is self-hosted).
 - **Astro 7**: the Rust compiler no longer fixes HTML (close every tag, no block inside `<p>`); `compressHTML: 'jsx'` removes whitespace that contains a line break between elements, so keep a wanted space on the same line (`{a} <em>{b}</em>`) or write `{' '}`.
-- No design value hard-coded: colors, spacing, radii, durations and easings come from `src/styles/tokens.css` (provisional values until S02).
+- No design value hard-coded: colors, spacing, radii, durations and easings come from `src/styles/tokens.css` .
 - Animate only `transform`, `opacity`, `clip-path` (and `filter` sparingly); no `scroll` listener to animate.
 
 ## Contact / WhatsApp
 
-- **WhatsApp number**: `41794368112` (E.164 without `+`); **phone**: `+41 79 436 81 12`; **email**: `nicholas@bullesenvalais.ch`. In the redesign they move to `src/data/contact.ts` (S03).
+- **WhatsApp number**: `41794368112` (E.164 without `+`); **phone**: `+41 79 436 81 12`; **email**: `nicholas@bullesenvalais.ch`. Source: `src/data/contact.ts`.
 - Without JavaScript the form cannot be sent (`contact.php` accepts JSON only): it shows a notice pointing to WhatsApp, phone and e-mail (kept in S10, D47). The submit button stays disabled until `contact-form.ts` starts.
 - The contact form POSTs JSON to `/api/contact` (`public/api/contact.php`), with a hidden honeypot field `website`, `elapsed` (ms since the page loaded) and `locale`. On failure the form shows an error — listing the fields the server rejected, if any; « try again in a minute » on 429; « the form is taking a break » on 503 busy — with a pre-filled `mailto:` link (never opened automatically) and WhatsApp. Success releases a burst of bubbles (`bv:bubbles`, `lib/bubbles/events.ts`).
 - `contact.php` checks, in order: method, `Content-Type: application/json`, `Origin` allowlist, body ≤ 32 KB, valid JSON, spam (honeypot filled, `elapsed` missing or < 3 s → fake 200, nothing sent, only the reason logged), field rules, then the **daily limit** (50 e-mails, D46: locked counter `/var/www/bullesenvalais/shared/state/contact-quota`, plain file only; past it `503 {error:"busy"}` without sending; an unusable counter sends anyway and logs it). It then sends one plain-text e-mail through Gmail SMTP (STARTTLS + AUTH LOGIN): base64 body, RFC 2047 headers, envelope addresses from the config only.
-- The SMTP credentials live in `mail-config.php` on the Pi: `/var/www/bullesenvalais/shared/mail-config.php` for the redesign (constant `MAIL_CONFIG_FILE`, outside the releases; a missing file → 500 and a log line), next to the old `contact.php` for the live site until S13: **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
+- The SMTP credentials live in `mail-config.php` on the Pi: `/var/www/bullesenvalais/shared/mail-config.php` (constant `MAIL_CONFIG_FILE`, outside the releases; a missing file → 500 and a log line); a copy also remains in the old docroot `/var/www/html/dive/api/` until it is archived: **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
 
-## Live site (`main`) — until S13
+## Production (Raspberry Pi)
 
-The notes below describe the current production and apply to the `main` branch until S13, which deploys `dist/` as atomic releases (`plans/refonte-la-descente/02-architecture.md` §16). Nothing is deployed from `refonte/la-descente` before S12.
+`ssh pi@bullesenvalais.ch`: Debian, nginx 1.22.1, PHP-FPM 7.4 (the default of every site on the Pi; `php8.2` passes the unit tests of `contact.php` but its FPM pool is stopped: switching dive to it is a separate, tested step). Any action on the Pi (ssh writes, nginx, deploy) needs Nicholas's agreement in the session, with a dry run first.
 
-### Run the old site locally (from a `main` worktree)
-
-```bash
-python3 -m http.server 8000 --bind 127.0.0.1
-# then open http://localhost:8000
+```
+/var/www/bullesenvalais/
+├── releases/<YYYYMMDD-HHMMSS>/   one build of dist/ each (UTC, root:root, read by www-data)
+├── current -> releases/…         served by the dive block
+├── staging -> releases/…         pre-production release (served by no nginx block)
+├── shared/                       750 root:www-data: mail-config.php (640), state/contact-quota (dir 700 www-data)
+└── deploy.log
 ```
 
-Always bind to `127.0.0.1`: the server serves the whole working tree as plain text, including gitignored files, to anyone on the network otherwise. Binding is not enough against DNS rebinding (the server ignores the `Host` header), so keep no secrets in the working tree.
-
-### Preview on the Pi (D31, D42)
-
-Nicholas reviews from his phone: every session that changes what he sees publishes the redesign next to the live site, without touching it, and gives him the URLs. `scripts/preview-pi.mjs` stages `_astro/`, `js/`, `styleguide/` and every page of `dist/` under `preview/` (links kept inside `/preview/`, `noindex, nofollow`, Google tag disabled in the staged `consent-default.js`), then rsyncs only those four folders (`-rlt`, scoped `--delete`) and `chown`s them. Allowed at every session for this command only (D42):
+### Deploy
 
 ```bash
-npm run build
-npm run preview:pi              # dry run: check that only _astro/, js/, styleguide/, preview/ appear
-npm run preview:pi -- --apply   # sends, then chown
+ops/deploy.sh production --dry-run   # npm ci, tests, build, pre-flight on the Pi, rsync -n
+ops/deploy.sh production             # new release, smoke test (files, php7.4 -l), atomic switch, HTTP check; asks y/N
+ops/deploy.sh staging                # same, on the staging link
+ops/rollback.sh --list | previous | <release>   # production by default; `staging previous` for staging
 ```
 
-URLs: `https://dive.bullesenvalais.ch/preview/`, `/preview/en/`, `/styleguide/`. It runs under the CSP of the old site, and its form posts to the live `contact.php` (a real e-mail). Never send `index.html`, `en/` or `api/` of `dist/` to the docroot: they would replace the live site. Retired in S13.
+A clean git tree is required. A release that fails before the switch is removed; if `/` stops answering after the switch, the previous release is put back. The last 5 releases are kept (never the ones `current` or `staging` point to). `--skip-build` reuses `dist/` (trusted to match HEAD).
 
-### Deploy to Raspberry Pi
+### nginx
 
-The Pi serves the site from `/var/www/html/dive` via nginx. There is no git repo on the Pi — deploy by rsync, from `main`:
+`/etc/nginx/sites-available/bullesenvalais` (also holds other sites: shop, fede, silence, dp-fede, which are not ours). Reference copy of our blocks: `ops/nginx/dive.conf`; headers snippet `/etc/nginx/snippets/bulles-security-headers.conf` = `ops/nginx/security-headers.conf`. To change them: back up the file on the Pi, edit, `sudo nginx -t && sudo systemctl reload nginx`, check the other sites still answer, then copy the change into `ops/nginx/`.
 
-```bash
-# Single file
-rsync -av --rsync-path="sudo rsync" \
-  --exclude='.git' --exclude='.venv' --exclude='.idea' \
-  path/to/file.jsx pi@bullesenvalais.ch:/var/www/html/dive/path/to/
+- `root /var/www/bullesenvalais/current`; real 404 (`try_files $uri $uri/ =404`, `error_page 404 /404.html`), no SPA fallback.
+- Cache: `/_astro/` 1 year `immutable`; images, icons and fonts 30 days; HTML and unhashed files (`js/boot.js`, `js/consent-default.js`…) `no-cache`. gzip level 6 for the text types (the `http` block compresses only HTML).
+- Every `location` with its own `add_header` includes the headers snippet again (nginx drops the inherited ones there).
+- PHP: only `location = /api/contact.php` (`/api/contact` is redirected to it internally): `limit_req zone=contact` 5/min per IP, burst 3, 429; body ≤ 32 KB; `SCRIPT_FILENAME $realpath_root…` (no stale release after a switch). Any other `.php` and anything else under `/api/` → 404. A new PHP endpoint needs its own exact `location`.
+- `http` block: TLS 1.2 and 1.3 only (since S13). certbot renews all the names by webroot `/var/www/html/dive` (`location ^~ /.well-known/acme-challenge/`): keep that folder, or change `webroot_path`, when the old docroot is removed.
+- Logs: `/var/log/nginx/dive.access_log`, `dive.error_log` (rotated weekly by `/etc/logrotate.d/nginx-dive`, 8 kept); `contact:` lines for the endpoint (rejections, SMTP step, `daily limit reached`).
 
-# Whole site: dry run first (-n), then the same command without -n.
-# Allowlist: only what the site serves. Never tests/, plans/, docs, local secrets
-# (settings.json, .env…), and never the Pi's own mail-config.php.
-rsync -av -n --rsync-path="sudo rsync" \
-  --include='/index.html' --include='/app.jsx' --include='/components/***' --include='/images/***' \
-  --include='/api/' --include='/api/contact.php' --exclude='*' \
-  /Users/nicholas/projects/bulles_en_valais/ pi@bullesenvalais.ch:/var/www/html/dive/
+### Rollback to the old site (until the old docroot is archived, J+14)
 
-# Toujours corriger les permissions après rsync (macOS rsync ne supporte pas --chown)
-ssh pi@bullesenvalais.ch "sudo chown -R www-data:www-data /var/www/html/dive"
-```
-
-> Le `chown` est obligatoire après chaque rsync : sans lui, les fichiers sont copiés avec le propriétaire Mac (uid 501) et nginx (`www-data`) ne peut pas les lire → 403.
-
-After nginx config changes: `ssh pi@bullesenvalais.ch "sudo nginx -t && sudo systemctl reload nginx"`
-
-### Nginx config
-
-Lives at `/etc/nginx/sites-available/bullesenvalais` on the Pi. The `dive` server block serves `dive.bullesenvalais.ch` (and the other `dive.*` names listed in `ALLOWED_ORIGINS`) from `/var/www/html/dive` with `index index.html`: static files, plus PHP for the contact endpoint only. `/api/contact` is internally redirected to `/api/contact.php`, the only PHP file executed (PHP-FPM 7.4, rate limit `zone=contact`: 5 requests/min per IP, burst 3, HTTP 429; body ≤ 32 KB); any other `.php` and any other path under `/api/` return 404. Other unknown paths return `index.html` with a 200 (SPA fallback), so check files on the Pi with `ls`, not `curl`. Logs: `/var/log/nginx/dive.access_log` and `dive.error_log`.
-
-Security headers are set in the `dive` server block only. The current `script-src` includes both `'unsafe-inline'` and `'unsafe-eval'` because Babel Standalone compiles the JSX in the browser and injects it as inline scripts; the redesign removes both (target CSP: `02-architecture.md` §14).
-
-### Old architecture (`legacy/`)
-
-React 18 + Babel Standalone from unpkg, JSX compiled in the browser; each component exposes itself on `window`. All copy in `legacy/components/i18n.jsx` (`TRANSLATIONS.fr` / `.en`), language chosen on the client. `Tweaks.jsx` and the `postMessage` edit mode are leftovers of a mock-up tool.
+The old React site is intact in `/var/www/html/dive`. Last resort: restore `/etc/nginx/sites-available/bullesenvalais.bak-20261002-155459-s13`, then `sudo nginx -t && sudo systemctl reload nginx`. Prefer `ops/rollback.sh previous`.

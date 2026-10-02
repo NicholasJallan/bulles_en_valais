@@ -277,7 +277,7 @@ export interface Course {
 - **CSP finale** (S11) : `ops/nginx/security-headers.conf`, vérifiée le 02.10.2026 sur le [guide de Google](https://developers.google.com/tag-platform/security/guides/csp) (page du 18.09.2026, balise Google + GA4 + conversions Ads), appliquée en S13 :
   ```
   default-src 'self';
-  script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com https://googleads.g.doubleclick.net;
+  script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com https://googleads.g.doubleclick.net/pagead/viewthroughconversion/;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://*.g.doubleclick.net https://pagead2.googlesyndication.com https://*.google.com https://*.google.ch https://*.google.fr;
   connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://*.g.doubleclick.net https://ad.doubleclick.net https://pagead2.googlesyndication.com https://*.google.com https://*.google.ch https://*.google.fr;
