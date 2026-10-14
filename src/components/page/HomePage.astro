@@ -39,6 +39,7 @@ const jsonLd = serializeJsonLd(
     site: new URL(Astro.site ?? '').origin,
     description: t.meta.description,
     labels: t.meta.structuredData,
+    faq: t.faq.items,
   }),
 );
 ---

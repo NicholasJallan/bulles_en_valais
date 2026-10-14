@@ -1,15 +1,63 @@
-# Bulles en Valais
+# Bulles en Valais — École & Cours de Plongée en Valais, Suisse
 
-> Scuba diving courses in Valais, Switzerland, with Nicholas Jallan, SDI/TDI, PADI and FFESSM instructor: from a first try-dive to technical trimix diving, in small groups (often one-to-one), at Lac du Rosel (Martigny), Les Îles (Sion) and Lake Geneva. Cours de plongée en Valais, en français et en anglais.
+> Bulles en Valais is an independent scuba diving school based in Valais, Switzerland, founded and taught by Nicholas Jallan. The school provides personalized scuba diving courses, try-dives (baptêmes de plongée), recreational certifications (SDI, PADI, FFESSM/CMAS), specialties (drysuit, nitrox, deep diving) and advanced technical diving (TDI Trimix, rebreather). Courses are taught in French and English, in small groups (often one-to-one), primarily at Lac du Rosel (Martigny), Les Îles (Sion), and Lake Geneva (Léman).
 
-## Pages
+## Quick Facts & Instructor Credentials
+
+- **Founder & Instructor**: Nicholas Jallan
+- **Certifications**:
+  - SDI/TDI Instructor #100650 (Recreational & Technical Diving)
+  - PADI Master Scuba Diver Trainer (MSDT) #444589
+  - FFESSM / CMAS E4 Trimix Instructor #30806 (PTH120)
+  - French State Diploma: DEJEPS #07425ED0350
+- **Teaching Philosophy**: Private tuition or micro-groups (1 to 3 students max), tailored schedule, no rushed certification, focus on watermanship, ease, and real-world alpine lake diving skills.
+- **Languages**: French (native), English (fluent).
+- **Regions Served**: Canton du Valais (Martigny, Sion, Monthey, Saint-Maurice, Sierre), Canton de Vaud, Lake Geneva Riviera, Western Switzerland (Suisse romande).
+
+## Courses & Pricing (CHF)
+
+### Recreational Courses (SDI / PADI / FFESSM)
+- **Try-dive / Baptême de plongée**: CHF 90 (approx. 2 hours, close supervision in open water)
+- **Open Water Scuba Diver / OWD**: CHF 690 (SDI) / CHF 790 (PADI) — autonomous certification down to 18 m, worldwide recognition
+- **Advanced Adventure / Advanced OWD**: CHF 450 (SDI) / CHF 550 (PADI) — depth to 30 m, navigation, night, deep
+- **Rescue Diver**: CHF 890 (SDI) / CHF 990 (PADI) — safety, emergency management, self-rescue
+- **Divemaster**: CHF 990 (SDI) / CHF 1090 (PADI) — first professional leadership level
+- **FFESSM Federal Levels**:
+  - Niveau 1 (PE20, supervised 20 m): CHF 390
+  - Niveau 2 (autonomous 20 m, supervised 40 m): CHF 490
+  - Niveau 3 (autonomous 60 m): CHF 690
+  - Niveau 4 (guide de palanquée): CHF 990
+- **Refresher / Remise à niveau (ReActivate)**: CHF 80 (~2h)
+- **Discover Local Diving (guidage lac)**: CHF 80 (half-day)
+
+### Technical & Specialty Courses (TDI / SDI / PADI)
+- **TDI Nitrox (air enrichi jusqu'à 40%)**: CHF 290
+- **TDI Advanced Nitrox (mélanges jusqu'à 100%)**: CHF 290
+- **TDI Decompression Procedures**: CHF 250
+- **Drysuit Diver (Combinaison étanche)**: CHF 250 (SDI) / CHF 300 (PADI) — essential for cold alpine lakes
+- **Deep Diver (Plongée profonde 40 m)**: CHF 290 (SDI) / CHF 340 (PADI)
+- **Trimix & CCR Rebreather (Recycleur)**: On request / Sur demande (custom coaching up to 120 m)
+
+## Dive Sites
+
+1. **Lac du Rosel (Martigny, Valais)**: max depth 23 m, exceptionally clear water, calm mountain quarry lake, ideal for try-dives and initial open water training.
+2. **Les Îles (Sion, Valais)**: max depth 38 m, year-round predictable conditions, training platforms, navigation drills.
+3. **Lake Geneva / Lac Léman (Rivaz, Hermance, Chillon Castle, Tougues)**: max depth up to 300 m, spectacular drop-offs (parois rocheuses), historic wrecks (l'Hirondelle), deep and technical dives.
+
+## Gift Vouchers (Bons Cadeaux)
+
+- Gift vouchers available for try-dives (baptêmes), certification courses or custom amounts.
+- Valid for 1 year, delivered by PDF, dates arranged directly with the instructor.
+
+## Pages & Navigation
 
 - [Accueil (français)](https://dive.bullesenvalais.ch/): formations, tarifs en CHF, lieux, bons cadeaux, questions fréquentes, contact
 - [Home (English)](https://dive.bullesenvalais.ch/en/): courses, prices in CHF, dive sites, gift vouchers, FAQ, contact
 - [Confidentialité](https://dive.bullesenvalais.ch/confidentialite/) · [Privacy](https://dive.bullesenvalais.ch/en/privacy/)
 - [Mentions légales](https://dive.bullesenvalais.ch/mentions-legales/) · [Legal notice](https://dive.bullesenvalais.ch/en/legal-notice/)
 
-## Contact
+## Direct Contact
 
-- WhatsApp and phone: +41 79 436 81 12
-- E-mail: nicholas@bullesenvalais.ch
+- **WhatsApp & Phone**: +41 79 436 81 12
+- **Email**: nicholas@bullesenvalais.ch
+- **Website**: https://dive.bullesenvalais.ch

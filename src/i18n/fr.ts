@@ -7,12 +7,12 @@ import { legalFr } from './legal/fr.ts';
 
 export const fr: Dictionary = {
   meta: {
-    title: 'Cours de plongée en Valais — Bulles en Valais',
+    title: 'Cours & école de plongée en Valais — Bulles en Valais',
     description:
-      'Cours de plongée SDI/TDI, PADI et FFESSM en Valais : lac du Rosel, Îles de Sion et Léman. Petits groupes, un instructeur, votre rythme.',
+      'Baptêmes et cours de plongée en Valais : SDI/TDI, PADI et FFESSM au lac du Rosel, à Sion et sur le Léman. Formation sur mesure avec instructeur dédié.',
     ogTitle: 'Descendre, lentement, vers le silence — Bulles en Valais',
     ogDescription:
-      'Formation plongée en Valais avec Nicholas Jallan, instructeur SDI/TDI, PADI et FFESSM. Du baptême au trimix, à votre rythme.',
+      'École de plongée en Valais avec Nicholas Jallan, instructeur SDI/TDI, PADI et FFESSM. Du baptême au trimix en petit comité, à votre rythme.',
     ogImageAlt:
       'Bulles en Valais : le lac du Rosel et le titre « Descendre, lentement, vers le silence ».',
     structuredData: {
@@ -56,7 +56,7 @@ export const fr: Dictionary = {
   hero: {
     eyebrow: 'Formation plongée · Valais, Suisse',
     title: { before: 'Descendre,', em: 'lentement,', after: 'vers le silence.' },
-    lead: 'Cours multi-écoles SDI/TDI, PADI et FFESSM au lac du Rosel, aux Îles de Sion et sur le Léman. Un instructeur, trois certifications, votre rythme.',
+    lead: 'École de plongée sous-marine en Valais : cours et baptêmes SDI/TDI, PADI et FFESSM au lac du Rosel (Martigny), aux Îles de Sion et sur le Léman. Un instructeur dédié, votre rythme.',
     primaryCta: 'Planifier une session',
     secondaryCta: 'Découvrir les cursus',
     places: 'Lac du Rosel · Les Îles, Sion · Léman',
@@ -71,10 +71,10 @@ export const fr: Dictionary = {
   instructor: {
     eyebrow: "L'instructeur",
     title: { before: "L'école,", em: "c'est une personne." },
-    lead: "Nicholas, instructeur SDI/TDI, MSDT PADI et instructeur trimix E4 FFESSM. Plus de vingt ans sous la surface, et la conviction qu'une bonne formation se construit à deux — un élève, un instructeur, et tout le temps nécessaire.",
+    lead: "Nicholas, instructeur de plongée breveté en Valais et Suisse romande (SDI/TDI, MSDT PADI et trimix E4 FFESSM). Plus de vingt ans sous la surface, et la conviction qu'une bonne formation se construit à deux — un élève, un instructeur, et tout le temps nécessaire.",
     body: [
-      "Mes cours se tiennent en petit comité — souvent en un-à-un, rarement plus de trois élèves. Chacun progresse à son rythme, et le contenu s'adapte au profil, pas l'inverse.",
-      "En tant qu'instructeur triple-certifié, je peux vous emmener vers le cursus le plus adapté à vos projets : SDI pour le loisir et TDI pour la filière technique, réunis dans un seul système ; PADI, si vous tenez à la carte la plus connue au monde ; ou le cadre fédéral français (FFESSM/CMAS). Ou les trois.",
+      "Mes cours de plongée se déroulent en petit comité — souvent en cours particulier (un-à-un), rarement plus de trois élèves. Chacun progresse à son rythme, et l'apprentissage s'adapte à votre profil, pas l'inverse.",
+      "En tant qu'instructeur triple-certifié en Suisse romande, je vous oriente vers le cursus le plus adapté à vos projets : SDI pour le loisir et TDI pour la filière technique, réunis dans un seul système ; PADI, si vous visez la certification la plus demandée en voyage ; ou le cadre fédéral français (FFESSM/CMAS). Ou les trois.",
     ],
     portraitAlt:
       "Nicholas, en recycleur et combinaison étanche rouge, avec une élève à la surface d'un lac.",
@@ -84,7 +84,7 @@ export const fr: Dictionary = {
   courses: {
     eyebrow: 'Cursus',
     title: { before: 'Trois écoles,', em: 'un instructeur.' },
-    lead: 'SDI/TDI et PADI partagent exactement les mêmes standards RSTC — même contenu, même reconnaissance. FFESSM dépend de la CMAS. Vous pouvez suivre un cursus unique, ou mélanger les trois (criss-cross) pour plonger sans restriction partout où vous irez.',
+    lead: 'SDI/TDI et PADI partagent exactement les mêmes standards internationaux RSTC — même contenu pédagogique, même reconnaissance mondiale. FFESSM dépend de la CMAS. Vous pouvez suivre un cursus unique (Open Water, Advanced, Rescue, Divemaster), ou combiner les trois pour plonger sans restriction partout où vous irez.',
     tabsLabel: 'Choisir une école',
     priceListTitle: 'Cours & tarifs',
     onRequest: 'Sur demande',
@@ -228,24 +228,24 @@ export const fr: Dictionary = {
   specialties: {
     eyebrow: 'Spécialités',
     title: { before: 'Toujours plus loin,', em: 'toujours mieux.' },
-    lead: "SDI, TDI, PADI, FFESSM — mêmes fondamentaux, quatre chemins. Choisissez l'organisme qui correspond à votre projet, ou mixez-les : les passerelles existent. Réductions pour formations à deux.",
+    lead: "Combinaison étanche, Nitrox, plongée profonde, Trimix : les spécialités idéales pour plonger en lac alpin ou préparer vos voyages. Choisissez l'organisme adapté (SDI, TDI, PADI, FFESSM) avec passerelles directes. Réductions pour formations à deux.",
     tabsLabel: 'Choisir un organisme',
     tabs: {
       sdi: {
         label: 'SDI',
-        lead: "Scuba Diving International — le standard RSTC sous son nom d'origine. Théorie flexible, prérogatives reconnues partout dans le monde, et passerelle directe vers la filière technique TDI.",
+        lead: 'Scuba Diving International — le standard RSTC : formation Open Water, plongée étanche, orientation et passerelle directe vers la filière technique TDI.',
       },
       tdi: {
         label: 'TDI',
-        lead: 'Technical Diving International — la voie vers la plongée technique. Mélanges enrichis, décompression planifiée, profondeurs au-delà du récréatif.',
+        lead: 'Technical Diving International — la référence mondiale de la plongée technique : Nitrox avancé, procédures de décompression, Trimix normoxique et hypoxique.',
       },
       padi: {
         label: 'PADI',
-        lead: 'Les dix mêmes spécialités que chez SDI, sous le nom PADI — pour ceux qui tiennent à cette carte-là. Même contenu, même instructeur.',
+        lead: "Les spécialités PADI (Dry Suit, Deep Diver, Enriched Air Nitrox, Épave) pour compléter votre carnet avec le label le plus reconnu à l'international. Même contenu, même instructeur.",
       },
       ffessm: {
         label: 'FFESSM',
-        lead: "Le cursus fédéral français, reconnu en Suisse et en Europe. Du premier niveau autonome jusqu'à la direction de plongée — une progression progressive et rigoureuse.",
+        lead: 'Le cursus fédéral français (CMAS), reconnu en Suisse et dans le monde : du Niveau 1 au Niveau 4 (guide de palanquée) et brevets Trimix pour une formation rigoureuse.',
       },
     },
     equivalent: 'Équivalent',
@@ -253,7 +253,7 @@ export const fr: Dictionary = {
   places: {
     eyebrow: 'Lieux',
     title: { before: "Trois plans d'eau,", em: 'trois ambiances.' },
-    lead: "Les cours se donnent principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur le Léman. Des stages avec hébergement sont possibles — n'hésitez pas à demander.",
+    lead: "Les cours et baptêmes ont lieu au lac du Rosel près de Martigny, au lac des Îles à Sion, et sur le lac Léman. Des sites idéaux pour l'apprentissage et l'exploration en Valais et en Suisse romande, avec possibilité de stage avec hébergement.",
     route: 'Le Rhône, de Sion au Léman',
     openMap: 'ouvrir dans Google Maps',
     facts: {
@@ -325,12 +325,12 @@ export const fr: Dictionary = {
   gifts: {
     eyebrow: 'Bons cadeaux',
     title: { before: 'Offrir une première', em: "respiration sous l'eau." },
-    lead: 'Un bon cadeau à utiliser à son rythme, en petit comité.',
+    lead: 'Offrez un bon cadeau pour un baptême de plongée, une formation complète ou une spécialité en Valais. Valable un an, à son propre rythme.',
     offersTitle: 'Les offres',
     offers: {
       baptism: {
         title: 'Un baptême',
-        text: "Environ deux heures pour une première respiration sous l'eau, encadrée de près.",
+        text: "Environ deux heures d'initiation pour une première respiration sous l'eau en milieu naturel, encadrée de près en toute sécurité.",
       },
       course: {
         title: 'Une formation',
@@ -465,17 +465,17 @@ export const fr: Dictionary = {
   faq: {
     eyebrow: 'Palier de sécurité · 3 min',
     title: { before: 'Vos questions,', em: 'mes réponses.' },
-    lead: "Les sujets qui reviennent le plus souvent. Si la vôtre n'est pas ici, un message suffit — je réponds en général dans la journée.",
+    lead: "Les questions fréquentes sur les cours, les baptêmes et le matériel de plongée en Valais. Si la vôtre n'est pas ici, un message suffit — je réponds en général dans la journée.",
     items: [
       {
-        question: 'Je débute : par quel cursus commencer ?',
+        question: 'Je débute : baptême de plongée ou cours Open Water ?',
         answer:
-          'Pour la plupart des débutants, je recommande le SDI Open Water Scuba Diver : théorie e-learning, progression rapide, reconnaissance internationale — les mêmes standards que PADI. Si vous plongez surtout en France, FFESSM Niveau 1 est une excellente alternative. Un coup de fil de 10 minutes et on trace ensemble le bon chemin.',
+          "Pour débuter, deux options : un baptême d'initiation (environ 2 heures) pour découvrir les sensations sous l'eau en lac, ou directement l'Open Water (SDI ou PADI), le brevet pour plonger en autonomie jusqu'à 18 mètres partout dans le monde. Théorie en e-learning, pratique en petit comité, calendrier flexible. Un appel de 10 minutes permet de choisir la bonne formule.",
       },
       {
-        question: 'Puis-je mélanger les écoles ?',
+        question: 'Puis-je mélanger les écoles (criss-cross) ?',
         answer:
-          "Oui — c'est même souvent une bonne idée. On appelle ça le criss-cross : valider certains niveaux en SDI ou PADI, d'autres en FFESSM. Votre formation est un peu plus longue, mais vous plongez ensuite sans restriction partout où vous irez.",
+          "Oui — c'est un des grands atouts de Bulles en Valais. Le criss-cross permet par exemple de valider un premier niveau en SDI ou PADI pour sa simplicité et sa reconnaissance internationale, puis des spécialités ou niveaux avancés en FFESSM/CMAS ou TDI. Vous plongez ensuite sans aucune restriction partout où vous irez.",
       },
       {
         question: 'Quelle est la différence entre SDI et PADI ?',
@@ -485,22 +485,22 @@ export const fr: Dictionary = {
       {
         question: 'Faut-il acheter du matériel avant de commencer ?',
         answer:
-          "Non. Une grande partie du matériel vous est fournie selon les tailles disponibles. Seul le set « palmes, masque, tuba » mérite d'être personnel — et je vous conseille de demander avant d'acheter pour éviter les mauvais choix.",
+          "Non. Une grande partie du matériel vous est fournie selon les tailles disponibles (bloc, détendeur, gilet, combinaison). Seul le set « palmes, masque, tuba » mérite d'être personnel — et je vous conseille de demander avant d'acheter pour éviter les mauvais choix.",
       },
       {
-        question: 'Où se déroulent les cours ?',
+        question: 'Où se déroulent les cours et baptêmes de plongée ?',
         answer:
-          'Principalement au lac du Rosel près de Martigny, aux Îles de Sion, et sur le Léman. Des formations en mode stage, avec hébergement, sont également possibles — contactez-moi pour en discuter.',
+          "Principalement au lac du Rosel près de Martigny, au plan d'eau des Îles à Sion, et sur les tombants du lac Léman (Rivaz, Chillon, St-Gingolph, Hermance). Ces sites de Suisse romande offrent des conditions d'apprentissage calmes, sécurisées et accessibles toute l'année. Des formules en stage avec hébergement en Valais sont aussi possibles.",
       },
       {
-        question: 'Combien de temps dure une formation ?',
+        question: 'Combien de temps dure une formation de plongée ?',
         answer:
-          "De deux heures pour un baptême à plusieurs semaines pour un Divemaster. L'Open Water se boucle en 3 jours minimum, l'Advanced en 2 jours, le Rescue en 3 jours. Le rythme peut être intensif ou étalé selon vos disponibilités.",
+          "De deux heures pour un baptême d'initiation à plusieurs semaines pour un cursus Divemaster. L'Open Water se réalise en 3 jours minimum (généralement sur un ou deux week-ends), l'Advanced en 2 jours, le Rescue en 3 jours. Le rythme est totalement modulable selon vos disponibilités.",
       },
       {
         question: 'Je suis déjà certifié ailleurs : que faire ?',
         answer:
-          'Apportez votre carte et votre carnet de plongée. Selon votre profil, une passerelle ou un simple refresher (ReActivate, ~2h, CHF 80) permet de reprendre dans les meilleures conditions. On évalue ensemble avant toute décision.',
+          'Apportez votre carte de niveau (PADI, SSI, CMAS, NAUI...) et votre carnet de plongée. Une passerelle équivalente ou une remise à niveau personnalisée (ReActivate, environ 2h, CHF 80) vous remet en confiance pour plonger dans les lacs suisses ou continuer vers un niveau supérieur.',
       },
     ],
   },

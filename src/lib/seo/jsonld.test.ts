@@ -119,6 +119,23 @@ describe('buildJsonLd', () => {
       }
     }
   });
+
+  it('includes an FAQPage node when FAQ items are provided', () => {
+    const withFaq = buildJsonLd({
+      ...input('fr'),
+      faq: [{ question: 'Q1', answer: 'A1' }],
+    });
+    const nodes = withFaq['@graph'] as Node[];
+    expect(nodes.map((n) => n['@type'])).toContain('FAQPage');
+    const faq = nodeOfType(nodes, 'FAQPage');
+    expect(faq.mainEntity).toEqual([
+      {
+        '@type': 'Question',
+        name: 'Q1',
+        acceptedAnswer: { '@type': 'Answer', text: 'A1' },
+      },
+    ]);
+  });
 });
 
 describe('serializeJsonLd', () => {

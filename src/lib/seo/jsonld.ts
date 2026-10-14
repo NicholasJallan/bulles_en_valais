@@ -13,6 +13,7 @@ export interface JsonLdInput {
   readonly site: string;
   readonly description: string;
   readonly labels: { readonly jobTitle: string; readonly catalogName: string };
+  readonly faq?: readonly { readonly question: string; readonly answer: string }[];
 }
 
 type Node = Readonly<Record<string, unknown>>;
@@ -26,6 +27,7 @@ function ids(site: string) {
     business: id('business'),
     person: id('nicholas'),
     catalog: id('courses'),
+    faq: id('faq'),
   };
 }
 
@@ -54,6 +56,21 @@ function catalog(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
   };
 }
 
+function faqPage(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
+  return {
+    '@type': 'FAQPage',
+    ...ref.faq,
+    mainEntity: (input.faq ?? []).map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+}
+
 function person(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
   return {
     '@type': 'Person',
@@ -77,6 +94,8 @@ function business(input: JsonLdInput, ref: ReturnType<typeof ids>, url: string):
     name: BUSINESS.name,
     url,
     description: input.description,
+    priceRange: 'CHF 80 - 1090',
+    currenciesAccepted: 'CHF',
     logo: `${site}/icon-512.png`,
     image: `${site}/og/og-${locale}.jpg`,
     telephone: PHONE.href.replace('tel:', ''),
@@ -91,21 +110,25 @@ function business(input: JsonLdInput, ref: ReturnType<typeof ids>, url: string):
 export function buildJsonLd(input: JsonLdInput): Node {
   const ref = ids(input.site);
   const url = `${input.site}${routePath('home', input.locale)}`;
+  const nodes: Node[] = [
+    {
+      '@type': 'WebSite',
+      ...ref.website,
+      url,
+      name: BUSINESS.name,
+      inLanguage: LANG_TAGS[input.locale],
+      publisher: ref.business,
+    },
+    business(input, ref, url),
+    person(input, ref),
+    catalog(input, ref),
+  ];
+  if (input.faq && input.faq.length > 0) {
+    nodes.push(faqPage(input, ref));
+  }
   return {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebSite',
-        ...ref.website,
-        url,
-        name: BUSINESS.name,
-        inLanguage: LANG_TAGS[input.locale],
-        publisher: ref.business,
-      },
-      business(input, ref, url),
-      person(input, ref),
-      catalog(input, ref),
-    ],
+    '@graph': nodes,
   };
 }
 

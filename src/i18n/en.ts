@@ -6,12 +6,12 @@ import { legalEn } from './legal/en.ts';
 
 export const en: Dictionary = {
   meta: {
-    title: 'Scuba diving courses in Valais — Bulles en Valais',
+    title: 'Scuba diving courses & school in Valais — Bulles en Valais',
     description:
-      'SDI/TDI, PADI and FFESSM scuba courses in Valais: Lac du Rosel, Les Îles in Sion and Lake Geneva. Small groups, one instructor, your pace.',
+      'Try-dives and scuba courses in Valais: SDI/TDI, PADI & FFESSM at Lac du Rosel, Sion & Lake Geneva. Tailored private training with a dedicated instructor.',
     ogTitle: 'Descending, slowly, into the silence — Bulles en Valais',
     ogDescription:
-      'Scuba training in Valais with Nicholas Jallan, SDI/TDI, PADI and FFESSM instructor. From try-dive to trimix, at your own pace.',
+      'Scuba diving school in Valais with Nicholas Jallan, SDI/TDI, PADI and FFESSM instructor. From try-dive to trimix in small groups, at your own pace.',
     ogImageAlt:
       'Bulles en Valais: Lac du Rosel and the title “Descending, slowly, into the silence”.',
     structuredData: {
@@ -55,7 +55,7 @@ export const en: Dictionary = {
   hero: {
     eyebrow: 'Dive training · Valais, Switzerland',
     title: { before: 'Descending,', em: 'slowly,', after: 'into the silence.' },
-    lead: 'Multi-agency courses (SDI/TDI, PADI, FFESSM) at Lac du Rosel, Les Îles in Sion and Lake Geneva. One instructor, three certifications, your own pace.',
+    lead: 'Scuba diving school in Valais: courses and try-dives (SDI/TDI, PADI, FFESSM) at Lac du Rosel (Martigny), Les Îles in Sion and Lake Geneva. One dedicated instructor, your own pace.',
     primaryCta: 'Book a session',
     secondaryCta: 'Explore the courses',
     places: 'Lac du Rosel · Les Îles, Sion · Lake Geneva',
@@ -69,10 +69,10 @@ export const en: Dictionary = {
   instructor: {
     eyebrow: 'The instructor',
     title: { before: 'A school is, above all,', em: 'a person.' },
-    lead: 'Nicholas — SDI/TDI instructor, PADI MSDT, FFESSM E4 Trimix instructor. Over twenty years under the surface, and the belief that good training is built between two people — a student, an instructor, and all the time it takes.',
+    lead: 'Nicholas — certified scuba instructor in Valais and Western Switzerland (SDI/TDI, PADI MSDT, FFESSM E4 Trimix). Over twenty years under the surface, and the belief that good training is built between two people — a student, an instructor, and all the time it takes.',
     body: [
-      'My classes are small — often one-on-one, rarely more than three students. Everyone progresses at their own pace, and the content adapts to the profile, not the other way around.',
-      'As a triple-certified instructor, I can guide you toward the curriculum that best fits your plans: SDI for recreational diving and TDI for the technical path, united in a single system; PADI, if you value the best-known card in the world; or the French federal system (FFESSM/CMAS). Or all three.',
+      'My scuba classes are small — often one-on-one, rarely more than three students. Everyone progresses at their own pace, and the teaching adapts to your profile, not the other way around.',
+      'As a triple-certified instructor in Switzerland, I can guide you toward the curriculum that best fits your plans: SDI for recreational diving and TDI for the technical path, united in a single system; PADI, if you value the most recognised card worldwide; or the French federal system (FFESSM/CMAS). Or all three.',
     ],
     portraitAlt:
       'Nicholas, wearing a rebreather and a red drysuit, with a student at the surface of a lake.',
@@ -82,7 +82,7 @@ export const en: Dictionary = {
   courses: {
     eyebrow: 'Courses',
     title: { before: 'Three schools,', em: 'one instructor.' },
-    lead: 'SDI/TDI and PADI share exactly the same RSTC standards — same content, same recognition. FFESSM reports to CMAS. You can follow a single curriculum, or mix all three (criss-cross) to dive without restriction wherever you go.',
+    lead: 'SDI/TDI and PADI share exactly the same international RSTC standards — same syllabus, same worldwide recognition. FFESSM reports to CMAS. You can follow a single curriculum (Open Water, Advanced, Rescue, Divemaster), or mix all three to dive without restriction wherever you go.',
     tabsLabel: 'Choose a school',
     priceListTitle: 'Courses & fees',
     onRequest: 'On request',
@@ -230,24 +230,24 @@ export const en: Dictionary = {
   specialties: {
     eyebrow: 'Specialties',
     title: { before: 'Further, deeper,', em: 'better.' },
-    lead: 'SDI, TDI, PADI, FFESSM — same fundamentals, four paths. Pick the one that fits your goals, or mix them: crossover pathways exist. Discounts when two of you train together.',
+    lead: 'Drysuit, Nitrox, deep diving, Trimix: essential specialties for diving alpine lakes or preparing for travel. Choose the agency that fits your goals (SDI, TDI, PADI, FFESSM) with direct cross-overs. Discounts when two of you train together.',
     tabsLabel: 'Choose an agency',
     tabs: {
       sdi: {
         label: 'SDI',
-        lead: 'Scuba Diving International — the RSTC standard under its original name. Flexible theory, prerogatives recognised worldwide, and a direct bridge into the TDI technical path.',
+        lead: 'Scuba Diving International — the standard RSTC: Open Water training, drysuit, navigation and a direct route to the TDI technical branch.',
       },
       tdi: {
         label: 'TDI',
-        lead: 'Technical Diving International — the path into technical diving. Enriched mixes, planned decompression, depths beyond recreational limits.',
+        lead: 'Technical Diving International — the world reference in technical diving: advanced Nitrox, staged decompression, normoxic and hypoxic Trimix.',
       },
       padi: {
         label: 'PADI',
-        lead: 'The same ten specialties as SDI, under the PADI name — for those who value that particular card. Same content, same instructor.',
+        lead: 'PADI specialties (Dry Suit, Deep Diver, Enriched Air Nitrox, Wreck) to complete your logbook with the most recognised international brand. Same content, same instructor.',
       },
       ffessm: {
         label: 'FFESSM',
-        lead: 'The French federation curriculum, recognised across Switzerland and Europe. From first autonomous dives to dive leadership.',
+        lead: 'The French federal curriculum (CMAS), recognised in Switzerland and worldwide: from Level 1 to Level 4 (dive guide) and Trimix certifications for rigorous training.',
       },
     },
     equivalent: 'Equivalent',
@@ -255,7 +255,7 @@ export const en: Dictionary = {
   places: {
     eyebrow: 'Locations',
     title: { before: 'Three bodies of water,', em: 'three atmospheres.' },
-    lead: 'Courses run mainly at Lac du Rosel near Martigny, at Les Îles in Sion, and on Lake Geneva. Residential stages are also possible — just ask.',
+    lead: 'Courses and try-dives take place at Lac du Rosel near Martigny, Les Îles in Sion, and on Lake Geneva. Ideal sites for training and exploration in Valais and Western Switzerland, with accommodation options for intensive courses.',
     route: 'The Rhône, from Sion to Lake Geneva',
     openMap: 'open in Google Maps',
     facts: {
@@ -327,12 +327,12 @@ export const en: Dictionary = {
   gifts: {
     eyebrow: 'Gift vouchers',
     title: { before: 'Give someone their first', em: 'breath underwater.' },
-    lead: 'A gift voucher to use at their own pace, in a small group.',
+    lead: 'Give a gift voucher for a try-dive, a full certification course or a specialty in Valais. Valid for one year, at their own pace.',
     offersTitle: 'The offers',
     offers: {
       baptism: {
         title: 'A try-dive',
-        text: 'About two hours for a first breath underwater, closely supervised.',
+        text: 'About two hours of introductory diving for a first breath underwater in open water, closely and safely supervised.',
       },
       course: {
         title: 'A course',
@@ -467,17 +467,17 @@ export const en: Dictionary = {
   faq: {
     eyebrow: 'Safety stop · 3 min',
     title: { before: 'Your questions,', em: 'my answers.' },
-    lead: 'The topics that come up most often. If yours is not here, a message is enough — I usually reply within the day.',
+    lead: 'Frequently asked questions about courses, try-dives and dive gear in Valais. If yours is not listed here, just drop me a message — I usually reply within the day.',
     items: [
       {
-        question: 'I am a beginner — where should I start?',
+        question: 'Beginner: should I choose a try-dive or an Open Water course?',
         answer:
-          'For most beginners, I recommend the SDI Open Water Scuba Diver: e-learning theory, fast progression, global recognition — the same standards as PADI. If you dive mainly in France, FFESSM Niveau 1 is an excellent alternative. A 10-minute call and we map the right path together.',
+          'Two options for beginners: a try-dive (about 2 hours) to discover underwater sensations in a lake, or directly the Open Water course (SDI or PADI) to become an autonomous diver down to 18 metres anywhere in the world. E-learning theory, small-group lake practice, flexible schedule. A 10-minute call helps you choose the right path.',
       },
       {
-        question: 'Can I mix agencies?',
+        question: 'Can I mix certification agencies (criss-cross)?',
         answer:
-          'Yes — and it is often a good idea. It is called criss-cross: validate some levels with SDI or PADI, others with FFESSM. Your training takes a little longer, but afterwards you can dive anywhere without restriction.',
+          'Yes — this is one of Bulles en Valais’s key strengths. Criss-crossing allows you to complete an initial level with SDI or PADI for convenience and global recognition, then take advanced levels or specialties with FFESSM/CMAS or TDI. You will then dive without restriction wherever you go.',
       },
       {
         question: 'What is the difference between SDI and PADI?',
@@ -487,22 +487,22 @@ export const en: Dictionary = {
       {
         question: 'Do I need to buy gear before starting?',
         answer:
-          'No. A large share of the equipment is provided based on available sizes. Only the mask/fins/snorkel set is worth owning — and I advise asking before buying to avoid wrong choices.',
+          'No. A large share of the equipment is provided based on available sizes (tank, regulator, BCD, wetsuit or drysuit). Only the mask/fins/snorkel set is worth owning — and I advise asking before buying to avoid wrong choices.',
       },
       {
-        question: 'Where do courses take place?',
+        question: 'Where do the diving courses and try-dives take place?',
         answer:
-          'Mainly at Lac du Rosel near Martigny, Les Îles in Sion, and on Lake Geneva. Residential training stages are also possible — reach out to discuss.',
+          'Mainly at Lac du Rosel near Martigny, Les Îles in Sion, and on Lake Geneva wall dives (Rivaz, Chillon, St-Gingolph, Hermance). These Swiss sites offer calm, safe training conditions accessible year-round. Dive camp packages with accommodation in Valais are also available on request.',
       },
       {
-        question: 'How long does training take?',
+        question: 'How long does a diving course take?',
         answer:
-          'From two hours for a try-dive to several weeks for a Divemaster. Open Water wraps in 3 days minimum, Advanced in 2 days, Rescue in 3 days. Pace can be intensive or spaced depending on your availability.',
+          'From two hours for a try-dive to several weeks for a Divemaster internship. Open Water takes a minimum of 3 days (typically over one or two weekends), Advanced takes 2 days, and Rescue 3 days. The schedule is fully adaptable to your availability.',
       },
       {
-        question: 'I am already certified elsewhere — what now?',
+        question: 'I am already certified with another agency: what should I do?',
         answer:
-          'Bring your card and logbook. Depending on your profile, a bridge or a simple refresher (ReActivate, ~2h, CHF 80) lets you get back in the water in the best conditions. We assess together before any decision.',
+          'Bring your certification card (PADI, SSI, CMAS, NAUI...) and your logbook. An equivalent cross-over or a tailored refresher (ReActivate, ~2 hours, CHF 80) will restore your confidence for diving Swiss lakes or continuing toward a higher qualification.',
       },
     ],
   },
