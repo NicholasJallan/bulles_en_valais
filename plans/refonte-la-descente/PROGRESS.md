@@ -687,7 +687,25 @@
   - Safari réel et iOS, coût GPU du hero sur téléphone moyen de gamme : à surveiller ; Firefox (D21).
 - **Retour arrière** : `ops/rollback.sh --list` puis `ops/rollback.sh <release>` (une seule release de production pour l'instant ; les releases `staging` de S12 restent disponibles) ; dernier recours : restaurer `sites-available/bullesenvalais.bak-20261002-155459-s13` (et `nginx.conf.bak-…-s13` pour TLS), `sudo nginx -t && sudo systemctl reload nginx` ; l'ancien docroot est intact.
 
-### 🔁 Bilan du plan — 2026-10-02
+### Post-S13 — 2026-10-14 (audit de code, durcissement backend, déploiement & GA4 Phase A)
+- **Frontend & robustesse** :
+  - `src/scripts/app.ts` : si un contrôleur échoue, `hasControllerFailure` court-circuite `startMotion()` et retire `motion-ok` / `motion-ready` en plus de `.js` pour garantir un rendu statique propre.
+  - `src/lib/typography.ts` : repli de sécurité sur `COMMON_RULES` si une locale non encore configurée est appelée.
+  - Typage : nettoyage des avertissements TypeScript dans `tests/e2e/{motion,form}.spec.ts`.
+- **DX & Performance** :
+  - `vitest.config.ts` : `isolate: false` divise le temps d'exécution des 54 fichiers de tests par 2,7 (~305 ms vs ~830 ms).
+  - Documentation du code : nettoyage des anciens commentaires `TODO(I-06)` et `TODO(I-07)` alignés sur D39 et D40.
+- **Backend & Sécurité** :
+  - `public/api/contact.php` : résolution de D48 avec `DAILY_IP_LIMIT = 5` par empreinte d'IP hachée (`shared/state/contact-quota-ip`) avec exemption du loopback local (`127.0.0.1`, `::1`). Code de retour `429 (rate_limited)`.
+  - Timeout global SMTP `SMTP_TRANSACTION_TIMEOUT_S = 25` protégeant FastCGI des tarpits ou lenteurs réseau.
+  - Tests PHP : 167 unitaires + 31 intégration passés.
+- **Déploiement & Production** :
+  - Commit `63e330e` poussé sur `main`.
+  - Déploiement sur le Raspberry Pi en release `20261014-115647` via `./ops/deploy.sh production --skip-build`. Bascule atomique du lien `current` et rechargement de Nginx (`sudo systemctl reload nginx`).
+- **Mesure Google (Phase A validée)** :
+  - Nicholas confirme en direct la bonne réception des visites et des événements de clic dans GA4 (`G-QG5ZCVY1Z7`) sans erreur CSP. I-06 passé à validé.
+
+### 🔁 Bilan du plan — 2026-10-02 (mis à jour le 14.10.2026)
 - **Livré** : 14 sessions (S00–S13) en trois jours ; site statique Astro FR/EN, parité garantie par les tests ; WebGL du hero calé sur le vrai lac (D49), profondimètre, échelle, lampe, parcours du Rhône, bulles, palier ; formulaire durci (S00) puis plafonné (S10) ; consentement et Consent Mode v2 ; déploiement atomique par releases avec retour arrière.
 - **Avant / après** (mobile) : Lighthouse —/91/73/83 → **99/100/100/100** ; LCP ≈ 1,8 s cache chaud (compilation Babel) → 1,7 s cache vide simulé ; ≈ 5 Mo d'images décodées → 503 Kio transférés ; JS : React + Babel par unpkg (≈ 1 Mo+) → 3,2 Ko initial, 111,4 Ko au total (WebGL à la demande) ; CSP avec `unsafe-eval` et `unsafe-inline` → sans script inline ; soft 404 → vraie 404 ; GA4 bloqué → reçu après consentement.
 - **Écarts** : MCP `chrome-devtools` jamais disponible (Playwright + Lighthouse en ligne de commande à la place) ; Firefox non validé (D21) ; pas de `next.` (option B) ; conversions Ads et GA4 détaillé sortis vers `plans/mesure-google/` (D40) ; animation du logo abandonnée (D35).

@@ -59,7 +59,8 @@ s'adapte). Les chemins de clic ci-dessous sont indicatifs.
 5. Optionnel : `https://tagassistant.google.com` sur `https://dive.bullesenvalais.ch/` montre la balise, la
    destination GA4 et l'état du consentement.
 
-**Fait quand** : visite visible en temps réel, aucune violation CSP, tableau des cookies exact.
+**Fait quand** : visite visible en temps réel, aucune violation CSP, tableau des cookies exact.  
+*(✅ Validé le 14.10.2026 en production par Nicholas : visites temps réel et clics d'événements visibles dans GA4).*
 
 ### Phase B — Suivre les prises de contact dans GA4 (interface GA4 seulement, pas de code)
 
