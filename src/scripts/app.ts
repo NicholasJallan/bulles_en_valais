@@ -39,13 +39,18 @@ async function startMotion(): Promise<void> {
   }
 }
 
+let hasControllerFailure = false;
+
 void mountControllers(document, CONTROLLERS, (error, name) => {
+  hasControllerFailure = true;
   console.error(`Controller "${name}" failed to start`, error);
   // A controller that does not start must not leave a half-enhanced page (tabs hiding their
   // panels, a disabled submit): fall back to the page as served without JavaScript.
-  root.classList.remove('js');
+  root.classList.remove('js', 'motion-ok', 'motion-ready');
 }).then(async () => {
   // Lets the end-to-end tests wait for the controllers.
   root.dataset.controllers = 'ready';
-  await startMotion();
+  if (!hasControllerFailure) {
+    await startMotion();
+  }
 });

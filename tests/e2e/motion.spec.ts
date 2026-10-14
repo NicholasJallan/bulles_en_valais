@@ -103,7 +103,7 @@ test.describe('motion', () => {
       }).observe({ type: 'layout-shift', buffered: true });
     });
     test.skip(
-      (await page.context().browser()?.browserType().name()) !== 'chromium',
+      page.context().browser()?.browserType().name() !== 'chromium',
       'layout-shift entries exist in Chromium only',
     );
     await gotoMoving(page);

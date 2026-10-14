@@ -5,11 +5,9 @@
 (function () {
   var PRODUCTION_HOST = 'dive.bullesenvalais.ch';
   var ADS_ID = 'AW-10798308119';
-  // TODO(I-06): set to 'G-QG5ZCVY1Z7' only if Tag Assistant shows that the Google tag does not
-  // already send to this GA4 property (a second config would count every page twice).
+  // D40: AW-10798308119 routes automatically to G-QG5ZCVY1Z7, keeping GA4_ID as null avoids double page views.
   var GA4_ID = null;
-  // TODO(I-07): 'advanced' (the tag loads at once, cookieless pings until consent) or 'basic' (the
-  // tag waits for consent). Advanced by default until Nicholas chooses.
+  // D39: Advanced Consent Mode confirmed (the tag loads at once, cookieless pings until consent).
   var MODE = 'advanced';
   var CONSENT_COOKIE = 'cc_cookie';
 

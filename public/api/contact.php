@@ -36,6 +36,7 @@ const MIN_ELAPSED_MS = 3000;
 // Daily cap of e-mails (Gmail quota): a robot with rotating addresses gets past the nginx
 // limit per address. The counter holds no personal data.
 const DAILY_LIMIT = 50;
+const DAILY_IP_LIMIT = 5;
 const QUOTA_FILE = SHARED_DIR . '/state/contact-quota';
 // Unquoted local part only: FILTER_VALIDATE_EMAIL alone accepts quoted parts
 // that smuggle LF or NUL into headers.
@@ -46,6 +47,7 @@ const HEADER_CHUNK_BYTES = 36; // encoded word = 60 chars, fits after "Subject: 
 const SITE_NAME = 'Bulles en Valais';
 const SMTP_HELO = 'localhost';
 const SMTP_TIMEOUT_S = 10;
+const SMTP_TRANSACTION_TIMEOUT_S = 25;
 const SMTP_MAX_REPLY_LINES = 50;
 
 // ---------------------------------------------------------------------------
@@ -343,8 +345,11 @@ function smtp_reply_code(string $reply): ?string
  *
  * @param resource $sock
  */
-function smtp_step($sock, ?string $command, string $expect, string $stage): ?string
+function smtp_step($sock, ?string $command, string $expect, string $stage, ?float $deadline = null): ?string
 {
+    if ($deadline !== null && microtime(true) >= $deadline) {
+        return $stage . ' (timeout)';
+    }
     if ($command !== null && !smtp_write($sock, $command . "\r\n")) {
         return $stage . ' (write)';
     }
@@ -357,10 +362,10 @@ function smtp_step($sock, ?string $command, string $expect, string $stage): ?str
 }
 
 /** @param resource $sock */
-function smtp_run($sock, array $steps): ?string
+function smtp_run($sock, array $steps, ?float $deadline = null): ?string
 {
     foreach ($steps as [$command, $expect, $stage]) {
-        $error = smtp_step($sock, $command, $expect, $stage);
+        $error = smtp_step($sock, $command, $expect, $stage, $deadline);
         if ($error !== null) {
             return $error;
         }
@@ -369,9 +374,9 @@ function smtp_run($sock, array $steps): ?string
 }
 
 /** @param resource $sock */
-function smtp_starttls($sock): ?string
+function smtp_starttls($sock, ?float $deadline = null): ?string
 {
-    $error = smtp_step($sock, 'STARTTLS', '220', 'starttls');
+    $error = smtp_step($sock, 'STARTTLS', '220', 'starttls', $deadline);
     if ($error !== null) {
         return $error;
     }
@@ -383,18 +388,21 @@ function smtp_starttls($sock): ?string
     if (stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) !== true) {
         return 'tls (handshake)';
     }
-    return smtp_step($sock, 'EHLO ' . SMTP_HELO, '250', 'ehlo');
+    return smtp_step($sock, 'EHLO ' . SMTP_HELO, '250', 'ehlo', $deadline);
 }
 
 /** @param resource $sock */
-function smtp_send_data($sock, string $message): ?string
+function smtp_send_data($sock, string $message, ?float $deadline = null): ?string
 {
+    if ($deadline !== null && microtime(true) >= $deadline) {
+        return 'message (timeout)';
+    }
     $stuffed = dot_stuff($message);
     $payload = substr($stuffed, -2) === "\r\n" ? $stuffed : $stuffed . "\r\n";
     if (!smtp_write($sock, $payload . ".\r\n")) {
         return 'message (write)';
     }
-    return smtp_step($sock, null, '250', 'message');
+    return smtp_step($sock, null, '250', 'message', $deadline);
 }
 
 /**
@@ -402,11 +410,11 @@ function smtp_send_data($sock, string $message): ?string
  *
  * @param resource $sock
  */
-function smtp_dialogue($sock, array $cfg, string $message): ?string
+function smtp_dialogue($sock, array $cfg, string $message, ?float $deadline = null): ?string
 {
-    $error = smtp_run($sock, [[null, '220', 'greeting'], ['EHLO ' . SMTP_HELO, '250', 'ehlo']]);
+    $error = smtp_run($sock, [[null, '220', 'greeting'], ['EHLO ' . SMTP_HELO, '250', 'ehlo']], $deadline);
     if ($error === null && ($cfg['starttls'] ?? true)) {
-        $error = smtp_starttls($sock);
+        $error = smtp_starttls($sock, $deadline);
     }
     if ($error === null) {
         $error = smtp_run($sock, [
@@ -416,22 +424,25 @@ function smtp_dialogue($sock, array $cfg, string $message): ?string
             ['MAIL FROM:<' . $cfg['from'] . '>', '250', 'mail'],
             ['RCPT TO:<' . $cfg['to'] . '>', '250', 'rcpt'],
             ['DATA', '354', 'data'],
-        ]);
+        ], $deadline);
     }
-    return $error ?? smtp_send_data($sock, $message);
+    return $error ?? smtp_send_data($sock, $message, $deadline);
 }
 
-function smtp_send(array $cfg, string $message): ?string
+function smtp_send(array $cfg, string $message, ?float $deadline = null): ?string
 {
+    $deadline = $deadline ?? (microtime(true) + SMTP_TRANSACTION_TIMEOUT_S);
     $errno = 0;
     $errstr = '';
-    $sock = @fsockopen($cfg['host'], $cfg['port'], $errno, $errstr, SMTP_TIMEOUT_S);
+    $remaining = max(1, (int) ceil($deadline - microtime(true)));
+    $timeout = min(SMTP_TIMEOUT_S, $remaining);
+    $sock = @fsockopen($cfg['host'], $cfg['port'], $errno, $errstr, $timeout);
     if ($sock === false) {
         return 'connect (' . $errno . ' ' . sanitize_header($errstr) . ')';
     }
-    stream_set_timeout($sock, SMTP_TIMEOUT_S);
+    stream_set_timeout($sock, $timeout);
     try {
-        return smtp_dialogue($sock, $cfg, $message);
+        return smtp_dialogue($sock, $cfg, $message, $deadline);
     } finally {
         @fwrite($sock, "QUIT\r\n");
         fclose($sock);
@@ -538,9 +549,84 @@ function take_daily_quota(string $path, string $today, int $limit): ?bool
     }
 }
 
-/** Sends within the daily limit; a counter that cannot be used never loses a real message. */
-function deliver_within_quota(array $fields, string $quotaPath, string $today): array
+function ip_quota_path(string $quotaPath): string
 {
+    return $quotaPath . '-ip';
+}
+
+function hash_ip(string $ip): string
+{
+    return substr(hash('sha256', $ip), 0, 16);
+}
+
+/**
+ * Counts one more e-mail today for a specific IP address under an exclusive lock:
+ * true when allowed, false when the IP limit is reached, null on counter error.
+ */
+function take_daily_ip_quota(string $ip, string $path, string $today, int $limit): ?bool
+{
+    if ($ip === '' || in_array($ip, LOOPBACK_HOSTS, true)) {
+        return true;
+    }
+    if (is_link($path)) {
+        return null;
+    }
+    $handle = @fopen($path, 'c+');
+    if ($handle === false) {
+        return null;
+    }
+    try {
+        $stat = fstat($handle);
+        if ($stat === false || ($stat['mode'] & 0170000) !== 0100000 || $stat['nlink'] !== 1) {
+            return null;
+        }
+        if (!flock($handle, LOCK_EX)) {
+            return null;
+        }
+        $raw = (string) stream_get_contents($handle);
+        $counts = [];
+        $lines = preg_split('/\r?\n/', trim($raw));
+        if ($lines !== false) {
+            foreach ($lines as $line) {
+                if (preg_match('/^(\d{4}-\d{2}-\d{2}) ([0-9a-f]{16}) (\d{1,9})$/D', $line, $m) === 1) {
+                    if ($m[1] === $today) {
+                        $counts[$m[2]] = (int) $m[3];
+                    }
+                }
+            }
+        }
+        $ipHash = hash_ip($ip);
+        $current = $counts[$ipHash] ?? 0;
+        if ($current >= $limit) {
+            return false;
+        }
+        $counts[$ipHash] = $current + 1;
+        $out = '';
+        foreach ($counts as $hash => $c) {
+            $out .= $today . ' ' . $hash . ' ' . $c . "\n";
+        }
+        $written = rewind($handle) && ftruncate($handle, 0)
+            && fwrite($handle, $out) !== false && fflush($handle);
+        return $written ? true : null;
+    } finally {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+}
+
+/** Sends within the daily limit; a counter that cannot be used never loses a real message. */
+function deliver_within_quota(array $fields, string $quotaPath, string $today, string $ip = ''): array
+{
+    if ($ip !== '') {
+        $ipAllowed = take_daily_ip_quota($ip, ip_quota_path($quotaPath), $today, DAILY_IP_LIMIT);
+        if ($ipAllowed === false) {
+            error_log('contact: daily ip limit reached');
+            return result(429, ['ok' => false, 'error' => 'rate_limited']);
+        }
+        if ($ipAllowed === null) {
+            error_log('contact: daily ip counter unavailable, sent anyway');
+        }
+    }
     $allowed = take_daily_quota($quotaPath, $today, DAILY_LIMIT);
     if ($allowed === false) {
         error_log('contact: daily limit reached');
@@ -593,8 +679,9 @@ function handle_request(): void
     if ($outcome['dropped'] !== null) {
         error_log('contact: dropped (' . $outcome['dropped'] . ')'); // reason only, to spot false positives
     }
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
     $final = $outcome['send'] !== null
-        ? deliver_within_quota($outcome['send'], quota_path(), date('Y-m-d'))
+        ? deliver_within_quota($outcome['send'], quota_path(), date('Y-m-d'), $ip)
         : $outcome;
     respond($final['status'], $final['body']);
 }

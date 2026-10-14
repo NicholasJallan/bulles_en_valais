@@ -231,6 +231,26 @@ if (!defined('CONTACT_TEST_NO_FILES')) {
     file_put_contents($quotaFile, '2026-10-02 3');
     $counted = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02');
     check('under the limit → counted and sent', $counted['status'] === 500 && file_get_contents($quotaFile) === '2026-10-02 4');
+
+    // IP quota checks
+    $ipQuotaFile = $quotaFile . '-ip';
+    check('first e-mail for IP → allowed', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === true);
+    check('second e-mail for IP → allowed', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === true);
+    check('third e-mail for IP → refused', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === false);
+    check('another IP on same day → allowed', take_daily_ip_quota('192.168.1.2', $ipQuotaFile, '2026-10-02', 2) === true);
+    check('next day for original IP → allowed again', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-03', 2) === true);
+    check('loopback IP is exempt from daily IP limit', take_daily_ip_quota('127.0.0.1', $ipQuotaFile, '2026-10-02', 0) === true);
+    @unlink($ipQuotaFile);
+
+    $ipLimited = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02', '192.168.1.99');
+    check('under IP limit → counted and sent', $ipLimited['status'] === 500);
+    for ($i = 0; $i < DAILY_IP_LIMIT; $i++) {
+        take_daily_ip_quota('192.168.1.99', $ipQuotaFile, '2026-10-02', DAILY_IP_LIMIT);
+    }
+    $ipBlocked = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02', '192.168.1.99');
+    check('IP limit reached → 429 rate_limited, nothing sent', $ipBlocked['status'] === 429 && $ipBlocked['body'] === ['ok' => false, 'error' => 'rate_limited']);
+    @unlink($ipQuotaFile);
+
     @unlink($quotaFile);
 }
 ini_set('error_log', (string) $previousLog);
@@ -354,6 +374,14 @@ fclose($server);
 $error = smtp_step($client, null, '220', 'greeting');
 fclose($client);
 check('no reply at all (closed or timed out) → "no reply"', $error === 'greeting (no reply)');
+
+$pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$client, $server] = $pair;
+$expiredDeadline = microtime(true) - 1.0;
+$timeoutError = smtp_dialogue($client, array_merge($cfg, ['starttls' => false]), "x\r\n", $expiredDeadline);
+fclose($client);
+fclose($server);
+check('expired deadline returns timeout stage', $timeoutError === 'greeting (timeout)');
 
 // ---------------------------------------------------------------------------
 section('entry points (no network, no file written)');

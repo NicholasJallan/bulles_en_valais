@@ -51,6 +51,10 @@ describe('typeset', () => {
     expect(typeset('Un élève — un instructeur', 'fr')).toBe(`Un élève${NBSP}— un instructeur`);
     expect(typeset('fastest — really', 'en')).toBe(`fastest${NBSP}— really`);
   });
+
+  it('falls back to common rules when an unknown locale is passed', () => {
+    expect(typeset("It's 18 m deep — sure", 'de' as any)).toBe(`It’s 18${NBSP}m deep${NBSP}— sure`);
+  });
 });
 
 describe('typesetDeep', () => {

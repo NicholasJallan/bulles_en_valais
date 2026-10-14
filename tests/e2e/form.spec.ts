@@ -7,14 +7,13 @@ async function fillForm(page: Page): Promise<void> {
   await page.locator('#contact-message').fill('Bonjour, un baptême en mai ?');
 }
 
-function mockContact(page: Page, status: number, body: unknown) {
+async function mockContact(page: Page, status: number, body: unknown) {
   const requests: unknown[] = [];
-  return page
-    .route('**/api/contact', async (route) => {
-      requests.push(route.request().postDataJSON());
-      await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-    })
-    .then(() => requests);
+  await page.route('**/api/contact', async (route) => {
+    requests.push(route.request().postDataJSON());
+    await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  return requests;
 }
 
 const submit = (page: Page) => page.getByRole('button', { name: 'Envoyer le message' }).click();

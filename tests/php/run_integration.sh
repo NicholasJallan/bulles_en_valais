@@ -24,7 +24,7 @@ cleanup() {
   [ -n "$SMTP_PID" ] && kill "$SMTP_PID" 2>/dev/null
   [ -n "$PHP_PID" ] && kill "$PHP_PID" 2>/dev/null
   rm -rf "$WORK"
-  rm -f "$QUOTA"
+  rm -f "$QUOTA" "$QUOTA-ip"
 }
 trap cleanup EXIT
 
