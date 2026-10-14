@@ -21,10 +21,11 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: 'scripts/google-ads-report/requirements.txt'
 
-      - name: Créer requirements.txt et installer les dépendances
+      - name: Installer les dépendances
         run: |
-          pip install google-analytics-data
+          pip install -r scripts/google-ads-report/requirements.txt
 
       - name: Exécuter le script de reporting et envoyer l'e-mail
         env:
