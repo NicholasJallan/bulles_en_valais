@@ -423,7 +423,7 @@ def send_email(subject: str, html_body: str) -> None:
     user = os.environ.get("SMTP_USER")
     password = os.environ.get("SMTP_PASS")
     sender = os.environ.get("SMTP_FROM", user)
-    recipient = os.environ.get("REPORT_RECIPIENT", "nicholas@bullesenvalais.ch")
+    recipient = os.environ.get("REPORT_RECIPIENT", "nicholas.jallan@gmail.com")
 
     if not user or not password:
         raise ValueError("Variables SMTP_USER ou SMTP_PASS manquantes.")
