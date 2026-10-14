@@ -1,0 +1,40 @@
+name: Rapport Quotidien Google Ads
+
+on:
+  schedule:
+    # 04:00 UTC correspond à 06:00 heure locale suisse (CEST, UTC+2) ou 05:00 (CET, UTC+1)
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Permet de lancer le rapport manuellement à tout moment depuis l'interface GitHub
+
+jobs:
+  send-report:
+    name: Extraire GA4 et Envoyer le Rapport
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v4
+
+      - name: Configurer Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Créer requirements.txt et installer les dépendances
+        run: |
+          pip install google-analytics-data
+
+      - name: Exécuter le script de reporting et envoyer l'e-mail
+        env:
+          GA4_SERVICE_ACCOUNT_KEY: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY }}
+          GA4_PROPERTY_ID: "358387240"
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
+        run: |
+          python scripts/google-ads-report/send_report.py
