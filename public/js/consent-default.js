@@ -50,6 +50,8 @@
   });
   // Without ad_storage, strip the ad click identifiers from what is sent.
   gtag('set', 'ads_data_redaction', true);
+  // Pass ad click identifiers in URLs when cookies are not yet stored.
+  gtag('set', 'url_passthrough', true);
   gtag('js', new Date());
   gtag('config', ADS_ID);
   if (GA4_ID) gtag('config', GA4_ID);
