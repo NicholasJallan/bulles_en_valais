@@ -1,5 +1,5 @@
 ---
-name: google-ads-performance
+name: google-ads
 description: >-
   Analyse la performance de la campagne Google Ads pour Bulles en Valais (Search-BEV),
   incluant les clics, impressions, coûts, coût par clic (CPC), conversions (leads, WhatsApp, appels)
