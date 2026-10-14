@@ -42,8 +42,10 @@ describe('conversionCommands', () => {
     }
   });
 
-  it('ships with every label disabled until I-06 is answered', () => {
-    expect(Object.values(CONVERSION_LABELS).every((label) => label === null)).toBe(true);
+  it('ships with the lead conversion label configured (I-06)', () => {
+    expect(CONVERSION_LABELS.lead).toBe('fJ-dCIad9pwdEJe2hJ0o');
+    expect(CONVERSION_LABELS.whatsapp).toBeNull();
+    expect(CONVERSION_LABELS.phone).toBeNull();
   });
 });
 
@@ -59,6 +61,7 @@ describe('track helpers', () => {
     trackWhatsApp();
     trackPhone();
     expect(gtag.mock.calls).toEqual([
+      ['event', 'conversion', { send_to: `${GOOGLE_ADS_ID}/fJ-dCIad9pwdEJe2hJ0o` }],
       ['event', 'generate_lead', { method: 'form' }],
       ['event', 'whatsapp_click', { method: 'whatsapp' }],
       ['event', 'phone_click', { method: 'phone' }],

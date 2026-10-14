@@ -8,10 +8,14 @@ export type ConversionKind = 'lead' | 'whatsapp' | 'phone';
 export type ConversionLabels = Readonly<Record<ConversionKind, string | null>>;
 
 /**
- * Labels of the Google Ads conversion actions (`AW-…/<label>`). Nicholas has no active paid
- * campaigns (D40); a null label sends no Ads conversion (the GA4 event is still sent).
+ * Labels of the Google Ads conversion actions (`AW-…/<label>`).
+ * Lead conversion action configured via Google Ads tag (I-06).
  */
-export const CONVERSION_LABELS: ConversionLabels = { lead: null, whatsapp: null, phone: null };
+export const CONVERSION_LABELS: ConversionLabels = {
+  lead: 'fJ-dCIad9pwdEJe2hJ0o',
+  whatsapp: null,
+  phone: null,
+};
 
 const GA4_EVENTS: Readonly<Record<ConversionKind, { name: string; method: string }>> = {
   lead: { name: 'generate_lead', method: 'form' },

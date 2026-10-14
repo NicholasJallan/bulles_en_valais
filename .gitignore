@@ -24,3 +24,4 @@ tests/php/.quota-integration
 
 # Service account keys and local credentials
 GA/
+client_secret_*.json
