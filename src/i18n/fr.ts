@@ -110,7 +110,7 @@ export const fr: Dictionary = {
         sub: 'Récréative · Internationale',
         headline: { before: 'Le nom le plus connu', em: 'de la plongée loisir.' },
         description:
-          "PADI est la marque la plus reconnue du grand public — un vrai argument si vous plongez surtout en voyage organisé ou si vos futurs binômes de palanquée en ont l'habitude. Sur le fond, la formation suit les mêmes standards RSTC que SDI : même contenu, mêmes prérogatives, même progression jusqu'au Divemaster. Une carte PADI est reconnue dans plus de 180 pays.",
+          "PADI est la marque la plus reconnue du grand public — un vrai argument si vous plongez surtout en voyage organisé ou si vos futurs binômes de palanquée en ont l'habitude. Sur le fond, la formation suit les mêmes standards RSTC que SDI : même contenu, mêmes prérogatives, même progression jusqu'au Divemaster. Comme pour SDI, votre certification est reconnue dans le monde entier.",
         highlights: [
           'La certification la plus reconnue par le grand public',
           'E-learning multilingue, accessible en continu',
@@ -183,7 +183,7 @@ export const fr: Dictionary = {
       },
       {
         label: 'Reconnaissance',
-        values: { 'sdi-tdi': '100+ pays', padi: '180+ pays', ffessm: 'France, Outre-mer, CMAS' },
+        values: { 'sdi-tdi': 'Mondiale', padi: 'Mondiale', ffessm: 'France, Outre-mer, CMAS' },
       },
       {
         label: 'Rythme',

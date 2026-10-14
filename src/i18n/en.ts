@@ -108,7 +108,7 @@ export const en: Dictionary = {
         sub: 'Recreational · International',
         headline: { before: 'The best-known name', em: 'in recreational diving.' },
         description:
-          'PADI is the brand the general public recognises most — a real advantage if you mostly dive on organised trips or if your future dive buddies are used to it. Underneath, the training follows the same RSTC standards as SDI: same content, same prerogatives, same progression up to Divemaster. A PADI card is recognised in 180+ countries.',
+          'PADI is the brand the general public recognises most — a real advantage if you mostly dive on organised trips or if your future dive buddies are used to it. Underneath, the training follows the same RSTC standards as SDI: same content, same prerogatives, same progression up to Divemaster. Just like SDI, your certification is recognised worldwide.',
         highlights: [
           'The certification most widely recognised by the general public',
           'Multilingual e-learning, available anytime',
@@ -182,8 +182,8 @@ export const en: Dictionary = {
       {
         label: 'Recognition',
         values: {
-          'sdi-tdi': '100+ countries',
-          padi: '180+ countries',
+          'sdi-tdi': 'Worldwide',
+          padi: 'Worldwide',
           ffessm: 'France, overseas, CMAS',
         },
       },
