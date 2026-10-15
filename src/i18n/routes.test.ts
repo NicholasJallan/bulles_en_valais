@@ -14,6 +14,13 @@ describe('routePath', () => {
     expect(routePath('legalNotice', 'fr')).toBe('/mentions-legales/');
     expect(routePath('legalNotice', 'en')).toBe('/en/legal-notice/');
   });
+
+  it('resolves the landing pages under their translated paths', () => {
+    expect(routePath('baptism', 'fr')).toBe('/bapteme-plongee-valais/');
+    expect(routePath('baptism', 'en')).toBe('/en/try-scuba-diving-valais/');
+    expect(routePath('drysuit', 'fr')).toBe('/combinaison-etanche-valais/');
+    expect(routePath('drysuit', 'en')).toBe('/en/dry-suit-diving-valais/');
+  });
 });
 
 describe('alternates', () => {

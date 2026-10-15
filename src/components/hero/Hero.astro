@@ -8,8 +8,10 @@ import Eyebrow from '@/components/ui/Eyebrow.astro';
 import Section from '@/components/ui/Section.astro';
 import { CREDENTIALS } from '@/data/credentials.ts';
 import { PLACES } from '@/data/places.ts';
+import { getActiveSpotlight } from '@/data/season.ts';
 import { markerDepth } from '@/data/sections.ts';
-import { getDictionary } from '@/i18n/index.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import { routePath } from '@/i18n/routes.ts';
 import type { Locale } from '@/i18n/types.ts';
 import { formatCoordinates } from '@/lib/format.ts';
 
@@ -19,6 +21,8 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getDictionary(locale);
+const spotlight = getActiveSpotlight();
+const spotlightHref = routePath(spotlight.route, locale);
 // The photo is the Rosel: its coordinates sign the image.
 const rosel = PLACES.find((place) => place.id === 'rosel');
 if (rosel === undefined) throw new Error('The Rosel is missing from places.ts');
@@ -49,6 +53,11 @@ const teaching = CREDENTIALS.filter((credential) =>
       <EmphasisText value={t.hero.title} />
     </h1>
     <p class="lead hero-lead">{t.hero.lead}</p>
+    <a href={spotlightHref} class="hero-spotlight">
+      <span class="hero-spotlight-badge">{localize(spotlight.badge, locale)}</span>
+      <span class="hero-spotlight-title">{localize(spotlight.title, locale)}</span>
+      <span class="hero-spotlight-arrow" aria-hidden="true">&rarr;</span>
+    </a>
     <div class="hero-actions">
       <Button href="#contact" icon="arrow-down">
         {t.hero.primaryCta}
@@ -233,6 +242,49 @@ const teaching = CREDENTIALS.filter((credential) =>
   .hero-lead {
     max-inline-size: 42ch;
     color: var(--fg-soft);
+  }
+
+  .hero-spotlight {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    padding: var(--space-3xs) var(--space-s);
+    background-color: color-mix(in oklch, var(--fg) 8%, transparent);
+    border: 1px solid color-mix(in oklch, var(--fg) 18%, transparent);
+    border-radius: var(--radius-round);
+    font-size: var(--step--2);
+    text-decoration: none;
+    color: var(--fg);
+    backdrop-filter: blur(8px);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    max-inline-size: 100%;
+  }
+
+  .hero-spotlight:hover {
+    background-color: color-mix(in oklch, var(--fg) 14%, transparent);
+    border-color: color-mix(in oklch, var(--fg) 32%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .hero-spotlight-badge {
+    font-weight: var(--text-strong);
+    color: var(--c-deco-emerald);
+  }
+
+  .hero-spotlight-title {
+    color: var(--fg-soft);
+  }
+
+  .hero-spotlight-arrow {
+    font-family: var(--font-sans);
+    color: var(--fg-soft);
+    transition: transform 0.2s ease;
+  }
+
+  .hero-spotlight:hover .hero-spotlight-arrow {
+    transform: translateX(2px);
+    color: var(--fg);
   }
 
   .hero-actions {

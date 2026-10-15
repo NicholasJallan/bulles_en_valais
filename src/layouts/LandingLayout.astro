@@ -1,0 +1,693 @@
+---
+import Button from '@/components/ui/Button.astro';
+import EmphasisText from '@/components/ui/EmphasisText.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ContactForm from '@/components/contact/ContactForm.astro';
+import Footer from '@/components/footer/Footer.astro';
+import Nav from '@/components/nav/Nav.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { BUSINESS, EMAIL, GOOGLE_PROFILE_URL, PHONE, whatsappUrl } from '@/data/contact.ts';
+import type { LandingPageData } from '@/data/landings.ts';
+import { getDictionary, localize } from '@/i18n/index.ts';
+import { routePath } from '@/i18n/routes.ts';
+import type { Locale } from '@/i18n/types.ts';
+import { serializeJsonLd } from '@/lib/seo/jsonld.ts';
+
+interface Props {
+  locale: Locale;
+  landing: LandingPageData;
+}
+
+const { locale, landing } = Astro.props;
+const dictionary = getDictionary(locale);
+const tContact = dictionary.contact;
+
+const title = localize(landing.meta.title, locale);
+const description = localize(landing.meta.description, locale);
+const ogTitle = localize(landing.meta.ogTitle, locale);
+const ogDescription = localize(landing.meta.ogDescription, locale);
+
+const siteUrl = Astro.site?.origin ?? 'https://dive.bullesenvalais.ch';
+const canonicalUrl = `${siteUrl}${routePath(landing.route, locale)}`;
+const homeUrl = `${siteUrl}${routePath('home', locale)}`;
+
+// Schema.org JSON-LD tailored for the Landing Page
+const jsonLdData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Course',
+      '@id': `${canonicalUrl}#course`,
+      name: title,
+      description,
+      provider: {
+        '@type': 'LocalBusiness',
+        name: BUSINESS.name,
+        url: homeUrl,
+        telephone: PHONE.href.replace('tel:', ''),
+        email: EMAIL,
+        sameAs: [GOOGLE_PROFILE_URL],
+      },
+      offers: [
+        {
+          '@type': 'Offer',
+          price: landing.price.amount,
+          priceCurrency: landing.price.currency,
+          availability: 'https://schema.org/InStock',
+          url: canonicalUrl,
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${canonicalUrl}#faq`,
+      mainEntity: landing.faq.map((item) => ({
+        '@type': 'Question',
+        name: localize(item.question, locale),
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: localize(item.answer, locale),
+        },
+      })),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: locale === 'en' ? 'Home' : 'Accueil',
+          item: homeUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: title,
+          item: canonicalUrl,
+        },
+      ],
+    },
+  ],
+};
+
+const jsonLd = serializeJsonLd(jsonLdData);
+const contactChannels = [
+  {
+    label: tContact.channels.whatsapp,
+    value: PHONE.display,
+    href: whatsappUrl(localize(landing.hero.primaryCta, locale)),
+    icon: 'message',
+    external: true,
+  },
+  {
+    label: tContact.channels.phone,
+    value: PHONE.display,
+    href: PHONE.href,
+    icon: 'phone',
+    external: false,
+  },
+  {
+    label: tContact.channels.email,
+    value: EMAIL,
+    href: `mailto:${EMAIL}`,
+    icon: 'mail',
+    external: false,
+  },
+] as const;
+---
+
+<BaseLayout
+  locale={locale}
+  route={landing.route}
+  title={title}
+  description={description}
+  ogTitle={ogTitle}
+  ogDescription={ogDescription}
+>
+  <script type="application/ld+json" is:inline slot="head" set:html={jsonLd} />
+
+  <!-- En-tête avec Navigation -->
+  <Nav locale={locale} route={landing.route} />
+
+  <main id="content" class="landing-main">
+    
+    <!-- HERO SECTION -->
+    <section class="landing-hero" data-tone="deep">
+      <div class="wrap landing-hero-content">
+        <span class="landing-eyebrow">{localize(landing.hero.eyebrow, locale)}</span>
+        <h1 class="landing-title">
+          <EmphasisText
+            value={{
+              before: localize(landing.hero.title.before, locale),
+              em: localize(landing.hero.title.em, locale),
+              after: localize(landing.hero.title.after, locale),
+            }}
+          />
+        </h1>
+        <p class="lead landing-lead">{localize(landing.hero.lead, locale)}</p>
+
+        <!-- CARTE DES CHIFFRES CLÉS / TARIFS -->
+        <div class="landing-facts-grid">
+          {landing.facts.map((fact) => (
+            <div class="landing-fact-card">
+              <span class="landing-fact-label">{localize(fact.label, locale)}</span>
+              <strong class="landing-fact-value">{localize(fact.value, locale)}</strong>
+            </div>
+          ))}
+        </div>
+
+        <div class="landing-hero-actions">
+          <Button href="#reserver" icon="arrow-down">
+            {localize(landing.hero.primaryCta, locale)}
+          </Button>
+          <Button
+            href={whatsappUrl(localize(landing.hero.primaryCta, locale))}
+            variant="secondary"
+            icon="message"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {localize(landing.hero.secondaryCta, locale)}
+          </Button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HIGHLIGHTS / POURQUOI CHOISIR BULLES EN VALAIS -->
+    <section data-tone="surface" class="landing-highlights-section landing-section">
+      <div class="wrap">
+        <header class="landing-section-header">
+          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Avantages & Sécurité' : 'Benefits & Safety'}</span>
+          <h2 class="landing-section-title">
+            <em>{localize(landing.highlightsTitle, locale)}</em>
+          </h2>
+        </header>
+        <div class="landing-cards-grid">
+          {landing.highlights.map((item) => (
+            <article class="landing-highlight-card">
+              <div class="landing-card-icon">
+                <Icon name="check" />
+              </div>
+              <h3 class="landing-card-title">{localize(item.title, locale)}</h3>
+              <p class="landing-card-text">{localize(item.description, locale)}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉTAPES DE DÉROULEMENT -->
+    <section data-tone="lagoon" class="landing-steps-section landing-section">
+      <div class="wrap">
+        <header class="landing-section-header">
+          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Progression & Méthode' : 'Progression & Method'}</span>
+          <h2 class="landing-section-title">
+            <em>{localize(landing.stepsTitle, locale)}</em>
+          </h2>
+          <p class="landing-section-lead">{localize(landing.stepsLead, locale)}</p>
+        </header>
+        <div class="landing-steps-list">
+          {landing.steps.map((step) => (
+            <div class="landing-step-row">
+              <div class="landing-step-num">{step.num}</div>
+              <div class="landing-step-body">
+                <div class="landing-step-header">
+                  <h3 class="landing-step-title">{localize(step.title, locale)}</h3>
+                  <span class="landing-step-duration">{localize(step.duration, locale)}</span>
+                </div>
+                <p class="landing-step-description">{localize(step.description, locale)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SPÉCIFIQUE -->
+    <section data-tone="deep" class="landing-faq-section landing-section">
+      <div class="wrap">
+        <header class="landing-section-header">
+          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Questions & Réponses' : 'Questions & Answers'}</span>
+          <h2 class="landing-section-title">
+            <em>{localize(landing.faqTitle, locale)}</em>
+          </h2>
+        </header>
+        <div class="landing-faq-grid">
+          {landing.faq.map((item) => (
+            <details class="landing-faq-details">
+              <summary class="landing-faq-question">
+                <span>{localize(item.question, locale)}</span>
+                <Icon name="arrow-down" class="landing-faq-arrow" />
+              </summary>
+              <div class="landing-faq-answer">
+                <p>{localize(item.answer, locale)}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- RÉSERVATION / FORMULAIRE DE CONTACT -->
+    <section id="reserver" data-tone="surface" class="landing-contact-section landing-section">
+      <div class="wrap">
+        <header class="landing-section-header">
+          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Contact & Réservation' : 'Booking & Contact'}</span>
+          <h2 class="landing-section-title">
+            {locale === 'fr' ? 'Planifions votre ' : 'Let’s plan your '}
+            <em>{locale === 'fr' ? 'immersion' : 'session'}</em>
+            {locale === 'fr' ? ' ensemble.' : ' together.'}
+          </h2>
+          <p class="landing-section-lead">
+            {
+              locale === 'fr'
+                ? 'Remplissez le formulaire ci-dessous ou écrivez-moi directement par WhatsApp. Dates flexibles selon vos disponibilités.'
+                : 'Fill out the form below or message me directly on WhatsApp. Flexible scheduling around your calendar.'
+            }
+          </p>
+        </header>
+
+        <div class="landing-contact-layout">
+          <div class="landing-channels">
+            <h3 class="landing-channels-title">
+              {locale === 'fr' ? 'Canaux directs :' : 'Direct channels:'}
+            </h3>
+            <ul class="bare-list landing-channels-list">
+              {contactChannels.map((c) => (
+                <li>
+                  <a
+                    href={c.href}
+                    class="landing-channel-link"
+                    target={c.external ? '_blank' : undefined}
+                    rel={c.external ? 'noopener noreferrer' : undefined}
+                  >
+                    <Icon name={c.icon} />
+                    <div>
+                      <div class="landing-channel-label">{c.label}</div>
+                      <div class="landing-channel-value">{c.value}</div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="landing-form-box">
+            <ContactForm locale={locale} defaultInterest={landing.contactInterest} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASSERELLE VERS LA DESCENTE (LE MONO-PAGE ARTISTIQUE) -->
+    <section class="landing-descent-teaser" data-tone="abyss">
+      <div class="wrap landing-teaser-inner">
+        <span class="landing-teaser-eyebrow">{localize(landing.descentTeaser.eyebrow, locale)}</span>
+        <h2 class="landing-teaser-title">{localize(landing.descentTeaser.title, locale)}</h2>
+        <p class="landing-teaser-lead">{localize(landing.descentTeaser.lead, locale)}</p>
+        <a href={homeUrl} class="landing-teaser-btn">
+          {localize(landing.descentTeaser.cta, locale)}
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <Footer locale={locale} route={landing.route} />
+</BaseLayout>
+
+<style>
+  .landing-main {
+    overflow-x: hidden;
+  }
+
+  .landing-section {
+    padding-block: var(--space-2xl);
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+
+  .landing-eyebrow,
+  .landing-section-eyebrow {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-deco);
+    font-weight: var(--text-strong);
+    display: block;
+    margin-block-end: var(--space-2xs);
+  }
+
+  .landing-section-header {
+    text-align: center;
+    max-width: 48rem;
+    margin: 0 auto var(--space-xl);
+  }
+
+  .landing-section-title {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: var(--leading-tight);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+  }
+
+  .landing-section-title :global(em) {
+    color: var(--c-deco-emerald);
+    font-style: italic;
+  }
+
+  .landing-section-lead {
+    font-size: var(--step-0);
+    color: var(--fg-soft);
+    margin-block-start: var(--space-xs);
+    line-height: var(--leading-lead);
+  }
+
+  .landing-hero {
+    padding-block: var(--space-3xl) var(--space-2xl);
+    background: radial-gradient(circle at 50% 20%, oklch(24% 0.05 240) 0%, oklch(14% 0.03 245) 100%);
+    border-block-end: 1px solid var(--line);
+    text-align: center;
+  }
+
+  .landing-hero-content {
+    max-width: 52rem;
+    display: grid;
+    gap: var(--space-m);
+    justify-items: center;
+  }
+
+  .landing-title {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-tight);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+  }
+
+  .landing-title :global(em) {
+    color: var(--c-deco-emerald);
+    font-style: italic;
+  }
+
+  .landing-lead {
+    font-size: var(--step-1);
+    color: var(--fg-soft);
+    max-width: 42rem;
+    line-height: var(--leading-lead);
+  }
+
+  .landing-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-s);
+    width: 100%;
+    margin-block: var(--space-m);
+  }
+
+  .landing-fact-card {
+    background-color: color-mix(in oklch, var(--fg) 5%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+    padding: var(--space-s) var(--space-m);
+    backdrop-filter: blur(8px);
+  }
+
+  .landing-fact-label {
+    display: block;
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-soft);
+  }
+
+  .landing-fact-value {
+    display: block;
+    font-size: var(--step-2);
+    font-weight: var(--text-strong);
+    color: var(--fg);
+    margin-block-start: var(--space-2xs);
+  }
+
+  .landing-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    justify-content: center;
+    margin-block-start: var(--space-s);
+  }
+
+  /* Highlights Cards */
+  .landing-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+  }
+
+  .landing-highlight-card {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+    padding: var(--space-l);
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .landing-highlight-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+  }
+
+  .landing-card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-sharp);
+    background-color: color-mix(in oklch, var(--action) 12%, transparent);
+    color: var(--action);
+    display: grid;
+    place-items: center;
+    margin-block-end: var(--space-2xs);
+  }
+
+  .landing-card-title {
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+  }
+
+  .landing-card-text {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    line-height: var(--leading-body);
+  }
+
+  /* Steps List */
+  .landing-steps-list {
+    display: grid;
+    gap: var(--space-m);
+    max-width: 48rem;
+    margin: var(--space-xl) auto 0;
+  }
+
+  .landing-step-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: var(--space-m);
+    align-items: start;
+    padding: var(--space-m);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+  }
+
+  .landing-step-num {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--accent-deco);
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .landing-step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-s);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .landing-step-title {
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+  }
+
+  .landing-step-duration {
+    font-size: var(--step--2);
+    color: var(--fg-soft);
+    font-family: monospace;
+  }
+
+  .landing-step-description {
+    font-size: var(--step--1);
+    color: var(--fg-soft);
+    line-height: var(--leading-body);
+    margin: 0;
+  }
+
+  /* FAQ */
+  .landing-faq-grid {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 46rem;
+    margin: var(--space-xl) auto 0;
+  }
+
+  .landing-faq-details {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+    padding: var(--space-m);
+  }
+
+  .landing-faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: var(--text-strong);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .landing-faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .landing-faq-arrow {
+    transition: transform 0.2s ease;
+  }
+
+  .landing-faq-details[open] .landing-faq-arrow {
+    transform: rotate(180deg);
+  }
+
+  .landing-faq-answer {
+    margin-block-start: var(--space-s);
+    color: var(--fg-soft);
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
+  }
+
+  /* Contact Layout */
+  .landing-contact-layout {
+    display: grid;
+    gap: var(--space-xl);
+    margin-block-start: var(--space-xl);
+  }
+
+  @media (width >= 56rem) {
+    .landing-contact-layout {
+      grid-template-columns: 1fr 2fr;
+    }
+  }
+
+  .landing-channels {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .landing-channels-title {
+    font-size: var(--step-0);
+    font-weight: var(--text-strong);
+  }
+
+  .landing-channels-list {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .landing-channel-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s ease;
+  }
+
+  .landing-channel-link:hover {
+    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+  }
+
+  .landing-channel-label {
+    font-size: var(--step--2);
+    color: var(--fg-soft);
+  }
+
+  .landing-channel-value {
+    font-weight: var(--text-strong);
+    font-size: var(--step--1);
+  }
+
+  /* Descent Teaser */
+  .landing-descent-teaser {
+    padding-block: var(--space-3xl);
+    background: linear-gradient(180deg, oklch(14% 0.03 245) 0%, oklch(8% 0.02 245) 100%);
+    border-block-start: 1px solid var(--line);
+    text-align: center;
+  }
+
+  .landing-teaser-inner {
+    max-width: 38rem;
+    display: grid;
+    gap: var(--space-m);
+    justify-items: center;
+  }
+
+  .landing-teaser-eyebrow {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-deco);
+  }
+
+  .landing-teaser-title {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: var(--display-weight);
+    line-height: var(--leading-snug);
+  }
+
+  .landing-teaser-lead {
+    color: var(--fg-soft);
+    font-size: var(--step-0);
+    line-height: var(--leading-lead);
+  }
+
+  .landing-teaser-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-s) var(--space-l);
+    background-color: color-mix(in oklch, var(--fg) 10%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sharp);
+    color: var(--fg);
+    text-decoration: none;
+    font-weight: var(--text-strong);
+    backdrop-filter: blur(8px);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .landing-teaser-btn:hover {
+    background-color: color-mix(in oklch, var(--fg) 18%, transparent);
+    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+  }
+</style>

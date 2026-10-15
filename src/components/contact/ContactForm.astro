@@ -4,6 +4,7 @@ import Field from '@/components/ui/Field.astro';
 import {
   DEFAULT_INTEREST,
   EMAIL,
+  type Interest,
   INTERESTS,
   INTEREST_LABELS,
   whatsappUrl,
@@ -19,9 +20,10 @@ import { LIMITS } from '@/lib/form/validate.ts';
  */
 interface Props {
   locale: Locale;
+  defaultInterest?: Interest;
 }
 
-const { locale } = Astro.props;
+const { locale, defaultInterest = DEFAULT_INTEREST } = Astro.props;
 const dictionary = getDictionary(locale);
 const t = dictionary.contact.form;
 const options = INTERESTS.map((value) => ({
@@ -94,7 +96,7 @@ const messages = JSON.stringify({
         control="select"
         label={t.interest}
         options={options}
-        value={DEFAULT_INTEREST}
+        value={defaultInterest}
       />
       <Field
         id="contact-message"

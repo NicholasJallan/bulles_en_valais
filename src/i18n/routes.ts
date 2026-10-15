@@ -6,6 +6,8 @@ export const ROUTES = {
   home: { fr: '/', en: '/' },
   privacy: { fr: '/confidentialite/', en: '/privacy/' },
   legalNotice: { fr: '/mentions-legales/', en: '/legal-notice/' },
+  baptism: { fr: '/bapteme-plongee-valais/', en: '/try-scuba-diving-valais/' },
+  drysuit: { fr: '/combinaison-etanche-valais/', en: '/dry-suit-diving-valais/' },
 } as const satisfies Readonly<Record<string, Localized>>;
 
 export type RouteId = keyof typeof ROUTES;
