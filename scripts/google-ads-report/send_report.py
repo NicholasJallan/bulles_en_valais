@@ -89,6 +89,11 @@ def fetch_campaign_report(client: BetaAnalyticsDataClient, days: int = 7) -> dic
     for row in response.rows:
         camp_name = row.dimension_values[0].value
         ad_group = row.dimension_values[1].value
+
+        # Ignorer les lignes de trafic non liées à Google Ads ((not set))
+        if camp_name == "(not set)" or ad_group == "(not set)":
+            continue
+
         impressions = int(row.metric_values[0].value or 0)
         clicks = int(row.metric_values[1].value or 0)
         cost = float(row.metric_values[2].value or 0.0)
@@ -173,12 +178,12 @@ def fetch_search_terms(client: BetaAnalyticsDataClient, days: int = 7) -> list:
     return queries
 
 
-def fetch_all_conversions_today(client: BetaAnalyticsDataClient) -> dict:
-    """Récupère tous les événements de conversion enregistrés aujourd'hui (toutes sources)."""
+def fetch_conversions_for_range(client: BetaAnalyticsDataClient, start_date: str, end_date: str) -> dict:
+    """Récupère les événements de conversion pour une plage donnée."""
     property_name = f"properties/{PROPERTY_ID}"
     request = RunReportRequest(
         property=property_name,
-        date_ranges=[DateRange(start_date="today", end_date="today")],
+        date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
         dimensions=[Dimension(name="eventName")],
         metrics=[Metric(name="eventCount")],
     )
@@ -192,7 +197,14 @@ def fetch_all_conversions_today(client: BetaAnalyticsDataClient) -> dict:
     return events
 
 
-def generate_html_email(camp_data: dict, search_terms: list, today_conversions: dict) -> str:
+def fetch_site_activity(client: BetaAnalyticsDataClient) -> dict:
+    """Récupère l'activité globale du site pour hier (journée complète) et aujourd'hui."""
+    yesterday = fetch_conversions_for_range(client, "yesterday", "yesterday")
+    today = fetch_conversions_for_range(client, "today", "today")
+    return {"yesterday": yesterday, "today": today}
+
+
+def generate_html_email(camp_data: dict, search_terms: list, site_activity: dict) -> str:
     """Génère le corps HTML de l'e-mail avec une mise en forme soignée."""
     now_str = datetime.now().strftime("%d/%m/%Y à %H:%M")
     period = camp_data["period_days"]
@@ -229,8 +241,8 @@ def generate_html_email(camp_data: dict, search_terms: list, today_conversions: 
     else:
         rows_html = """
         <tr>
-            <td colspan="10" style="padding: 16px; text-align: center; color: #64748b; font-style: italic;">
-                Données de campagne consolidées en cours de synchronisation Google Ads ↔ GA4 (délai standard 12-24h).
+            <td colspan="10" style="padding: 18px; text-align: center; color: #64748b; font-size: 13px;">
+                ℹ️ <strong>Campagne Search-BEV</strong> : En cours de diffusion ou de synchronisation avec Google Ads (délai standard 12-24h). Aucune dépense ni clic payant consolidé sur cette période.
             </td>
         </tr>
         """
@@ -259,6 +271,7 @@ def generate_html_email(camp_data: dict, search_terms: list, today_conversions: 
         """
 
     cpa_summary = f"CHF {camp_data['cpa']:.2f}" if camp_data['total_conversions'] > 0 else "—"
+    cpc_summary = f"CHF {camp_data['avg_cpc']:.2f}" if camp_data['total_clicks'] > 0 else "—"
 
     html = f"""
     <!DOCTYPE html>
@@ -316,7 +329,7 @@ def generate_html_email(camp_data: dict, search_terms: list, today_conversions: 
                         <div style="display: table-cell; width: 25%; padding: 6px;">
                             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: center;">
                                 <div style="font-size: 11px; text-transform: uppercase; color: #475569; font-weight: 700; letter-spacing: 0.5px;">CPC Moyen</div>
-                                <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 4px 0;">CHF {camp_data['avg_cpc']:.2f}</div>
+                                <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 4px 0;">{cpc_summary}</div>
                                 <div style="font-size: 11px; color: #64748b;">Plafond: 2.00</div>
                             </div>
                         </div>
@@ -324,7 +337,7 @@ def generate_html_email(camp_data: dict, search_terms: list, today_conversions: 
                         <!-- Card 4 : Conversions -->
                         <div style="display: table-cell; width: 25%; padding: 6px;">
                             <div style="background-color: #fefce8; border: 1px solid #fef08a; border-radius: 10px; padding: 14px; text-align: center;">
-                                <div style="font-size: 11px; text-transform: uppercase; color: #854d0e; font-weight: 700; letter-spacing: 0.5px;">Contacts (CPA)</div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: #854d0e; font-weight: 700; letter-spacing: 0.5px;">Contacts Ads (CPA)</div>
                                 <div style="font-size: 20px; font-weight: 800; color: #713f12; margin: 4px 0;">{camp_data['total_conversions']}</div>
                                 <div style="font-size: 11px; color: #a16207;">CPA: {cpa_summary}</div>
                             </div>
@@ -333,15 +346,20 @@ def generate_html_email(camp_data: dict, search_terms: list, today_conversions: 
                     </div>
                 </div>
 
-                <!-- ACTIVITÉ DU JOUR (GA4 DIRECT) -->
+                <!-- ACTIVITÉ DU SITE (GA4 DIRECT) -->
                 <div style="background-color: #f8fafc; border-left: 4px solid #0284c7; padding: 14px 18px; border-radius: 6px; margin-bottom: 26px;">
-                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
-                        🎯 Activité globale captée sur le site aujourd'hui :
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                        🎯 Activité globale captée sur le site (toutes sources confondues) :
                     </div>
-                    <div style="font-size: 13px; color: #334155;">
-                        • <strong>{today_conversions['generate_lead']}</strong> formulaire(s) de lead envoyé(s)<br>
-                        • <strong>{today_conversions['whatsapp_click']}</strong> clic(s) WhatsApp<br>
-                        • <strong>{today_conversions['phone_click']}</strong> clic(s) Appel téléphonique
+                    <div style="font-size: 13px; color: #334155; line-height: 1.6;">
+                        <strong>Hier (journée complète) :</strong> 
+                        <strong>{site_activity['yesterday']['generate_lead']}</strong> formulaire(s) de lead • 
+                        <strong>{site_activity['yesterday']['whatsapp_click']}</strong> clic(s) WhatsApp • 
+                        <strong>{site_activity['yesterday']['phone_click']}</strong> appel(s)<br>
+                        <span style="color: #64748b; font-size: 12px;">Aujourd'hui (depuis minuit) : 
+                        {site_activity['today']['generate_lead']} formulaire(s) • 
+                        {site_activity['today']['whatsapp_click']} WhatsApp • 
+                        {site_activity['today']['phone_click']} appel(s)</span>
                     </div>
                 </div>
 
@@ -456,12 +474,12 @@ def main():
         # Extraction des données
         camp_data = fetch_campaign_report(client, days=7)
         search_terms = fetch_search_terms(client, days=7)
-        today_conversions = fetch_all_conversions_today(client)
+        site_activity = fetch_site_activity(client)
 
         print(f"Données extraites : {camp_data['total_clicks']} clics, CHF {camp_data['total_cost']:.2f}")
 
         # Rendu HTML
-        html = generate_html_email(camp_data, search_terms, today_conversions)
+        html = generate_html_email(camp_data, search_terms, site_activity)
 
         # Envoi e-mail
         subject = f"🤿 Bulles en Valais — Rapport Google Ads du {datetime.now().strftime('%d/%m/%Y')}"
