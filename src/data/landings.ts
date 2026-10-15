@@ -26,7 +26,7 @@ export interface LandingFaqItem {
 }
 
 export interface LandingPageData {
-  readonly id: 'baptism' | 'drysuit';
+  readonly id: 'baptism' | 'drysuit' | 'openwater';
   readonly route: RouteId;
   readonly contactInterest: Interest;
   readonly price: { readonly amount: number; readonly currency: 'CHF' };
@@ -59,7 +59,7 @@ export interface LandingPageData {
   };
 }
 
-export const LANDINGS: Readonly<Record<'baptism' | 'drysuit', LandingPageData>> = {
+export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', LandingPageData>> = {
   baptism: {
     id: 'baptism',
     route: 'baptism',
@@ -445,6 +445,288 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit', LandingPageData>> 
         answer: {
           fr: 'Les deux certifications sont reconnues dans le monde entier sans restriction. SDI met l’accent sur une approche moderne et pratique ; PADI offre la notoriété globale de son réseau.',
           en: 'Both certifications are recognized worldwide without restrictions. SDI emphasizes modern, practical skills, while PADI offers its global brand network.',
+        },
+      },
+    ],
+    descentTeaser: {
+      eyebrow: {
+        fr: 'Expérience immersive',
+        en: 'Immersive experience',
+      },
+      title: {
+        fr: 'Envie d’explorer tout l’univers de Bulles en Valais ?',
+        en: 'Want to discover the full Bulles en Valais universe?',
+      },
+      lead: {
+        fr: 'Découvrez notre page contemplative « La Descente », notre philosophie de formation et les spots de plongée du Valais et du Léman.',
+        en: 'Explore our contemplative experience "La Descente", our training philosophy, and iconic alpine dive sites.',
+      },
+      cta: {
+        fr: 'Explorer La Descente →',
+        en: 'Experience La Descente →',
+      },
+    },
+  },
+  openwater: {
+    id: 'openwater',
+    route: 'openwater',
+    contactInterest: 'sdi-owd',
+    price: { amount: 690, currency: 'CHF' },
+    meta: {
+      title: {
+        fr: 'Cours Open Water Valais — Brevet de Plongée (CHF 690)',
+        en: 'Open Water Scuba Course Valais — Dive Licence (CHF 690)',
+      },
+      description: {
+        fr: 'Devenez plongeur autonome à 18m. Cours Open Water SDI ou PADI en Valais avec Nicholas Jallan : petit comité, lac alpin et horaire modulable sur mesure.',
+        en: 'Become a certified autonomous diver to 18m. SDI or PADI Open Water course in Valais with Nicholas Jallan: small groups, alpine lake and flexible schedule.',
+      },
+      ogTitle: {
+        fr: 'Cours Open Water en Valais — Votre passeport pour explorer le monde sous-marin',
+        en: 'Open Water Course in Valais — Your passport to explore the underwater world',
+      },
+      ogDescription: {
+        fr: 'Obtenez votre brevet de plongée international reconnu à vie avec Nicholas Jallan. Formation sur mesure au lac du Rosel et aux Îles de Sion.',
+        en: 'Earn your lifetime international scuba certification with Nicholas Jallan. Tailored training at Lac du Rosel and Les Îles in Sion.',
+      },
+    },
+    hero: {
+      eyebrow: {
+        fr: 'Formation Débutant · Brevet International · Valais, Suisse',
+        en: 'Beginner Course · International Certification · Valais, Switzerland',
+      },
+      title: {
+        before: {
+          fr: 'Formation ',
+          en: 'Your ',
+        },
+        em: {
+          fr: 'Open Water Diver',
+          en: 'Open Water Diver',
+        },
+        after: {
+          fr: ' en lac alpin.',
+          en: ' scuba licence.',
+        },
+      },
+      lead: {
+        fr: 'Le brevet indispensable pour plonger en autonomie jusqu’à 18 mètres partout sur la planète. Apprentissage personnalisé en petit comité (1 à 3 élèves) au lac du Rosel et à Sion.',
+        en: 'The essential certification to dive autonomously down to 18 meters worldwide. Tailored coaching in small groups (1 to 3 students) at Lac du Rosel and Sion.',
+      },
+      primaryCta: {
+        fr: 'Planifier ma formation Open Water',
+        en: 'Plan your Open Water course',
+      },
+      secondaryCta: {
+        fr: 'Poser une question WhatsApp',
+        en: 'Ask on WhatsApp',
+      },
+    },
+    facts: [
+      {
+        label: {
+          fr: 'Tarif de la formation',
+          en: 'Course fee',
+        },
+        value: {
+          fr: 'CHF 690 (SDI) / 790 (PADI)',
+          en: 'CHF 690 (SDI) / 790 (PADI)',
+        },
+      },
+      {
+        label: {
+          fr: 'Prérequis',
+          en: 'Prerequisites',
+        },
+        value: {
+          fr: 'Dès 10-12 ans · Savoir nager',
+          en: 'Age 10-12+ · Basic swimming',
+        },
+      },
+      {
+        label: {
+          fr: 'Format des cours',
+          en: 'Format',
+        },
+        value: {
+          fr: '1 à 3 élèves (personnalisé)',
+          en: '1 to 3 students (private coaching)',
+        },
+      },
+      {
+        label: {
+          fr: 'Durée moyenne',
+          en: 'Duration',
+        },
+        value: {
+          fr: '3 à 4 jours modulables',
+          en: '3 to 4 flexible days',
+        },
+      },
+    ],
+    highlightsTitle: {
+      fr: 'Pourquoi passer son brevet avec Bulles en Valais ?',
+      en: 'Why take your Open Water with Bulles en Valais?',
+    },
+    highlights: [
+      {
+        title: {
+          fr: 'Brevet international reconnu à vie',
+          en: 'Lifetime international licence',
+        },
+        description: {
+          fr: 'Valable dans le monde entier sans restriction. Que vous voyagiez en Mer Rouge ou aux Caraïbes, votre carte SDI ou PADI est reconnue partout.',
+          en: 'Recognized worldwide without restrictions. Whether you travel to the Red Sea or the Caribbean, your card is accepted everywhere.',
+        },
+        icon: 'award',
+      },
+      {
+        title: {
+          fr: 'Une vraie aisance dans l’eau',
+          en: 'Genuine underwater comfort',
+        },
+        description: {
+          fr: 'Pas de formation expédiée au rabais. Vous apprenez la vraie stabilisation, la gestion du souffle et la sécurité pour être 100 % autonome et serein.',
+          en: 'No rushed training. You master real buoyancy, breathing control, and safety skills to become a truly autonomous diver.',
+        },
+        icon: 'shield',
+      },
+      {
+        title: {
+          fr: 'Théorie en ligne à votre rythme',
+          en: 'Self-paced digital e-learning',
+        },
+        description: {
+          fr: 'Étudiez la théorie confortablement chez vous sur smartphone ou tablette via l’application e-learning officielle avant de vous jeter à l’eau.',
+          en: 'Study theory at home on your phone or tablet with official e-learning materials before heading to the lake.',
+        },
+        icon: 'compass',
+      },
+      {
+        title: {
+          fr: 'Équipement complet fourni',
+          en: 'Complete scuba gear included',
+        },
+        description: {
+          fr: 'Bouteille, détendeurs haut de gamme, gilet stabilisateur, combinaison chaude 7 mm et ordinateur de plongée inclus pendant toute votre formation.',
+          en: 'Tanks, top-tier regulators, BCD, warm 7 mm wetsuit, and dive computer included throughout your entire course.',
+        },
+        icon: 'check',
+      },
+    ],
+    stepsTitle: {
+      fr: 'Le déroulement de votre formation',
+      en: 'Course progression & steps',
+    },
+    stepsLead: {
+      fr: 'De vos premiers exercices en eau calme jusqu’à vos explorations profondes en autonomie en lac.',
+      en: 'From your first shallow exercises to autonomous deep exploration in alpine lakes.',
+    },
+    steps: [
+      {
+        num: '01',
+        title: {
+          fr: 'E-learning & Théorie en ligne',
+          en: 'Online E-Learning & Theory',
+        },
+        duration: {
+          fr: 'À votre rythme',
+          en: 'At your pace',
+        },
+        description: {
+          fr: 'Vidéos, quiz et modules interactifs pour acquérir les bases de la physique, de la physiologie et de la sécurité en plongée depuis chez vous.',
+          en: 'Videos, quizzes, and interactive modules covering diving physics, physiology, and safety rules at your own pace.',
+        },
+      },
+      {
+        num: '02',
+        title: {
+          fr: 'Séance en eau calme (Milieu protégé)',
+          en: 'Confined Water Skills Workshop',
+        },
+        duration: {
+          fr: '~3h',
+          en: '~3 hours',
+        },
+        description: {
+          fr: 'Premières respirations sous l’eau à faible profondeur au Lac du Rosel ou en piscine pour maîtriser le vidage de masque, le détendeur et l’équilibrage.',
+          en: 'First breaths underwater in shallow calm water to master mask clearing, regulator recovery, and ear equalization.',
+        },
+      },
+      {
+        num: '03',
+        title: {
+          fr: '4 Plongées en milieu naturel (Lac alpin)',
+          en: '4 Open Water Lake Dives',
+        },
+        duration: {
+          fr: '2 jours',
+          en: '2 days',
+        },
+        description: {
+          fr: 'Mise en application progressive entre 5 et 18 mètres de profondeur au lac du Rosel et aux Îles de Sion. Exploration de la faune, navigation et flottabilité.',
+          en: 'Progressive real-world application between 5 and 18 meters at Lac du Rosel and Les Îles. Wildlife exploration, navigation, and trim.',
+        },
+      },
+      {
+        num: '04',
+        title: {
+          fr: 'Certification internationale immédiate',
+          en: 'Immediate International Certification',
+        },
+        duration: {
+          fr: 'Validation',
+          en: 'Certification',
+        },
+        description: {
+          fr: 'Débriefing personnalisé, signature de votre carnet de plongée et émission immédiate de votre carte numérique de plongeur autonome SDI ou PADI.',
+          en: 'Personal debrief, logbook endorsement, and instant delivery of your digital SDI or PADI autonomous diver certification.',
+        },
+      },
+    ],
+    faqTitle: {
+      fr: 'Questions fréquentes sur l’Open Water',
+      en: 'Frequently asked questions about Open Water',
+    },
+    faq: [
+      {
+        question: {
+          fr: 'Quelle est la différence entre l’Open Water SDI et PADI ?',
+          en: 'What is the difference between SDI and PADI Open Water?',
+        },
+        answer: {
+          fr: 'Aucune sur vos prérogatives : les deux brevets sont régis par les mêmes standards mondiaux RSTC et vous autorisent à plonger jusqu’à 18 m en autonomie partout sur terre. SDI offre une approche plus moderne et axée sur l’ordinateur de plongée ; PADI bénéficie de sa renommée commerciale historique.',
+          en: 'None in terms of privileges: both share the exact same global RSTC standards, allowing you to dive down to 18 m autonomously anywhere in the world. SDI emphasizes modern computer diving; PADI has historic global brand awareness.',
+        },
+      },
+      {
+        question: {
+          fr: 'Faut-il être un grand sportif pour débuter la plongée ?',
+          en: 'Do I need to be an athlete to start scuba diving?',
+        },
+        answer: {
+          fr: 'Non, la plongée sous-marine n’est pas un sport de vitesse ou de force brute. Il suffit d’être en bonne santé générale, de savoir nager 200 mètres à son rythme et d’être à l’aise dans l’eau. Un questionnaire médical standard est rempli au préalable.',
+          en: 'No, scuba diving is not about physical strength or endurance. You just need to be in good health, able to swim 200 meters comfortably at your own pace, and relaxed in the water. A simple medical questionnaire is completed beforehand.',
+        },
+      },
+      {
+        question: {
+          fr: 'L’eau n’est-elle pas trop froide dans les lacs suisses ?',
+          en: 'Isn’t the water too cold in Swiss lakes?',
+        },
+        answer: {
+          fr: 'Nous fournissons des combinaisons néoprène 7 mm avec surveste, cagoule et gants de haute qualité qui maintiennent parfaitement la chaleur corporelle. Dès le mois de mai jusqu’en octobre, la couche de surface se réchauffe très agréablement.',
+          en: 'We provide premium 7 mm wetsuits with hoods, gloves, and over-vests that retain body heat remarkably well. From May through October, surface lake layers warm up comfortably.',
+        },
+      },
+      {
+        question: {
+          fr: 'Comment s’organise le calendrier des cours ?',
+          en: 'How is the course schedule organized?',
+        },
+        answer: {
+          fr: 'Le calendrier est totalement sur mesure selon vos disponibilités. La formation se réalise typiquement sur 2 week-ends consécutifs ou sur 3 à 4 jours en semaine selon votre emploi du temps.',
+          en: 'Scheduling is completely tailored to your availability. Training typically takes place over two consecutive weekends or 3 to 4 weekdays to match your calendar.',
         },
       },
     ],

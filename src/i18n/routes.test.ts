@@ -20,6 +20,8 @@ describe('routePath', () => {
     expect(routePath('baptism', 'en')).toBe('/en/try-scuba-diving-valais/');
     expect(routePath('drysuit', 'fr')).toBe('/combinaison-etanche-valais/');
     expect(routePath('drysuit', 'en')).toBe('/en/dry-suit-diving-valais/');
+    expect(routePath('openwater', 'fr')).toBe('/cours-open-water-valais/');
+    expect(routePath('openwater', 'en')).toBe('/en/open-water-diver-valais/');
   });
 });
 
