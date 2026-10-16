@@ -234,21 +234,126 @@ if (!defined('CONTACT_TEST_NO_FILES')) {
 
     // IP quota checks
     $ipQuotaFile = $quotaFile . '-ip';
-    check('first e-mail for IP → allowed', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === true);
-    check('second e-mail for IP → allowed', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === true);
-    check('third e-mail for IP → refused', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === false);
-    check('another IP on same day → allowed', take_daily_ip_quota('192.168.1.2', $ipQuotaFile, '2026-10-02', 2) === true);
-    check('next day for original IP → allowed again', take_daily_ip_quota('192.168.1.1', $ipQuotaFile, '2026-10-03', 2) === true);
-    check('loopback IP is exempt from daily IP limit', take_daily_ip_quota('127.0.0.1', $ipQuotaFile, '2026-10-02', 0) === true);
+    $testSalt = '0123456789abcdef0123456789abcdef';
+
+    // normalize_ip
+    check('normalize_ip keeps IPv4 unchanged', normalize_ip('192.168.1.1') === '192.168.1.1');
+    check('normalize_ip unmaps IPv4-mapped IPv6', normalize_ip('::ffff:192.168.1.1') === '192.168.1.1');
+    check('normalize_ip masks IPv6 to /64 network', normalize_ip('2001:db8:1:2:aaaa:bbbb:cccc:dddd') === '2001:db8:1:2::');
+    check('normalize_ip returns empty string for invalid IP', normalize_ip('not.an.ip') === '' && normalize_ip('') === '');
+
+    // hash_ip
+    $h1 = hash_ip('2001:db8:1:2:1111:2222:3333:4444', $testSalt);
+    $h2 = hash_ip('2001:db8:1:2:5555:6666:7777:8888', $testSalt);
+    $h3 = hash_ip('2001:db8:1:3:1111:2222:3333:4444', $testSalt);
+    $otherSalt = 'fedcba9876543210fedcba9876543210';
+    $hDifferentSalt = hash_ip('2001:db8:1:2:1111:2222:3333:4444', $otherSalt);
+    check('hash_ip returns 16 hex chars', (bool) preg_match('/^[0-9a-f]{16}$/D', $h1));
+    check('hash_ip maps same /64 to same hash', $h1 === $h2);
+    check('hash_ip maps different /64 to different hash', $h1 !== $h3);
+    check('hash_ip with different salt gives different hash', $h1 !== $hDifferentSalt);
+    check('hash_ip does not contain plain IP', strpos($h1, '2001') === false && strpos(hash_ip('192.168.1.1', $testSalt), '192.168') === false);
+
+    // parse_ip_quota & format_ip_quota
+    $countsData = [$h1 => 2, $h3 => 5];
+    $formatted = format_ip_quota('2026-10-02', $testSalt, $countsData);
+    $parsed = parse_ip_quota($formatted, '2026-10-02');
+    check('parse_ip_quota roundtrips format_ip_quota', $parsed['salt'] === $testSalt && $parsed['counts'] === $countsData);
+    $yesterdayRaw = format_ip_quota('2026-10-01', $testSalt, $countsData);
+    $parsedYesterday = parse_ip_quota($yesterdayRaw, '2026-10-02');
+    check('parse_ip_quota ignores data from another date', $parsedYesterday['salt'] === null && $parsedYesterday['counts'] === []);
+    $parsedMalformed = parse_ip_quota("# 2026-10-02 {$testSalt}\nbad_line\n{$h1} 4\n", '2026-10-02');
+    check('parse_ip_quota ignores malformed count lines', $parsedMalformed['counts'] === [$h1 => 4]);
+
+    // ip_quota_reached
+    @unlink($ipQuotaFile);
+    check('ip_quota_reached returns false and does not create missing file', ip_quota_reached('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === false && !file_exists($ipQuotaFile));
+    check('ip_quota_reached exempts loopback IP', ip_quota_reached('127.0.0.1', $ipQuotaFile, '2026-10-02', 0) === false);
+    check('ip_quota_reached returns false for empty IP', ip_quota_reached('', $ipQuotaFile, '2026-10-02', 0) === false);
+
+    file_put_contents($ipQuotaFile, format_ip_quota('2026-10-02', $testSalt, [$h1 => 2]));
+    $beforeRead = file_get_contents($ipQuotaFile);
+    check('ip_quota_reached is true when count >= limit', ip_quota_reached('2001:db8:1:2::1', $ipQuotaFile, '2026-10-02', 2) === true);
+    check('ip_quota_reached is false when count < limit', ip_quota_reached('2001:db8:1:2::1', $ipQuotaFile, '2026-10-02', 3) === false);
+    check('ip_quota_reached is false for uncounted IP', ip_quota_reached('192.168.1.99', $ipQuotaFile, '2026-10-02', 2) === false);
+    check('ip_quota_reached is read-only (file untouched)', file_get_contents($ipQuotaFile) === $beforeRead);
+
+    @unlink($ipQuotaFile);
+    $symlinkOk = @symlink(__FILE__, $ipQuotaFile);
+    check('ip_quota_reached returns null on symbolic link', $symlinkOk && is_link($ipQuotaFile) && ip_quota_reached('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === null);
     @unlink($ipQuotaFile);
 
-    $ipLimited = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02', '192.168.1.99');
-    check('under IP limit → counted and sent', $ipLimited['status'] === 500);
+    $probeFile = $quotaFile . '-probe';
+    file_put_contents($probeFile, 'probe');
+    $linkOk = @link($probeFile, $ipQuotaFile);
+    check('ip_quota_reached returns null on hard link (nlink > 1)', $linkOk && ip_quota_reached('192.168.1.1', $ipQuotaFile, '2026-10-02', 2) === null);
+    @unlink($ipQuotaFile);
+    @unlink($probeFile);
+
+    // record_ip_send
+    check('record_ip_send creates file and increments to 1', record_ip_send('192.168.1.1', $ipQuotaFile, '2026-10-02') === true);
+    $ipFileContent = file_get_contents($ipQuotaFile);
+    $ipParsed = parse_ip_quota($ipFileContent, '2026-10-02');
+    $hV4 = hash_ip('192.168.1.1', (string) $ipParsed['salt']);
+    check('record_ip_send initialized valid 32-hex salt', (bool) preg_match('/^[0-9a-f]{32}$/D', (string) $ipParsed['salt']));
+    check('record_ip_send recorded count of 1', ($ipParsed['counts'][$hV4] ?? 0) === 1);
+
+    check('record_ip_send second send increments to 2', record_ip_send('192.168.1.1', $ipQuotaFile, '2026-10-02') === true);
+    $ipParsed2 = parse_ip_quota(file_get_contents($ipQuotaFile), '2026-10-02');
+    check('record_ip_send count is now 2', ($ipParsed2['counts'][$hV4] ?? 0) === 2);
+
+    check('record_ip_send loopback returns true without touching file', record_ip_send('127.0.0.1', $ipQuotaFile, '2026-10-02') === true);
+
+    // new day resets counter and rotates salt
+    check('record_ip_send on new day rotates salt and resets count', record_ip_send('192.168.1.1', $ipQuotaFile, '2026-10-03') === true);
+    $ipParsedNextDay = parse_ip_quota(file_get_contents($ipQuotaFile), '2026-10-03');
+    $hV4NextDay = hash_ip('192.168.1.1', (string) $ipParsedNextDay['salt']);
+    check('record_ip_send next day resets count to 1', ($ipParsedNextDay['counts'][$hV4NextDay] ?? 0) === 1);
+    @unlink($ipQuotaFile);
+
+    // deliver_within_quota with simulated send
+    $fakePayload = validate_payload(valid_payload())['data'];
+    file_put_contents($quotaFile, '2026-10-02 0');
+
+    // 1. Success path: send succeeds -> global count + 1, IP count + 1
+    $sendOk = static function (array $fields): array {
+        return result(200, ['ok' => true]);
+    };
+    $resOk = deliver_within_quota($fakePayload, $quotaFile, '2026-10-02', '192.168.1.50', $sendOk);
+    check('deliver_within_quota success returns 200', $resOk['status'] === 200);
+    check('deliver_within_quota increments global quota on success', file_get_contents($quotaFile) === '2026-10-02 1');
+    check('deliver_within_quota records IP send on success', ip_quota_reached('192.168.1.50', $ipQuotaFile, '2026-10-02', 1) === true);
+
+    // 2. Delivery failure (500): global quota incremented, IP quota NOT incremented
+    $sendFail = static function (array $fields): array {
+        return result(500, ['ok' => false, 'error' => 'delivery']);
+    };
+    $resFail = deliver_within_quota($fakePayload, $quotaFile, '2026-10-02', '192.168.1.50', $sendFail);
+    check('deliver_within_quota failure returns 500', $resFail['status'] === 500);
+    check('deliver_within_quota consumes global quota on SMTP failure', file_get_contents($quotaFile) === '2026-10-02 2');
+    check('deliver_within_quota does NOT increment IP quota on SMTP failure', ip_quota_reached('192.168.1.50', $ipQuotaFile, '2026-10-02', 2) === false);
+
+    // 3. IP quota reached: 503 busy, send NEVER called, global quota UNCHANGED
     for ($i = 0; $i < DAILY_IP_LIMIT; $i++) {
-        take_daily_ip_quota('192.168.1.99', $ipQuotaFile, '2026-10-02', DAILY_IP_LIMIT);
+        record_ip_send('192.168.1.99', $ipQuotaFile, '2026-10-02');
     }
-    $ipBlocked = deliver_within_quota(validate_payload(valid_payload())['data'], $quotaFile, '2026-10-02', '192.168.1.99');
-    check('IP limit reached → 429 rate_limited, nothing sent', $ipBlocked['status'] === 429 && $ipBlocked['body'] === ['ok' => false, 'error' => 'rate_limited']);
+    $globalBeforeBlocked = file_get_contents($quotaFile);
+    $sendSpyCalled = false;
+    $sendSpy = static function (array $fields) use (&$sendSpyCalled): array {
+        $sendSpyCalled = true;
+        return result(200, ['ok' => true]);
+    };
+    $resBlocked = deliver_within_quota($fakePayload, $quotaFile, '2026-10-02', '192.168.1.99', $sendSpy);
+    check('deliver_within_quota returns 503 busy when IP limit reached', $resBlocked['status'] === 503 && $resBlocked['body'] === ['ok' => false, 'error' => 'busy']);
+    check('deliver_within_quota did not invoke send when IP limit reached', $sendSpyCalled === false);
+    check('deliver_within_quota left global quota unchanged when IP limit reached', file_get_contents($quotaFile) === $globalBeforeBlocked);
+
+    // 4. Global quota reached: 503 busy, IP quota NOT incremented
+    file_put_contents($quotaFile, '2026-10-02 ' . DAILY_LIMIT);
+    $resGlobalBlocked = deliver_within_quota($fakePayload, $quotaFile, '2026-10-02', '192.168.1.77', $sendSpy);
+    check('deliver_within_quota returns 503 busy when global limit reached', $resGlobalBlocked['status'] === 503 && $resGlobalBlocked['body'] === ['ok' => false, 'error' => 'busy']);
+    check('deliver_within_quota did not increment IP quota when global limit reached', ip_quota_reached('192.168.1.77', $ipQuotaFile, '2026-10-02', 1) === false);
+
     @unlink($ipQuotaFile);
 
     @unlink($quotaFile);

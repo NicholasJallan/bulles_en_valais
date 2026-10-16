@@ -36,6 +36,7 @@ const MIN_ELAPSED_MS = 3000;
 // Daily cap of e-mails (Gmail quota): a robot with rotating addresses gets past the nginx
 // limit per address. The counter holds no personal data.
 const DAILY_LIMIT = 50;
+// Per address (an IPv6 /64), keyed with a random salt replaced every day (record_ip_send).
 const DAILY_IP_LIMIT = 5;
 const QUOTA_FILE = SHARED_DIR . '/state/contact-quota';
 // Unquoted local part only: FILTER_VALIDATE_EMAIL alone accepts quoted parts
@@ -554,28 +555,93 @@ function ip_quota_path(string $quotaPath): string
     return $quotaPath . '-ip';
 }
 
-function hash_ip(string $ip): string
+/**
+ * The address the daily cap counts: IPv4 as is, IPv6 reduced to its /64 (one subscriber's
+ * network, inside which a robot would otherwise rotate freely); '' when it is not an address.
+ */
+function normalize_ip(string $ip): string
 {
-    return substr(hash('sha256', $ip), 0, 16);
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+        return $ip;
+    }
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
+        return '';
+    }
+    $packed = inet_pton($ip);
+    if ($packed === false || strlen($packed) !== 16) {
+        return '';
+    }
+    // An IPv4-mapped address (::ffff:a.b.c.d) is the IPv4 it carries: its /64 is ::/64 for all.
+    if (substr($packed, 0, 12) === str_repeat("\0", 10) . "\xff\xff") {
+        $ipv4 = inet_ntop(substr($packed, 12));
+        return $ipv4 === false ? '' : $ipv4;
+    }
+    $network = inet_ntop(substr($packed, 0, 8) . str_repeat("\0", 8));
+    return $network === false ? '' : $network;
 }
 
 /**
- * Counts one more e-mail today for a specific IP address under an exclusive lock:
- * true when allowed, false when the IP limit is reached, null on counter error.
+ * Keyed with the salt of the day, drawn at random and replaced every day: once the day has passed,
+ * nothing links a line of the counter to an address.
  */
-function take_daily_ip_quota(string $ip, string $path, string $today, int $limit): ?bool
+function hash_ip(string $ip, string $salt): string
 {
-    if ($ip === '' || in_array($ip, LOOPBACK_HOSTS, true)) {
-        return true;
+    return substr(hash_hmac('sha256', normalize_ip($ip), $salt), 0, 16);
+}
+
+/** @return array{salt: ?string, counts: array<string, int>} the salt and counts of $today, if any. */
+function parse_ip_quota(string $raw, string $today): array
+{
+    $lines = preg_split('/\r?\n/', trim($raw));
+    $header = $lines === false ? '' : (string) array_shift($lines);
+    $isToday = preg_match('/^# (\d{4}-\d{2}-\d{2}) ([0-9a-f]{32})$/D', $header, $m) === 1
+        && $m[1] === $today;
+    if (!$isToday || $lines === false) {
+        return ['salt' => null, 'counts' => []];
     }
+    $counts = [];
+    foreach ($lines as $line) {
+        if (preg_match('/^([0-9a-f]{16}) (\d{1,9})$/D', $line, $c) === 1) {
+            $counts[$c[1]] = (int) $c[2];
+        }
+    }
+    return ['salt' => $m[2], 'counts' => $counts];
+}
+
+/** @param array<string, int> $counts */
+function format_ip_quota(string $today, string $salt, array $counts): string
+{
+    $out = '# ' . $today . ' ' . $salt . "\n";
+    foreach ($counts as $hash => $count) {
+        $out .= $hash . ' ' . $count . "\n";
+    }
+    return $out;
+}
+
+/** Whether the address is exempt from the cap (loopback for the tests, or not an address). */
+function ip_exempt(string $ip): bool
+{
+    return in_array($ip, LOOPBACK_HOSTS, true) || normalize_ip($ip) === '';
+}
+
+/**
+ * Opens a counter file under an exclusive lock and passes its handle to $use; null when the file
+ * cannot be trusted (a link, not a plain file) or locked. A missing file is created only by $create.
+ */
+function with_locked_counter(string $path, bool $create, callable $use)
+{
     if (is_link($path)) {
         return null;
     }
-    $handle = @fopen($path, 'c+');
+    if (!$create && !file_exists($path)) {
+        return $use(null);
+    }
+    $handle = @fopen($path, 'c+'); // a failure is logged by the caller
     if ($handle === false) {
         return null;
     }
     try {
+        // A shared temporary directory: only a plain file of our own making, never a hard link.
         $stat = fstat($handle);
         if ($stat === false || ($stat['mode'] & 0170000) !== 0100000 || $stat['nlink'] !== 1) {
             return null;
@@ -583,49 +649,72 @@ function take_daily_ip_quota(string $ip, string $path, string $today, int $limit
         if (!flock($handle, LOCK_EX)) {
             return null;
         }
-        $raw = (string) stream_get_contents($handle);
-        $counts = [];
-        $lines = preg_split('/\r?\n/', trim($raw));
-        if ($lines !== false) {
-            foreach ($lines as $line) {
-                if (preg_match('/^(\d{4}-\d{2}-\d{2}) ([0-9a-f]{16}) (\d{1,9})$/D', $line, $m) === 1) {
-                    if ($m[1] === $today) {
-                        $counts[$m[2]] = (int) $m[3];
-                    }
-                }
-            }
-        }
-        $ipHash = hash_ip($ip);
-        $current = $counts[$ipHash] ?? 0;
-        if ($current >= $limit) {
-            return false;
-        }
-        $counts[$ipHash] = $current + 1;
-        $out = '';
-        foreach ($counts as $hash => $c) {
-            $out .= $today . ' ' . $hash . ' ' . $c . "\n";
-        }
-        $written = rewind($handle) && ftruncate($handle, 0)
-            && fwrite($handle, $out) !== false && fflush($handle);
-        return $written ? true : null;
+        return $use($handle);
     } finally {
         flock($handle, LOCK_UN);
         fclose($handle);
     }
 }
 
-/** Sends within the daily limit; a counter that cannot be used never loses a real message. */
-function deliver_within_quota(array $fields, string $quotaPath, string $today, string $ip = ''): array
+/** Whether the address has already sent its daily share: null when the counter is unusable. */
+function ip_quota_reached(string $ip, string $path, string $today, int $limit): ?bool
 {
-    if ($ip !== '') {
-        $ipAllowed = take_daily_ip_quota($ip, ip_quota_path($quotaPath), $today, DAILY_IP_LIMIT);
-        if ($ipAllowed === false) {
-            error_log('contact: daily ip limit reached');
-            return result(429, ['ok' => false, 'error' => 'rate_limited']);
+    if (ip_exempt($ip)) {
+        return false;
+    }
+    return with_locked_counter($path, false, function ($handle) use ($ip, $today, $limit) {
+        if ($handle === null) {
+            return false; // no counter yet: nothing sent today
         }
-        if ($ipAllowed === null) {
-            error_log('contact: daily ip counter unavailable, sent anyway');
+        $quota = parse_ip_quota((string) stream_get_contents($handle), $today);
+        if ($quota['salt'] === null) {
+            return false;
         }
+        return ($quota['counts'][hash_ip($ip, $quota['salt'])] ?? 0) >= $limit;
+    });
+}
+
+/** Counts one e-mail sent for the address today; false when the counter could not be updated. */
+function record_ip_send(string $ip, string $path, string $today): bool
+{
+    if (ip_exempt($ip)) {
+        return true;
+    }
+    $written = with_locked_counter($path, true, function ($handle) use ($ip, $today) {
+        $quota = parse_ip_quota((string) stream_get_contents($handle), $today);
+        try {
+            $salt = $quota['salt'] ?? bin2hex(random_bytes(16));
+        } catch (Exception $e) {
+            return false; // no randomness: the counter is left as it is
+        }
+        $counts = $quota['counts'];
+        $hash = hash_ip($ip, $salt);
+        $counts[$hash] = ($counts[$hash] ?? 0) + 1;
+        return rewind($handle) && ftruncate($handle, 0)
+            && fwrite($handle, format_ip_quota($today, $salt, $counts)) !== false && fflush($handle);
+    });
+    return $written === true;
+}
+
+/**
+ * Sends within the daily limits; a counter that cannot be used never loses a real message. The
+ * address is counted only once its e-mail has left, so a failed delivery never uses up its share.
+ */
+function deliver_within_quota(
+    array $fields,
+    string $quotaPath,
+    string $today,
+    string $ip = '',
+    ?callable $send = null
+): array {
+    $ipPath = ip_quota_path($quotaPath);
+    $ipReached = ip_quota_reached($ip, $ipPath, $today, DAILY_IP_LIMIT);
+    if ($ipReached === true) {
+        error_log('contact: daily ip limit reached');
+        return result(503, ['ok' => false, 'error' => 'busy']);
+    }
+    if ($ipReached === null) {
+        error_log('contact: daily ip counter unavailable, sent anyway');
     }
     $allowed = take_daily_quota($quotaPath, $today, DAILY_LIMIT);
     if ($allowed === false) {
@@ -635,7 +724,11 @@ function deliver_within_quota(array $fields, string $quotaPath, string $today, s
     if ($allowed === null) {
         error_log('contact: daily counter unavailable, sent anyway');
     }
-    return deliver($fields);
+    $outcome = ($send ?? 'deliver')($fields);
+    if ($outcome['status'] === 200 && !record_ip_send($ip, $ipPath, $today)) {
+        error_log('contact: daily ip counter not updated');
+    }
+    return $outcome;
 }
 
 function deliver(array $fields): array
