@@ -25,3 +25,6 @@ tests/php/.quota-integration
 # Service account keys and local credentials
 GA/
 client_secret_*.json
+
+# Python bytecode (scripts/google-ads-report tests)
+__pycache__/

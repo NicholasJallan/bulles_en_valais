@@ -6,6 +6,10 @@ on:
     - cron: '0 4 * * *'
   workflow_dispatch: # Permet de lancer le rapport manuellement à tout moment depuis l'interface GitHub
 
+# Le rapport ne fait que lire le dépôt : le jeton GitHub n'a pas d'autre droit.
+permissions:
+  contents: read
+
 jobs:
   send-report:
     name: Extraire GA4 et Envoyer le Rapport
@@ -27,10 +31,14 @@ jobs:
         run: |
           pip install -r scripts/google-ads-report/requirements.txt
 
+      - name: Tester le script (rendu, échappement, plage de dates, SMTP)
+        run: |
+          python -m unittest discover -s scripts/google-ads-report -p 'test_*.py'
+
       - name: Exécuter le script de reporting et envoyer l'e-mail
         env:
           GA4_SERVICE_ACCOUNT_KEY: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY }}
-          GA4_PROPERTY_ID: "358387240"
+          GA4_PROPERTY_ID: '358387240'
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}

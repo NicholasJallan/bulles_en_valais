@@ -11,28 +11,43 @@ import smtplib
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from html import escape
+from zoneinfo import ZoneInfo
 
-try:
-    from google.analytics.data_v1beta import BetaAnalyticsDataClient
-    from google.analytics.data_v1beta.types import (
-        RunReportRequest,
-        DateRange,
-        Dimension,
-        Metric,
-    )
-    from google.oauth2 import service_account
-except ImportError:
-    print("Erreur : le package 'google-analytics-data' n'est pas installé.", file=sys.stderr)
-    print("Installez-le via : pip install google-analytics-data", file=sys.stderr)
-    sys.exit(1)
+# Le SDK Google n'est importé que par les fonctions qui interrogent GA4 (_ga4) : le rendu de l'e-mail
+# et l'envoi se testent sans lui (test_send_report.py).
 
 
 PROPERTY_ID = os.environ.get("GA4_PROPERTY_ID", "358387240")
 DAILY_BUDGET_CHF = 3.00
 TARGET_MAX_CPC_CHF = 2.00
+REPORT_DAYS = 7
+SEARCH_TERMS_LIMIT = 20
+LOCAL_TZ = ZoneInfo("Europe/Zurich")
 
 
-def get_client() -> BetaAnalyticsDataClient:
+def _ga4():
+    """Le module de types GA4, importé à la demande ; message clair s'il manque."""
+    try:
+        from google.analytics.data_v1beta import types
+    except ImportError:
+        print("Erreur : le package 'google-analytics-data' n'est pas installé.", file=sys.stderr)
+        print("Installez-le via : pip install -r scripts/google-ads-report/requirements.txt", file=sys.stderr)
+        sys.exit(1)
+    return types
+
+
+def report_range(days: int = REPORT_DAYS) -> dict:
+    """Les `days` derniers jours complets : de `<days>daysAgo` à hier (aujourd'hui est partiel)."""
+    return {"start_date": f"{days}daysAgo", "end_date": "yesterday"}
+
+
+def local_now() -> datetime:
+    """L'heure suisse : le runner GitHub tourne en UTC."""
+    return datetime.now(LOCAL_TZ)
+
+
+def get_client():
     """Initialise le client GA4 via les credentials SA (fichier ou variable JSON)."""
     sa_key = os.environ.get("GA4_SERVICE_ACCOUNT_KEY")
     if not sa_key:
@@ -45,6 +60,12 @@ def get_client() -> BetaAnalyticsDataClient:
         else:
             raise ValueError("Variable GA4_SERVICE_ACCOUNT_KEY manquante.")
 
+    try:
+        from google.analytics.data_v1beta import BetaAnalyticsDataClient
+        from google.oauth2 import service_account
+    except ImportError:
+        _ga4()  # même message, puis sortie
+
     # Si c'est du JSON brut en string
     if sa_key.strip().startswith("{"):
         info = json.loads(sa_key)
@@ -56,27 +77,30 @@ def get_client() -> BetaAnalyticsDataClient:
     return BetaAnalyticsDataClient(credentials=credentials)
 
 
-def fetch_campaign_report(client: BetaAnalyticsDataClient, days: int = 7) -> dict:
-    """Récupère les métriques de la campagne Google Ads et des groupes d'annonces."""
-    property_name = f"properties/{PROPERTY_ID}"
-    request = RunReportRequest(
-        property=property_name,
-        date_ranges=[DateRange(start_date=f"{days}daysAgo", end_date="today")],
+def build_campaign_request(types, days: int = REPORT_DAYS):
+    """Requête GA4 des métriques par campagne et groupe d'annonces (`types` : module de types GA4)."""
+    return types.RunReportRequest(
+        property=f"properties/{PROPERTY_ID}",
+        date_ranges=[types.DateRange(**report_range(days))],
         dimensions=[
-            Dimension(name="sessionGoogleAdsCampaignName"),
-            Dimension(name="sessionGoogleAdsAdGroupName"),
+            types.Dimension(name="sessionGoogleAdsCampaignName"),
+            types.Dimension(name="sessionGoogleAdsAdGroupName"),
         ],
         metrics=[
-            Metric(name="advertiserAdImpressions"),
-            Metric(name="advertiserAdClicks"),
-            Metric(name="advertiserAdCost"),
-            Metric(name="advertiserAdCostPerClick"),
-            Metric(name="keyEvents:generate_lead"),
-            Metric(name="keyEvents:whatsapp_click"),
-            Metric(name="keyEvents:phone_click"),
+            types.Metric(name="advertiserAdImpressions"),
+            types.Metric(name="advertiserAdClicks"),
+            types.Metric(name="advertiserAdCost"),
+            types.Metric(name="advertiserAdCostPerClick"),
+            types.Metric(name="keyEvents:generate_lead"),
+            types.Metric(name="keyEvents:whatsapp_click"),
+            types.Metric(name="keyEvents:phone_click"),
         ],
     )
-    response = client.run_report(request)
+
+
+def fetch_campaign_report(client, days: int = REPORT_DAYS) -> dict:
+    """Récupère les métriques de la campagne Google Ads et des groupes d'annonces."""
+    response = client.run_report(build_campaign_request(_ga4(), days))
 
     rows = []
     total_impressions = 0
@@ -142,24 +166,32 @@ def fetch_campaign_report(client: BetaAnalyticsDataClient, days: int = 7) -> dic
     }
 
 
-def fetch_search_terms(client: BetaAnalyticsDataClient, days: int = 7) -> list:
-    """Récupère les requêtes exactes tapées par les internautes."""
-    property_name = f"properties/{PROPERTY_ID}"
-    request = RunReportRequest(
-        property=property_name,
-        date_ranges=[DateRange(start_date=f"{days}daysAgo", end_date="today")],
+def build_search_terms_request(types, days: int = REPORT_DAYS):
+    """Requête GA4 des termes de recherche, les plus cliqués d'abord."""
+    return types.RunReportRequest(
+        property=f"properties/{PROPERTY_ID}",
+        date_ranges=[types.DateRange(**report_range(days))],
         dimensions=[
-            Dimension(name="sessionGoogleAdsQuery"),
-            Dimension(name="sessionGoogleAdsAdGroupName"),
+            types.Dimension(name="sessionGoogleAdsQuery"),
+            types.Dimension(name="sessionGoogleAdsAdGroupName"),
         ],
         metrics=[
-            Metric(name="advertiserAdClicks"),
-            Metric(name="advertiserAdCost"),
-            Metric(name="keyEvents:generate_lead"),
+            types.Metric(name="advertiserAdClicks"),
+            types.Metric(name="advertiserAdCost"),
+            types.Metric(name="keyEvents:generate_lead"),
         ],
-        limit=20,
+        order_bys=[
+            types.OrderBy(
+                metric=types.OrderBy.MetricOrderBy(metric_name="advertiserAdClicks"), desc=True
+            )
+        ],
+        limit=SEARCH_TERMS_LIMIT,
     )
-    response = client.run_report(request)
+
+
+def fetch_search_terms(client, days: int = REPORT_DAYS) -> list:
+    """Récupère les requêtes exactes tapées par les internautes."""
+    response = client.run_report(build_search_terms_request(_ga4(), days))
     queries = []
     for row in response.rows:
         query = row.dimension_values[0].value
@@ -178,14 +210,14 @@ def fetch_search_terms(client: BetaAnalyticsDataClient, days: int = 7) -> list:
     return queries
 
 
-def fetch_conversions_for_range(client: BetaAnalyticsDataClient, start_date: str, end_date: str) -> dict:
+def fetch_conversions_for_range(client, start_date: str, end_date: str) -> dict:
     """Récupère les événements de conversion pour une plage donnée."""
-    property_name = f"properties/{PROPERTY_ID}"
-    request = RunReportRequest(
-        property=property_name,
-        date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
-        dimensions=[Dimension(name="eventName")],
-        metrics=[Metric(name="eventCount")],
+    types = _ga4()
+    request = types.RunReportRequest(
+        property=f"properties/{PROPERTY_ID}",
+        date_ranges=[types.DateRange(start_date=start_date, end_date=end_date)],
+        dimensions=[types.Dimension(name="eventName")],
+        metrics=[types.Metric(name="eventCount")],
     )
     response = client.run_report(request)
     events = {"generate_lead": 0, "whatsapp_click": 0, "phone_click": 0}
@@ -197,7 +229,7 @@ def fetch_conversions_for_range(client: BetaAnalyticsDataClient, start_date: str
     return events
 
 
-def fetch_site_activity(client: BetaAnalyticsDataClient) -> dict:
+def fetch_site_activity(client) -> dict:
     """Récupère l'activité globale du site pour hier (journée complète) et aujourd'hui."""
     yesterday = fetch_conversions_for_range(client, "yesterday", "yesterday")
     today = fetch_conversions_for_range(client, "today", "today")
@@ -206,7 +238,7 @@ def fetch_site_activity(client: BetaAnalyticsDataClient) -> dict:
 
 def generate_html_email(camp_data: dict, search_terms: list, site_activity: dict) -> str:
     """Génère le corps HTML de l'e-mail avec une mise en forme soignée."""
-    now_str = datetime.now().strftime("%d/%m/%Y à %H:%M")
+    now_str = local_now().strftime("%d/%m/%Y à %H:%M")
     period = camp_data["period_days"]
 
     # Budget status
@@ -226,7 +258,7 @@ def generate_html_email(camp_data: dict, search_terms: list, site_activity: dict
 
             rows_html += f"""
             <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td style="padding: 10px; font-weight: 600; color: #1e293b;">{r['ad_group']}</td>
+                <td style="padding: 10px; font-weight: 600; color: #1e293b;">{escape(r['ad_group'])}</td>
                 <td style="padding: 10px; text-align: center; color: #475569;">{r['impressions']}</td>
                 <td style="padding: 10px; text-align: center; font-weight: 600; color: #0284c7;">{r['clicks']}</td>
                 <td style="padding: 10px; text-align: center; color: #475569;">{c_ctr:.1f}%</td>
@@ -254,8 +286,8 @@ def generate_html_email(camp_data: dict, search_terms: list, site_activity: dict
             badge = '<span style="background-color: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600;">Converti</span>' if q['leads'] > 0 else '<span style="background-color: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 9999px; font-size: 11px;">Clic</span>'
             queries_html += f"""
             <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 8px 10px; color: #334155; font-family: monospace;">{q['query']}</td>
-                <td style="padding: 8px 10px; color: #64748b;">{q['ad_group']}</td>
+                <td style="padding: 8px 10px; color: #334155; font-family: monospace;">{escape(q['query'])}</td>
+                <td style="padding: 8px 10px; color: #64748b;">{escape(q['ad_group'])}</td>
                 <td style="padding: 8px 10px; text-align: center; font-weight: 600;">{q['clicks']}</td>
                 <td style="padding: 8px 10px; text-align: right; color: #475569;">CHF {q['cost']:.2f}</td>
                 <td style="padding: 8px 10px; text-align: center;">{badge}</td>
@@ -457,11 +489,10 @@ def send_email(subject: str, html_body: str) -> None:
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     print(f"Connexion au serveur SMTP {host}:{port}...")
-    server = smtplib.SMTP(host, port, timeout=30)
-    server.starttls()
-    server.login(user, password)
-    server.send_message(msg)
-    server.quit()
+    with smtplib.SMTP(host, port, timeout=30) as server:
+        server.starttls()
+        server.login(user, password)
+        server.send_message(msg)
     print(f"✅ E-mail envoyé avec succès à {recipient} !")
 
 
@@ -482,7 +513,7 @@ def main():
         html = generate_html_email(camp_data, search_terms, site_activity)
 
         # Envoi e-mail
-        subject = f"🤿 Bulles en Valais — Rapport Google Ads du {datetime.now().strftime('%d/%m/%Y')}"
+        subject = f"🤿 Bulles en Valais — Rapport Google Ads du {local_now().strftime('%d/%m/%Y')}"
         send_email(subject, html)
         print("=== Fin de l'exécution avec succès ===")
     except Exception as e:
