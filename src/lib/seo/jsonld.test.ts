@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { COURSES, isOnRequest } from '../../data/courses.ts';
 import { CREDENTIALS } from '../../data/credentials.ts';
 import { EMAIL, GOOGLE_PROFILE_URL, SOCIAL_PROFILES } from '../../data/contact.ts';
-import { buildJsonLd, serializeJsonLd, type JsonLdInput } from './jsonld.ts';
+import { formatCHF } from '../format.ts';
+import { routePath } from '../../i18n/routes.ts';
+import { buildJsonLd, buildLandingJsonLd, serializeJsonLd, type JsonLdInput } from './jsonld.ts';
 
 const SITE = 'https://dive.bullesenvalais.ch';
 
@@ -71,6 +73,10 @@ describe('buildJsonLd', () => {
       GOOGLE_PROFILE_URL,
     ]);
     expect(business).not.toHaveProperty('address');
+    const priced = COURSES.flatMap((c) => (isOnRequest(c.price) ? [] : [c.price.amount]));
+    const min = Math.min(...priced);
+    const max = Math.max(...priced);
+    expect(business.priceRange).toBe(`${formatCHF(min, 'fr')} – ${formatCHF(max, 'fr')}`);
     expect(JSON.stringify(ld)).not.toMatch(/Rating|review/i);
   });
 
@@ -133,6 +139,83 @@ describe('buildJsonLd', () => {
         '@type': 'Question',
         name: 'Q1',
         acceptedAnswer: { '@type': 'Answer', text: 'A1' },
+      },
+    ]);
+  });
+});
+
+describe('buildLandingJsonLd', () => {
+  const landingInput = {
+    site: SITE,
+    locale: 'fr' as const,
+    url: `${SITE}/bapteme-plongee-valais/`,
+    name: 'Baptême de plongée en Valais',
+    description: 'Premier baptême de plongée en lac alpin',
+    price: 90,
+    faq: [{ question: 'Combien de temps ?', answer: '2 heures' }],
+    breadcrumbHome: 'Accueil',
+  };
+
+  it('builds a graph containing Course, FAQPage, and BreadcrumbList', () => {
+    const ld = buildLandingJsonLd(landingInput);
+    const graph = ld['@graph'] as Node[];
+    expect(ld['@context']).toBe('https://schema.org');
+    expect(graph.map((n) => n['@type'])).toEqual(['Course', 'FAQPage', 'BreadcrumbList']);
+  });
+
+  it('references the main LocalBusiness as provider without redeclaring it', () => {
+    const ld = buildLandingJsonLd(landingInput);
+    const graph = ld['@graph'] as Node[];
+    const course = nodeOfType(graph, 'Course');
+    const homeBusiness = nodeOfType(buildJsonLd(input('fr'))['@graph'] as Node[], 'LocalBusiness');
+    expect(course.provider).toEqual({ '@id': `${SITE}/#business` });
+    expect(course.provider).toEqual({ '@id': homeBusiness['@id'] });
+  });
+
+  it('declares the offer with the course price in CHF and inStock availability', () => {
+    const ld = buildLandingJsonLd(landingInput);
+    const graph = ld['@graph'] as Node[];
+    const course = nodeOfType(graph, 'Course');
+    expect(course['@id']).toBe(`${landingInput.url}#course`);
+    expect(course.name).toBe(landingInput.name);
+    expect(course.description).toBe(landingInput.description);
+    expect(course.offers).toEqual([
+      {
+        '@type': 'Offer',
+        price: 90,
+        priceCurrency: 'CHF',
+        availability: 'https://schema.org/InStock',
+        url: landingInput.url,
+      },
+    ]);
+  });
+
+  it('structures the FAQPage and BreadcrumbList', () => {
+    const ld = buildLandingJsonLd(landingInput);
+    const graph = ld['@graph'] as Node[];
+    const faq = nodeOfType(graph, 'FAQPage');
+    expect(faq['@id']).toBe(`${landingInput.url}#faq`);
+    expect(faq.mainEntity).toEqual([
+      {
+        '@type': 'Question',
+        name: 'Combien de temps ?',
+        acceptedAnswer: { '@type': 'Answer', text: '2 heures' },
+      },
+    ]);
+
+    const breadcrumbs = nodeOfType(graph, 'BreadcrumbList');
+    expect(breadcrumbs.itemListElement).toEqual([
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: `${SITE}${routePath('home', 'fr')}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: landingInput.name,
+        item: landingInput.url,
       },
     ]);
   });

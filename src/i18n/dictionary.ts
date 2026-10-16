@@ -263,8 +263,14 @@ export interface Dictionary {
     readonly region: string;
     /** After « © <year> ». */
     readonly copyright: string;
-    readonly creditsTitle: string;
     readonly credits: { readonly photos: string };
+    /** Column of links to the landing pages (src/pages/, one per course). */
+    readonly coursesTitle: string;
+    readonly courses: {
+      readonly baptism: string;
+      readonly drysuit: string;
+      readonly openwater: string;
+    };
     readonly legalLinks: { readonly privacy: string; readonly legalNotice: string };
     readonly calmMode: {
       readonly label: string;
@@ -304,6 +310,18 @@ export interface Dictionary {
     };
     /** Label of the link to the privacy page, in the banner and the preferences. */
     readonly privacyLink: string;
+  };
+  /** Shared texts of the landing pages (LandingLayout); their own texts live in data/landings.ts. */
+  readonly landing: {
+    readonly highlightsEyebrow: string;
+    readonly stepsEyebrow: string;
+    readonly faqEyebrow: string;
+    readonly contactEyebrow: string;
+    readonly contactTitle: Emphasis;
+    readonly contactLead: string;
+    readonly channelsTitle: string;
+    /** Name of the home page in the breadcrumb of the structured data. */
+    readonly breadcrumbHome: string;
   };
   readonly notFound: {
     readonly meta: PageMeta;

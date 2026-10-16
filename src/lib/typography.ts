@@ -32,8 +32,7 @@ const RULES: Readonly<Record<Locale, readonly Rule[]>> = {
 
 /** Applies the typographic rules of a language to a text. */
 export function typeset(text: string, locale: Locale): string {
-  const rules = RULES[locale] ?? COMMON_RULES;
-  return rules.reduce(
+  return RULES[locale].reduce(
     (result, [pattern, replacement]) => result.replace(pattern, replacement),
     text,
   );

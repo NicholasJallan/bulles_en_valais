@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { getDictionary } from '../../src/i18n/index.ts';
-import { alternates, type RouteId } from '../../src/i18n/routes.ts';
+import { alternates, routePath, type RouteId } from '../../src/i18n/routes.ts';
 import type { Locale } from '../../src/i18n/types.ts';
 
 const SITE = 'https://dive.bullesenvalais.ch';
@@ -51,5 +51,15 @@ for (const { path, locale, lang, route } of PAGES) {
         );
       }
     });
+
+    if (route === 'home') {
+      test('footer contains links to the three course landing pages', async ({ page }) => {
+        await page.goto(path);
+        const footer = page.locator('footer.site-footer');
+        await expect(footer.locator(`a[href="${routePath('baptism', locale)}"]`)).toBeVisible();
+        await expect(footer.locator(`a[href="${routePath('drysuit', locale)}"]`)).toBeVisible();
+        await expect(footer.locator(`a[href="${routePath('openwater', locale)}"]`)).toBeVisible();
+      });
+    }
   });
 }

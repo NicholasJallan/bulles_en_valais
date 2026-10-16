@@ -17,6 +17,8 @@ const { locale, route = 'home' } = Astro.props;
 const dictionary = getDictionary(locale);
 const t = dictionary.footer;
 const year = new Date().getFullYear();
+// The landing pages, linked from every page so that each is reachable (and crawled).
+const COURSE_ROUTES = ['baptism', 'drysuit', 'openwater'] as const;
 const consentTexts = JSON.stringify({
   ...dictionary.consent,
   privacyHref: routePath('privacy', locale),
@@ -47,9 +49,15 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
     </div>
 
     <div class="footer-column">
-      <h2 class="footer-title">{t.creditsTitle}</h2>
-      <ul class="bare-list fine">
-        <li>{t.credits.photos}</li>
+      <h2 class="footer-title">{t.coursesTitle}</h2>
+      <ul class="bare-list">
+        {COURSE_ROUTES.map((id) => (
+          <li>
+            <a href={routePath(id, locale)} aria-current={id === route ? 'page' : undefined}>
+              {t.courses[id]}
+            </a>
+          </li>
+        ))}
       </ul>
     </div>
 
@@ -74,7 +82,7 @@ const top = route === 'home' ? '#top' : `${localePath(locale, '/')}#top`;
   </div>
   <div class="wrap footer-bottom fine">
     <p>
-      © {year} {t.copyright}
+      © {year} {t.copyright} · {t.credits.photos}
     </p>
     <ul class="bare-list footer-legal">
       <li>

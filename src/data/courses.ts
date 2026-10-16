@@ -1,7 +1,8 @@
 // Every course and its price, once (prices migrated as is from legacy/components/i18n.jsx, S03).
 // The Cursus panels list the courses with a `cursus` role, in this order; the specialty tabs
 // reference them from specialties.ts; the depth ladder shows those `inLadder` at `maxDepth`.
-import type { Localized } from '../i18n/types.ts';
+import type { Locale, Localized } from '../i18n/types.ts';
+import { formatCHF } from '../lib/format.ts';
 import type { Interest } from './contact.ts';
 
 export const AGENCIES = ['sdi-tdi', 'padi', 'ffessm'] as const;
@@ -502,4 +503,19 @@ export function ladderCourses(): readonly LadderCourse[] {
 
 export function isOnRequest(price: Price): price is { readonly onRequest: true } {
   return 'onRequest' in price;
+}
+
+/** `{price:<course id>}` in a text: the price of that course, written by fillPrices(). */
+const PRICE_MARKER = /\{price:([a-z0-9-]+)\}/g;
+
+/**
+ * Writes the prices that texts outside this file quote (landing pages, seasonal spotlight) from
+ * this list, so that they never drift from it: each `{price:<course id>}` becomes « CHF 90 ».
+ */
+export function fillPrices(text: string, locale: Locale): string {
+  return text.replace(PRICE_MARKER, (_marker, id: string) => {
+    const { price } = courseById(id as CourseId);
+    if (isOnRequest(price)) throw new Error(`Course "${id}" has no price to quote`);
+    return formatCHF(price.amount, locale);
+  });
 }

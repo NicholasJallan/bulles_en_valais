@@ -6,6 +6,8 @@ export type SeasonalKey = 'baptism' | 'drysuit';
 export interface SeasonalSpotlight {
   readonly id: SeasonalKey;
   readonly route: RouteId;
+  /** Months it is shown, 0 = January (Date#getMonth); every month belongs to one spotlight. */
+  readonly months: readonly number[];
   readonly badge: Localized;
   readonly title: Localized;
   readonly cta: Localized;
@@ -15,12 +17,13 @@ export const SPOTLIGHTS: Readonly<Record<SeasonalKey, SeasonalSpotlight>> = {
   drysuit: {
     id: 'drysuit',
     route: 'drysuit',
+    months: [0, 1, 2, 3, 9, 10, 11],
     badge: {
-      fr: '❄️ Saison Automne / Hiver',
-      en: '❄️ Autumn / Winter Season',
+      fr: 'Saison froide · octobre à avril',
+      en: 'Cold season · October to April',
     },
     title: {
-      fr: 'Plongez au chaud toute l’année avec la combinaison étanche',
+      fr: "Plongez au chaud toute l'année avec la combinaison étanche",
       en: 'Dive warm year-round with the dry suit specialty',
     },
     cta: {
@@ -31,13 +34,14 @@ export const SPOTLIGHTS: Readonly<Record<SeasonalKey, SeasonalSpotlight>> = {
   baptism: {
     id: 'baptism',
     route: 'baptism',
+    months: [4, 5, 6, 7, 8],
     badge: {
-      fr: '☀️ Saison Printemps / Été',
-      en: '☀️ Spring / Summer Season',
+      fr: 'Belle saison · mai à septembre',
+      en: 'Warm season · May to September',
     },
     title: {
-      fr: 'Votre premier baptême de plongée en lac alpin dès CHF 90',
-      en: 'Your first try-dive in an alpine lake from CHF 90',
+      fr: 'Votre premier baptême de plongée en lac alpin dès {price:padi-dsd}',
+      en: 'Your first try-dive in an alpine lake from {price:padi-dsd}',
     },
     cta: {
       fr: 'Découvrir le baptême',
@@ -46,11 +50,13 @@ export const SPOTLIGHTS: Readonly<Record<SeasonalKey, SeasonalSpotlight>> = {
   },
 };
 
+/** Every spotlight, in the order the hero renders them (the page then shows one by month). */
+export const SPOTLIGHT_LIST: readonly SeasonalSpotlight[] = Object.values(SPOTLIGHTS);
+
 /**
- * Returns the active seasonal spotlight.
- * May to September (months 4-8) = Summer / Baptism
- * October to April = Winter / Dry Suit
- * Can be explicitly overridden with an override parameter.
+ * The spotlight of a date's month (`months`), unless overridden. The hero renders them all and
+ * picks the visible one in the browser (boot.js sets html[data-month]); this choice, made at build
+ * time, is the one shown without JavaScript.
  */
 export function getActiveSpotlight(
   override?: SeasonalKey,
@@ -59,7 +65,8 @@ export function getActiveSpotlight(
   if (override !== undefined) {
     return SPOTLIGHTS[override];
   }
-  const month = date.getMonth(); // 0: Jan ... 9: Oct, 11: Dec
-  const isSummer = month >= 4 && month <= 8;
-  return isSummer ? SPOTLIGHTS.baptism : SPOTLIGHTS.drysuit;
+  const month = date.getMonth();
+  const spotlight = SPOTLIGHT_LIST.find((entry) => entry.months.includes(month));
+  if (spotlight === undefined) throw new Error(`No seasonal spotlight for month ${month}`);
+  return spotlight;
 }

@@ -572,9 +572,14 @@ export const fr: Dictionary = {
   footer: {
     region: 'Valais · Suisse',
     copyright: 'Bulles en Valais · Nicholas Jallan',
-    creditsTitle: 'Crédits',
     credits: {
       photos: 'Photos : © Nicholas Jallan',
+    },
+    coursesTitle: 'Formations',
+    courses: {
+      baptism: 'Baptême de plongée',
+      drysuit: 'Combinaison étanche',
+      openwater: 'Cours Open Water',
     },
     legalLinks: { privacy: 'Confidentialité', legalNotice: 'Mentions légales' },
     calmMode: {
@@ -624,6 +629,17 @@ export const fr: Dictionary = {
         'Le nom, le fournisseur et la durée de chaque cookie, ainsi que vos droits, sont détaillés dans la politique de confidentialité.',
     },
     privacyLink: 'Politique de confidentialité',
+  },
+  landing: {
+    highlightsEyebrow: 'Avantages et sécurité',
+    stepsEyebrow: 'Progression et méthode',
+    faqEyebrow: 'Questions et réponses',
+    contactEyebrow: 'Contact et réservation',
+    contactTitle: { before: 'Planifions votre', em: 'immersion', after: 'ensemble.' },
+    contactLead:
+      'Remplissez le formulaire ci-dessous ou écrivez-moi directement par WhatsApp. Dates flexibles selon vos disponibilités.',
+    channelsTitle: 'Canaux directs',
+    breadcrumbHome: 'Accueil',
   },
   notFound: {
     meta: {

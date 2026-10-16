@@ -7,9 +7,11 @@ import {
   type CourseId,
   courseById,
   cursusCourses,
+  fillPrices,
   isOnRequest,
   ladderCourses,
 } from './courses.ts';
+import { formatCHF } from '../lib/format.ts';
 
 const ids = (courses: readonly Course[]): string[] => courses.map((course) => course.id);
 /** Widened to `Course`, so that optional fields can be read on every entry. */
@@ -170,5 +172,33 @@ describe('isOnRequest', () => {
   it('tells a price on request from an amount', () => {
     expect(isOnRequest({ onRequest: true })).toBe(true);
     expect(isOnRequest({ amount: 90, currency: 'CHF' })).toBe(false);
+  });
+});
+
+describe('fillPrices', () => {
+  it('replaces a single price marker with formatted CHF amount in fr and en', () => {
+    const template = 'Baptême dès {price:padi-dsd}';
+    expect(fillPrices(template, 'fr')).toBe(`Baptême dès ${formatCHF(90, 'fr')}`);
+    expect(fillPrices(template, 'en')).toBe(`Baptême dès ${formatCHF(90, 'en')}`);
+  });
+
+  it('replaces multiple price markers in the same string', () => {
+    const template = '{price:sdi-drysuit} (SDI) / {price:padi-drysuit} (PADI)';
+    expect(fillPrices(template, 'fr')).toBe(
+      `${formatCHF(250, 'fr')} (SDI) / ${formatCHF(300, 'fr')} (PADI)`,
+    );
+  });
+
+  it('leaves a string without price markers unchanged', () => {
+    const text = 'Simple texte sans marqueur de prix.';
+    expect(fillPrices(text, 'fr')).toBe(text);
+  });
+
+  it('throws an error for an unknown course id', () => {
+    expect(() => fillPrices('Prix: {price:non-existent}', 'fr')).toThrow();
+  });
+
+  it('throws an error for a course with price on request', () => {
+    expect(() => fillPrices('Trimix: {price:ffessm-pth70}', 'fr')).toThrow();
   });
 });

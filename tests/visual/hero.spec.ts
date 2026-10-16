@@ -13,6 +13,7 @@ test('hero without WebGL', async ({ page }) => {
     } as typeof getContext;
   });
   await gotoReady(page, '/');
+  await page.evaluate(() => document.documentElement.setAttribute('data-month', '9'));
   await expect(page.locator('html')).toHaveAttribute('data-intro', '');
   // The intro has settled: every title line back in place, the HUD lit.
   await expect

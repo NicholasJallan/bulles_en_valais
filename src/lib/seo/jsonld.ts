@@ -1,11 +1,12 @@
-// Structured data of the home page (02-architecture.md §13): one schema.org @graph built from
-// src/data. No postal address (I-08) and no AggregateRating: Google ignores, and may penalise,
-// ratings a business publishes about itself.
+// Structured data of the home page (02-architecture.md §13) and of the landing pages: schema.org
+// @graphs built from src/data. No postal address (I-08) and no AggregateRating: Google ignores,
+// and may penalise, ratings a business publishes about itself.
 import { BUSINESS, EMAIL, GOOGLE_PROFILE_URL, PHONE, SOCIAL_PROFILES } from '../../data/contact.ts';
 import { COURSES, isOnRequest } from '../../data/courses.ts';
 import { CREDENTIALS } from '../../data/credentials.ts';
 import { routePath } from '../../i18n/routes.ts';
 import { LANG_TAGS, type Locale } from '../../i18n/types.ts';
+import { formatCHF } from '../format.ts';
 
 export interface JsonLdInput {
   readonly locale: Locale;
@@ -13,7 +14,27 @@ export interface JsonLdInput {
   readonly site: string;
   readonly description: string;
   readonly labels: { readonly jobTitle: string; readonly catalogName: string };
-  readonly faq?: readonly { readonly question: string; readonly answer: string }[];
+  readonly faq?: readonly FaqEntry[];
+}
+
+export interface FaqEntry {
+  readonly question: string;
+  readonly answer: string;
+}
+
+/** Structured data of a landing page: its course, its FAQ and its place under the home page. */
+export interface LandingJsonLdInput {
+  readonly site: string;
+  readonly locale: Locale;
+  /** Canonical URL of the page. */
+  readonly url: string;
+  readonly name: string;
+  readonly description: string;
+  /** Price in CHF of the course the page offers. */
+  readonly price: number;
+  readonly faq: readonly FaqEntry[];
+  /** Name of the home page in the breadcrumb. */
+  readonly breadcrumbHome: string;
 }
 
 type Node = Readonly<Record<string, unknown>>;
@@ -56,11 +77,11 @@ function catalog(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
   };
 }
 
-function faqPage(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
+function faqPage(faq: readonly FaqEntry[], id: Node): Node {
   return {
     '@type': 'FAQPage',
-    ...ref.faq,
-    mainEntity: (input.faq ?? []).map((item) => ({
+    ...id,
+    mainEntity: faq.map((item) => ({
       '@type': 'Question',
       name: item.question,
       acceptedAnswer: {
@@ -69,6 +90,14 @@ function faqPage(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
       },
     })),
   };
+}
+
+/** « CHF 80 – CHF 1090 »: the cheapest and dearest courses with a price (not on request). */
+function priceRange(locale: Locale): string {
+  const amounts = COURSES.flatMap((course) =>
+    isOnRequest(course.price) ? [] : [course.price.amount],
+  );
+  return `${formatCHF(Math.min(...amounts), locale)} – ${formatCHF(Math.max(...amounts), locale)}`;
 }
 
 function person(input: JsonLdInput, ref: ReturnType<typeof ids>): Node {
@@ -94,7 +123,7 @@ function business(input: JsonLdInput, ref: ReturnType<typeof ids>, url: string):
     name: BUSINESS.name,
     url,
     description: input.description,
-    priceRange: 'CHF 80 - 1090',
+    priceRange: priceRange(locale),
     currenciesAccepted: 'CHF',
     logo: `${site}/icon-512.png`,
     image: `${site}/og/og-${locale}.jpg`,
@@ -124,11 +153,50 @@ export function buildJsonLd(input: JsonLdInput): Node {
     catalog(input, ref),
   ];
   if (input.faq && input.faq.length > 0) {
-    nodes.push(faqPage(input, ref));
+    nodes.push(faqPage(input.faq, ref.faq));
   }
   return {
     '@context': 'https://schema.org',
     '@graph': nodes,
+  };
+}
+
+export function buildLandingJsonLd(input: LandingJsonLdInput): Node {
+  const { site, locale, url } = input;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Course',
+        '@id': `${url}#course`,
+        name: input.name,
+        description: input.description,
+        // The business described once, on the home page: referenced, never declared again.
+        provider: ids(site).business,
+        offers: [
+          {
+            '@type': 'Offer',
+            price: input.price,
+            priceCurrency: 'CHF',
+            availability: 'https://schema.org/InStock',
+            url,
+          },
+        ],
+      },
+      faqPage(input.faq, { '@id': `${url}#faq` }),
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: input.breadcrumbHome,
+            item: `${site}${routePath('home', locale)}`,
+          },
+          { '@type': 'ListItem', position: 2, name: input.name, item: url },
+        ],
+      },
+    ],
   };
 }
 

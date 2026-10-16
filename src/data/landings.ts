@@ -1,4 +1,5 @@
 import type { Interest } from './contact.ts';
+import type { CourseId } from './courses.ts';
 import type { RouteId } from '../i18n/routes.ts';
 import type { Localized } from '../i18n/types.ts';
 
@@ -29,7 +30,10 @@ export interface LandingPageData {
   readonly id: 'baptism' | 'drysuit' | 'openwater';
   readonly route: RouteId;
   readonly contactInterest: Interest;
-  readonly price: { readonly amount: number; readonly currency: 'CHF' };
+  /** Course whose price the structured data offers (the entry price of the page). */
+  readonly primaryCourseId: CourseId;
+  /** Courses the page presents: the only ones its texts may quote with `{price:<id>}`. */
+  readonly courseIds: readonly CourseId[];
   readonly meta: {
     readonly title: Localized;
     readonly description: Localized;
@@ -38,7 +42,11 @@ export interface LandingPageData {
   };
   readonly hero: {
     readonly eyebrow: Localized;
-    readonly title: { readonly before: Localized; readonly em: Localized; readonly after: Localized };
+    readonly title: {
+      readonly before: Localized;
+      readonly em: Localized;
+      readonly after: Localized;
+    };
     readonly lead: Localized;
     readonly primaryCta: Localized;
     readonly secondaryCta: Localized;
@@ -64,11 +72,12 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     id: 'baptism',
     route: 'baptism',
     contactInterest: 'baptism',
-    price: { amount: 90, currency: 'CHF' },
+    primaryCourseId: 'padi-dsd',
+    courseIds: ['padi-dsd'],
     meta: {
       title: {
-        fr: 'Baptême de plongée en Valais — Initiation lac (CHF 90)',
-        en: 'Try Scuba Diving in Valais — Alpine Lake Dive (CHF 90)',
+        fr: 'Baptême de plongée en Valais — Initiation lac ({price:padi-dsd})',
+        en: 'Try Scuba Diving in Valais — Alpine Lake Dive ({price:padi-dsd})',
       },
       description: {
         fr: 'Premier baptême de plongée sous-marine en Valais au lac du Rosel ou à Sion. Encadrement privé ou duo avec Nicholas Jallan, matériel inclus.',
@@ -109,7 +118,7 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     facts: [
       {
         label: { fr: 'Tarif tout compris', en: 'All-inclusive price' },
-        value: { fr: 'CHF 90', en: 'CHF 90' },
+        value: { fr: '{price:padi-dsd}', en: '{price:padi-dsd}' },
       },
       {
         label: { fr: 'Durée totale', en: 'Total duration' },
@@ -268,11 +277,12 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     id: 'drysuit',
     route: 'drysuit',
     contactInterest: 'specialty',
-    price: { amount: 250, currency: 'CHF' },
+    primaryCourseId: 'sdi-drysuit',
+    courseIds: ['sdi-drysuit', 'padi-drysuit'],
     meta: {
       title: {
-        fr: 'Formation Combinaison Étanche Valais — Dry Suit (CHF 250)',
-        en: 'Dry Suit Diving Course in Valais — SDI & PADI (CHF 250)',
+        fr: 'Formation Combinaison Étanche Valais — Dry Suit ({price:sdi-drysuit})',
+        en: 'Dry Suit Diving Course in Valais — SDI & PADI ({price:sdi-drysuit})',
       },
       description: {
         fr: 'Plongez au chaud toute l’année dans les lacs suisses. Spécialité Combinaison Étanche SDI & PADI en Valais avec Nicholas Jallan, instructeur breveté.',
@@ -313,7 +323,10 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     facts: [
       {
         label: { fr: 'Tarif de la formation', en: 'Course tuition' },
-        value: { fr: 'CHF 250 (SDI) / 300 (PADI)', en: 'CHF 250 (SDI) / 300 (PADI)' },
+        value: {
+          fr: '{price:sdi-drysuit} (SDI) / {price:padi-drysuit} (PADI)',
+          en: '{price:sdi-drysuit} (SDI) / {price:padi-drysuit} (PADI)',
+        },
       },
       {
         label: { fr: 'Immersion', en: 'Open water dives' },
@@ -334,7 +347,10 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     },
     highlights: [
       {
-        title: { fr: 'Une visibilité exceptionnelle en hiver', en: 'Crystal-clear winter visibility' },
+        title: {
+          fr: 'Une visibilité exceptionnelle en hiver',
+          en: 'Crystal-clear winter visibility',
+        },
         description: {
           fr: 'En automne et en hiver, les algues disparaissent et l’eau des lacs devient translucide. La combinaison étanche vous ouvre cette saison magique.',
           en: 'In autumn and winter, algae vanish and alpine lakes turn crystal clear. A dry suit unlocks this breathtaking diving season.',
@@ -404,7 +420,10 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
       },
       {
         num: '04',
-        title: { fr: 'Plongée 2 : Exploration & Validation', en: 'Dive 2: Exploration & Certification' },
+        title: {
+          fr: 'Plongée 2 : Exploration & Validation',
+          en: 'Dive 2: Exploration & Certification',
+        },
         duration: { fr: '~50 min', en: '~50 min' },
         description: {
           fr: 'Plongée d’exploration complète en autonomie avec votre binôme, validation des compétences et délivrance de votre brevet international SDI ou PADI.',
@@ -471,11 +490,12 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
     id: 'openwater',
     route: 'openwater',
     contactInterest: 'sdi-owd',
-    price: { amount: 690, currency: 'CHF' },
+    primaryCourseId: 'sdi-owsd',
+    courseIds: ['sdi-owsd', 'padi-owd'],
     meta: {
       title: {
-        fr: 'Cours Open Water Valais — Brevet de Plongée (CHF 690)',
-        en: 'Open Water Scuba Course Valais — Dive Licence (CHF 690)',
+        fr: 'Cours Open Water Valais — Brevet de Plongée ({price:sdi-owsd})',
+        en: 'Open Water Scuba Course Valais — Dive Licence ({price:sdi-owsd})',
       },
       description: {
         fr: 'Devenez plongeur autonome à 18m. Cours Open Water SDI ou PADI en Valais avec Nicholas Jallan : petit comité, lac alpin et horaire modulable sur mesure.',
@@ -529,8 +549,8 @@ export const LANDINGS: Readonly<Record<'baptism' | 'drysuit' | 'openwater', Land
           en: 'Course fee',
         },
         value: {
-          fr: 'CHF 690 (SDI) / 790 (PADI)',
-          en: 'CHF 690 (SDI) / 790 (PADI)',
+          fr: '{price:sdi-owsd} (SDI) / {price:padi-owd} (PADI)',
+          en: '{price:sdi-owsd} (SDI) / {price:padi-owd} (PADI)',
         },
       },
       {

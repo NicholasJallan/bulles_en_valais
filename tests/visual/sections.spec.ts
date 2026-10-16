@@ -62,6 +62,7 @@ for (const width of WIDTHS) {
     );
     await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
     await gotoReady(page, '/');
+    await page.evaluate(() => document.documentElement.setAttribute('data-month', '9'));
     await settle(page);
     for (const id of SECTIONS) await expectSection(page, `#${id}`, `${id}-${width}.png`);
     await expectSection(page, 'footer.site-footer', `footer-${width}.png`);

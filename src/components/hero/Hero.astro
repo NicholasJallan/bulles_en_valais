@@ -8,7 +8,8 @@ import Eyebrow from '@/components/ui/Eyebrow.astro';
 import Section from '@/components/ui/Section.astro';
 import { CREDENTIALS } from '@/data/credentials.ts';
 import { PLACES } from '@/data/places.ts';
-import { getActiveSpotlight } from '@/data/season.ts';
+import { fillPrices } from '@/data/courses.ts';
+import { getActiveSpotlight, SPOTLIGHT_LIST } from '@/data/season.ts';
 import { markerDepth } from '@/data/sections.ts';
 import { getDictionary, localize } from '@/i18n/index.ts';
 import { routePath } from '@/i18n/routes.ts';
@@ -21,8 +22,9 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getDictionary(locale);
-const spotlight = getActiveSpotlight();
-const spotlightHref = routePath(spotlight.route, locale);
+// Every seasonal spotlight is rendered; html[data-month] (boot.js) shows the one of the month
+// before the first paint. Without JavaScript, the one of the build date shows.
+const buildSpotlight = getActiveSpotlight();
 // The photo is the Rosel: its coordinates sign the image.
 const rosel = PLACES.find((place) => place.id === 'rosel');
 if (rosel === undefined) throw new Error('The Rosel is missing from places.ts');
@@ -53,13 +55,22 @@ const teaching = CREDENTIALS.filter((credential) =>
       <EmphasisText value={t.hero.title} />
     </h1>
     <p class="lead hero-lead">{t.hero.lead}</p>
-    <a href={spotlightHref} class="hero-spotlight">
-      <span class="hero-spotlight-badge">{localize(spotlight.badge, locale)}</span>
-      <span class="hero-spotlight-title">{localize(spotlight.title, locale)}</span>
-      <span class="hero-spotlight-arrow" aria-hidden="true">
-        &rarr;
-      </span>
-    </a>
+    {SPOTLIGHT_LIST.map((spotlight) => (
+      <a
+        href={routePath(spotlight.route, locale)}
+        class="hero-spotlight"
+        data-months={spotlight.months.join(' ')}
+        data-build-active={spotlight === buildSpotlight ? '' : undefined}
+      >
+        <span class="hero-spotlight-badge">{localize(spotlight.badge, locale)}</span>
+        <span class="hero-spotlight-title">
+          {fillPrices(localize(spotlight.title, locale), locale)}
+        </span>
+        <span class="hero-spotlight-arrow" aria-hidden="true">
+          &rarr;
+        </span>
+      </a>
+    ))}
     <div class="hero-actions">
       <Button href="#contact" icon="arrow-down">
         {t.hero.primaryCta}
@@ -246,8 +257,10 @@ const teaching = CREDENTIALS.filter((credential) =>
     color: var(--fg-soft);
   }
 
+  /* One spotlight shows: the one of the month (boot.js sets html[data-month]), else the one of
+     the build date. Twelve static rules, the months themselves come from season.ts. */
   .hero-spotlight {
-    display: inline-flex;
+    display: none;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-2xs) var(--space-xs);
@@ -264,6 +277,22 @@ const teaching = CREDENTIALS.filter((credential) =>
       border-color var(--dur-fast) var(--ease-surface),
       translate var(--dur-fast) var(--ease-surface);
     max-inline-size: 100%;
+  }
+
+  :global(html:not([data-month])) .hero-spotlight[data-build-active],
+  :global(html[data-month='0']) .hero-spotlight[data-months~='0'],
+  :global(html[data-month='1']) .hero-spotlight[data-months~='1'],
+  :global(html[data-month='2']) .hero-spotlight[data-months~='2'],
+  :global(html[data-month='3']) .hero-spotlight[data-months~='3'],
+  :global(html[data-month='4']) .hero-spotlight[data-months~='4'],
+  :global(html[data-month='5']) .hero-spotlight[data-months~='5'],
+  :global(html[data-month='6']) .hero-spotlight[data-months~='6'],
+  :global(html[data-month='7']) .hero-spotlight[data-months~='7'],
+  :global(html[data-month='8']) .hero-spotlight[data-months~='8'],
+  :global(html[data-month='9']) .hero-spotlight[data-months~='9'],
+  :global(html[data-month='10']) .hero-spotlight[data-months~='10'],
+  :global(html[data-month='11']) .hero-spotlight[data-months~='11'] {
+    display: inline-flex;
   }
 
   .hero-spotlight-badge {

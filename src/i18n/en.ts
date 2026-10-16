@@ -574,9 +574,14 @@ export const en: Dictionary = {
   footer: {
     region: 'Valais · Switzerland',
     copyright: 'Bulles en Valais · Nicholas Jallan',
-    creditsTitle: 'Credits',
     credits: {
       photos: 'Photos: © Nicholas Jallan',
+    },
+    coursesTitle: 'Courses',
+    courses: {
+      baptism: 'Try scuba diving',
+      drysuit: 'Dry suit diving',
+      openwater: 'Open Water course',
     },
     legalLinks: { privacy: 'Privacy', legalNotice: 'Legal notice' },
     calmMode: {
@@ -626,6 +631,17 @@ export const en: Dictionary = {
         'The name, provider and duration of each cookie, and your rights, are set out in the privacy policy.',
     },
     privacyLink: 'Privacy policy',
+  },
+  landing: {
+    highlightsEyebrow: 'Benefits and safety',
+    stepsEyebrow: 'Progression and method',
+    faqEyebrow: 'Questions and answers',
+    contactEyebrow: 'Booking and contact',
+    contactTitle: { before: "Let's plan your", em: 'session', after: 'together.' },
+    contactLead:
+      'Fill out the form below or message me directly on WhatsApp. Flexible scheduling around your calendar.',
+    channelsTitle: 'Direct channels',
+    breadcrumbHome: 'Home',
   },
   notFound: {
     meta: {

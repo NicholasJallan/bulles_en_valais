@@ -6,12 +6,13 @@ import ContactForm from '@/components/contact/ContactForm.astro';
 import Footer from '@/components/footer/Footer.astro';
 import Nav from '@/components/nav/Nav.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { BUSINESS, EMAIL, GOOGLE_PROFILE_URL, PHONE, whatsappUrl } from '@/data/contact.ts';
+import { EMAIL, PHONE, whatsappUrl } from '@/data/contact.ts';
+import { courseById, fillPrices, isOnRequest } from '@/data/courses.ts';
 import type { LandingPageData } from '@/data/landings.ts';
 import { getDictionary, localize } from '@/i18n/index.ts';
 import { routePath } from '@/i18n/routes.ts';
-import type { Locale } from '@/i18n/types.ts';
-import { serializeJsonLd } from '@/lib/seo/jsonld.ts';
+import type { Locale, Localized } from '@/i18n/types.ts';
+import { buildLandingJsonLd, serializeJsonLd } from '@/lib/seo/jsonld.ts';
 
 interface Props {
   locale: Locale;
@@ -20,82 +21,40 @@ interface Props {
 
 const { locale, landing } = Astro.props;
 const dictionary = getDictionary(locale);
+const t = dictionary.landing;
 const tContact = dictionary.contact;
+/** A text of the landing, typeset, with its `{price:…}` read from courses.ts. */
+const text = (value: Localized): string => fillPrices(localize(value, locale), locale);
 
-const title = localize(landing.meta.title, locale);
-const description = localize(landing.meta.description, locale);
-const ogTitle = localize(landing.meta.ogTitle, locale);
-const ogDescription = localize(landing.meta.ogDescription, locale);
+const title = text(landing.meta.title);
+const description = text(landing.meta.description);
+const ogTitle = text(landing.meta.ogTitle);
+const ogDescription = text(landing.meta.ogDescription);
 
 const siteUrl = Astro.site?.origin ?? 'https://dive.bullesenvalais.ch';
 const canonicalUrl = `${siteUrl}${routePath(landing.route, locale)}`;
 const homeUrl = `${siteUrl}${routePath('home', locale)}`;
 
-// Schema.org JSON-LD tailored for the Landing Page
-const jsonLdData = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Course',
-      '@id': `${canonicalUrl}#course`,
-      name: title,
-      description,
-      provider: {
-        '@type': 'LocalBusiness',
-        name: BUSINESS.name,
-        url: homeUrl,
-        telephone: PHONE.href.replace('tel:', ''),
-        email: EMAIL,
-        sameAs: [GOOGLE_PROFILE_URL],
-      },
-      offers: [
-        {
-          '@type': 'Offer',
-          price: landing.price.amount,
-          priceCurrency: landing.price.currency,
-          availability: 'https://schema.org/InStock',
-          url: canonicalUrl,
-        },
-      ],
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${canonicalUrl}#faq`,
-      mainEntity: landing.faq.map((item) => ({
-        '@type': 'Question',
-        name: localize(item.question, locale),
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: localize(item.answer, locale),
-        },
-      })),
-    },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: locale === 'en' ? 'Home' : 'Accueil',
-          item: homeUrl,
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          name: title,
-          item: canonicalUrl,
-        },
-      ],
-    },
-  ],
-};
-
-const jsonLd = serializeJsonLd(jsonLdData);
+const { price } = courseById(landing.primaryCourseId);
+if (isOnRequest(price)) throw new Error(`${landing.primaryCourseId} has no price to offer`);
+const jsonLd = serializeJsonLd(
+  buildLandingJsonLd({
+    site: siteUrl,
+    locale,
+    url: canonicalUrl,
+    name: title,
+    description,
+    price: price.amount,
+    faq: landing.faq.map((item) => ({ question: text(item.question), answer: text(item.answer) })),
+    breadcrumbHome: t.breadcrumbHome,
+  }),
+);
+const whatsappHref = whatsappUrl(text(landing.hero.primaryCta));
 const contactChannels = [
   {
     label: tContact.channels.whatsapp,
     value: PHONE.display,
-    href: whatsappUrl(localize(landing.hero.primaryCta, locale)),
+    href: whatsappHref,
     icon: 'message',
     external: true,
   },
@@ -132,40 +91,40 @@ const contactChannels = [
     <!-- HERO SECTION -->
     <section class="landing-hero" id="top" data-tone="deep">
       <div class="wrap landing-hero-content">
-        <span class="eyebrow landing-eyebrow">{localize(landing.hero.eyebrow, locale)}</span>
+        <span class="eyebrow landing-eyebrow">{text(landing.hero.eyebrow)}</span>
         <h1 class="landing-title">
           <EmphasisText
             value={{
-              before: localize(landing.hero.title.before, locale),
-              em: localize(landing.hero.title.em, locale),
-              after: localize(landing.hero.title.after, locale),
+              before: text(landing.hero.title.before),
+              em: text(landing.hero.title.em),
+              after: text(landing.hero.title.after),
             }}
           />
         </h1>
-        <p class="lead landing-lead">{localize(landing.hero.lead, locale)}</p>
+        <p class="lead landing-lead">{text(landing.hero.lead)}</p>
 
         <!-- CARTE DES CHIFFRES CLÉS / TARIFS -->
         <div class="landing-facts-grid">
           {landing.facts.map((fact) => (
             <div class="landing-fact-card">
-              <span class="landing-fact-label">{localize(fact.label, locale)}</span>
-              <strong class="landing-fact-value">{localize(fact.value, locale)}</strong>
+              <span class="landing-fact-label">{text(fact.label)}</span>
+              <strong class="landing-fact-value">{text(fact.value)}</strong>
             </div>
           ))}
         </div>
 
         <div class="landing-hero-actions">
           <Button href="#reserver" icon="arrow-down">
-            {localize(landing.hero.primaryCta, locale)}
+            {text(landing.hero.primaryCta)}
           </Button>
           <Button
-            href={whatsappUrl(localize(landing.hero.primaryCta, locale))}
+            href={whatsappHref}
             variant="secondary"
             icon="message"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {localize(landing.hero.secondaryCta, locale)}
+            {text(landing.hero.secondaryCta)}
           </Button>
         </div>
       </div>
@@ -175,11 +134,9 @@ const contactChannels = [
     <section data-tone="surface" class="landing-highlights-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="eyebrow landing-section-eyebrow">
-            {locale === 'fr' ? 'Avantages & Sécurité' : 'Benefits & Safety'}
-          </span>
+          <span class="eyebrow landing-section-eyebrow">{t.highlightsEyebrow}</span>
           <h2 class="landing-section-title">
-            <em>{localize(landing.highlightsTitle, locale)}</em>
+            <em>{text(landing.highlightsTitle)}</em>
           </h2>
         </header>
         <div class="landing-cards-grid">
@@ -188,8 +145,8 @@ const contactChannels = [
               <div class="landing-card-icon">
                 <Icon name="check" />
               </div>
-              <h3 class="landing-card-title">{localize(item.title, locale)}</h3>
-              <p class="landing-card-text">{localize(item.description, locale)}</p>
+              <h3 class="landing-card-title">{text(item.title)}</h3>
+              <p class="landing-card-text">{text(item.description)}</p>
             </article>
           ))}
         </div>
@@ -200,13 +157,11 @@ const contactChannels = [
     <section data-tone="lagoon" class="landing-steps-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="eyebrow landing-section-eyebrow">
-            {locale === 'fr' ? 'Progression & Méthode' : 'Progression & Method'}
-          </span>
+          <span class="eyebrow landing-section-eyebrow">{t.stepsEyebrow}</span>
           <h2 class="landing-section-title">
-            <em>{localize(landing.stepsTitle, locale)}</em>
+            <em>{text(landing.stepsTitle)}</em>
           </h2>
-          <p class="landing-section-lead">{localize(landing.stepsLead, locale)}</p>
+          <p class="landing-section-lead">{text(landing.stepsLead)}</p>
         </header>
         <div class="landing-steps-list">
           {landing.steps.map((step) => (
@@ -214,10 +169,10 @@ const contactChannels = [
               <div class="landing-step-num">{step.num}</div>
               <div class="landing-step-body">
                 <div class="landing-step-header">
-                  <h3 class="landing-step-title">{localize(step.title, locale)}</h3>
-                  <span class="landing-step-duration">{localize(step.duration, locale)}</span>
+                  <h3 class="landing-step-title">{text(step.title)}</h3>
+                  <span class="landing-step-duration">{text(step.duration)}</span>
                 </div>
-                <p class="landing-step-description">{localize(step.description, locale)}</p>
+                <p class="landing-step-description">{text(step.description)}</p>
               </div>
             </div>
           ))}
@@ -229,22 +184,20 @@ const contactChannels = [
     <section data-tone="deep" class="landing-faq-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="eyebrow landing-section-eyebrow">
-            {locale === 'fr' ? 'Questions & Réponses' : 'Questions & Answers'}
-          </span>
+          <span class="eyebrow landing-section-eyebrow">{t.faqEyebrow}</span>
           <h2 class="landing-section-title">
-            <em>{localize(landing.faqTitle, locale)}</em>
+            <em>{text(landing.faqTitle)}</em>
           </h2>
         </header>
         <div class="landing-faq-grid">
           {landing.faq.map((item) => (
             <details class="landing-faq-details">
               <summary class="landing-faq-question">
-                <span>{localize(item.question, locale)}</span>
+                <span>{text(item.question)}</span>
                 <Icon name="arrow-down" class="landing-faq-arrow" />
               </summary>
               <div class="landing-faq-answer">
-                <p>{localize(item.answer, locale)}</p>
+                <p>{text(item.answer)}</p>
               </div>
             </details>
           ))}
@@ -256,26 +209,16 @@ const contactChannels = [
     <section id="reserver" data-tone="surface" class="landing-contact-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="eyebrow landing-section-eyebrow">
-            {locale === 'fr' ? 'Contact & Réservation' : 'Booking & Contact'}
-          </span>
+          <span class="eyebrow landing-section-eyebrow">{t.contactEyebrow}</span>
           <h2 class="landing-section-title">
-            {locale === 'fr' ? 'Planifions votre ' : 'Let’s plan your '}
-            <em>{locale === 'fr' ? 'immersion' : 'session'}</em>
-            {locale === 'fr' ? ' ensemble.' : ' together.'}
+            <EmphasisText value={t.contactTitle} />
           </h2>
-          <p class="landing-section-lead">
-            {locale === 'fr'
-              ? 'Remplissez le formulaire ci-dessous ou écrivez-moi directement par WhatsApp. Dates flexibles selon vos disponibilités.'
-              : 'Fill out the form below or message me directly on WhatsApp. Flexible scheduling around your calendar.'}
-          </p>
+          <p class="landing-section-lead">{t.contactLead}</p>
         </header>
 
         <div class="landing-contact-layout">
           <div class="landing-channels">
-            <h3 class="landing-channels-title">
-              {locale === 'fr' ? 'Canaux directs :' : 'Direct channels:'}
-            </h3>
+            <h3 class="landing-channels-title">{t.channelsTitle}</h3>
             <ul class="bare-list landing-channels-list">
               {contactChannels.map((c) => (
                 <li>
@@ -306,13 +249,11 @@ const contactChannels = [
     <!-- PASSERELLE VERS LA DESCENTE (LE MONO-PAGE ARTISTIQUE) -->
     <section class="landing-descent-teaser" data-tone="abyss">
       <div class="wrap landing-teaser-inner">
-        <span class="eyebrow landing-teaser-eyebrow">
-          {localize(landing.descentTeaser.eyebrow, locale)}
-        </span>
-        <h2 class="landing-teaser-title">{localize(landing.descentTeaser.title, locale)}</h2>
-        <p class="landing-teaser-lead">{localize(landing.descentTeaser.lead, locale)}</p>
+        <span class="eyebrow landing-teaser-eyebrow">{text(landing.descentTeaser.eyebrow)}</span>
+        <h2 class="landing-teaser-title">{text(landing.descentTeaser.title)}</h2>
+        <p class="landing-teaser-lead">{text(landing.descentTeaser.lead)}</p>
         <Button href={homeUrl} variant="secondary">
-          {localize(landing.descentTeaser.cta, locale)}
+          {text(landing.descentTeaser.cta)}
         </Button>
       </div>
     </section>
