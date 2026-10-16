@@ -44,11 +44,18 @@ remote '
   base="$1"; release="$2"
   sudo test -d "$base/releases" || { echo "missing $base/releases (see S12)" >&2; exit 1; }
   sudo test -f "$base/shared/mail-config.php" || { echo "missing $base/shared/mail-config.php" >&2; exit 1; }
+  sudo -u "$3" test -r "$base/shared/mail-config.php" || { echo "$3 cannot read mail-config.php" >&2; exit 1; }
   # Without it the daily cap of the form is off (contact.php sends anyway and logs it).
-  sudo -u www-data test -w "$base/shared/state" || { echo "www-data cannot write $base/shared/state" >&2; exit 1; }
+  sudo -u "$3" test -w "$base/shared/state" || { echo "$3 cannot write $base/shared/state" >&2; exit 1; }
+  # The credentials stay out of reach of the other sites of the Pi (pool www, www-data), unless
+  # contact.php itself is back on that pool (CLAUDE.md, PHP).
+  if [ "$3" != www-data ] && sudo -u www-data test -r "$base/shared/mail-config.php"; then
+    echo "www-data can read mail-config.php" >&2
+    exit 1
+  fi
   sudo test ! -e "$base/releases/$release" || { echo "release $release already exists" >&2; exit 1; }
   df -h "$base" | tail -1
-' "$BASE" "$release"
+' "$BASE" "$release" "$PHP_USER"
 previous="$(linked_release "$link")"
 echo "$link -> ${previous:-nothing yet}; new release: $release ($commit, $(git branch --show-current))"
 if [ "$target" = production ] && ! $dry_run; then
@@ -77,7 +84,7 @@ trap remove_unswitched EXIT
 
 step "Send dist/ to releases/$release"
 rsync "${rsync_options[@]}" dist/ "$REMOTE:$BASE/releases/$release/"
-# Owned by root, read by www-data: PHP-FPM must not be able to rewrite its own endpoint.
+# Owned by root, read by nginx and the PHP pool: PHP-FPM must not be able to rewrite its own endpoint.
 remote 'sudo chmod -R u=rwX,go=rX "$1" && sudo chown -R root:root "$1"' "$BASE/releases/$release"
 
 step "Smoke test of releases/$release, before the switch"

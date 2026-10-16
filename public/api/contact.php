@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 // Contact form relay: validates the JSON request, then sends one plain-text
 // e-mail through an authenticated SMTP session (STARTTLS + AUTH LOGIN).
-// Must stay compatible with PHP 7.4 (the version PHP-FPM runs in production).
+// Runs on PHP 8.5, in a PHP-FPM pool of its own (ops/php/dive-pool.conf).
 // Credentials live in mail-config.php, on the server only (never committed), in the shared
 // folder that every release reads (plans/refonte-la-descente/02-architecture.md §16).
 
-// Outside the docroot and kept across releases: 750 root:www-data, state/ 700 www-data.
+// Outside the docroot and kept across releases: 750 root:bulles-php, state/ 700 bulles-php.
 const SHARED_DIR = '/var/www/bullesenvalais/shared';
 const MAIL_CONFIG_FILE = SHARED_DIR . '/mail-config.php';
 

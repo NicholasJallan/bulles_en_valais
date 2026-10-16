@@ -4,12 +4,15 @@
 #   /var/www/bullesenvalais/current -> releases/…        served by the dive block (from S13)
 #   /var/www/bullesenvalais/staging -> releases/…        pre-production
 #   /var/www/bullesenvalais/shared/                       mail-config.php, state/ (contact quota)
+# contact.php runs in the PHP-FPM 8.5 pool `dive` (ops/php/dive-pool.conf), as its own user.
 
 REMOTE="${BEV_REMOTE:-pi@bullesenvalais.ch}"
 BASE='/var/www/bullesenvalais'
 PRODUCTION_URL='https://dive.bullesenvalais.ch/'
 KEEP_RELEASES=5
 RELEASE_PATTERN='^[0-9]{8}-[0-9]{6}$'
+PHP_BIN='php8.5'
+PHP_USER='bulles-php'
 # One multiplexed connection per run: the Pi refuses bursts of new ssh connections.
 SSH_OPTIONS=(-o BatchMode=yes -o ControlMaster=auto -o "ControlPath=$HOME/.ssh/bev-%C" -o ControlPersist=60)
 
@@ -61,8 +64,8 @@ switch_link() {
   ' "$BASE" "$link" "$release"
 }
 
-# Files every release must hold, and a PHP 7.4 syntax check of the endpoint. $1: a path under
-# the base (releases/<name>, or a link name).
+# Files every release must hold, and a syntax check of the endpoint by the PHP of its pool, as
+# its user. $1: a path under the base (releases/<name>, or a link name).
 smoke_files() {
   remote '
     dir="$1/$2"
@@ -71,9 +74,9 @@ smoke_files() {
     done
     sudo test ! -e "$dir/api/mail-config.php" || { echo "mail-config.php inside the release" >&2; exit 1; }
     sudo -u www-data test -r "$dir/index.html" || { echo "www-data cannot read the release" >&2; exit 1; }
-    sudo -u www-data php7.4 -l "$dir/api/contact.php" >/dev/null
-    echo "files ok, contact.php passes php7.4 -l"
-  ' "$BASE" "$1"
+    sudo -u "$3" "$4" -l "$dir/api/contact.php" >/dev/null
+    echo "files ok, contact.php passes $4 -l as $3"
+  ' "$BASE" "$1" "$PHP_USER" "$PHP_BIN"
 }
 
 # Production only: the site answers, and tells whether it already serves this release

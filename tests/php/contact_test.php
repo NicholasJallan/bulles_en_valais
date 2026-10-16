@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// Unit tests for public/api/contact.php — dependency-free, runs on PHP 7.4+.
+// Unit tests for public/api/contact.php — dependency-free, runs on PHP 8.5+.
 // Usage: php tests/php/contact_test.php  (exit code 1 on failure)
 
 if (PHP_SAPI !== 'cli') {
@@ -208,7 +208,7 @@ $previousLog = ini_set('error_log', '/dev/null');
 check('counter in a missing directory → unknown (null)', @take_daily_quota(sys_get_temp_dir() . '/no-such-dir/quota', '2026-10-02', 2) === null);
 $unknown = deliver_within_quota(validate_payload(valid_payload())['data'], sys_get_temp_dir() . '/no-such-dir/quota', '2026-10-02');
 check('counter unavailable → sent anyway (here 500: no configuration in the tests)', $unknown['status'] === 500 && $unknown['body']['error'] === 'delivery');
-// These write a counter in the temporary directory: skipped on the Pi (run_unit_php74.sh).
+// These write a counter in the temporary directory: skipped on the Pi (run_unit_pi.sh).
 if (!defined('CONTACT_TEST_NO_FILES')) {
     $quotaFile = (string) tempnam(sys_get_temp_dir(), 'bev-quota-');
     check('first e-mail of the day → allowed', take_daily_quota($quotaFile, '2026-10-02', 2) === true);

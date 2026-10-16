@@ -41,10 +41,10 @@ Invariants at the end of every session: `npm run build`, `npm run check` and `np
 ```bash
 php tests/php/contact_test.php      # unit tests, dependency-free (local PHP: brew install php)
 bash tests/php/run_integration.sh   # PHP built-in server + fake SMTP server (needs curl, lsof, Python 3.8+; ports 8099 and 2525)
-bash tests/php/run_unit_php74.sh    # unit tests with the production PHP 7.4, piped over ssh to the Pi (ask first)
+bash tests/php/run_unit_pi.sh       # unit tests with the production PHP 8.5, piped over ssh to the Pi (ask first; PHP_BIN=php8.x for another)
 ```
 
-Production runs **PHP-FPM 7.4**: keep `public/api/contact.php` compatible with PHP 7.4 (no `str_starts_with`, `match`, union types, named arguments…). `php7.4 -l` only checks the syntax; `run_unit_php74.sh` runs the unit tests, which call every function including the entry points, under 7.4 without writing anything on the Pi.
+Production runs `contact.php` on **PHP-FPM 8.5**, in a pool of its own (D57); PHP 7.4 compatibility was dropped on 2026-10-16. `php8.5 -l` only checks the syntax; `run_unit_pi.sh` runs the unit tests, which call every function including the entry points, under the PHP of the Pi without writing anything there.
 
 ## Architecture
 
@@ -103,18 +103,18 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 - Without JavaScript the form cannot be sent (`contact.php` accepts JSON only): it shows a notice pointing to WhatsApp, phone and e-mail (kept in S10, D47). The submit button stays disabled until `contact-form.ts` starts.
 - The contact form POSTs JSON to `/api/contact` (`public/api/contact.php`), with a hidden honeypot field `website`, `elapsed` (ms since the page loaded) and `locale`. On failure the form shows an error — listing the fields the server rejected, if any; « try again in a minute » on 429; « the form is taking a break » on 503 busy — with a pre-filled `mailto:` link (never opened automatically) and WhatsApp. Success releases a burst of bubbles (`bv:bubbles`, `lib/bubbles/events.ts`).
 - `contact.php` checks, in order: method, `Content-Type: application/json`, `Origin` allowlist, body ≤ 32 KB, valid JSON, spam (honeypot filled, `elapsed` missing or < 3 s → fake 200, nothing sent, only the reason logged), field rules, then the **daily limit** (50 e-mails, D46: locked counter `/var/www/bullesenvalais/shared/state/contact-quota`, plain file only; past it `503 {error:"busy"}` without sending; an unusable counter sends anyway and logs it). It then sends one plain-text e-mail through Gmail SMTP (STARTTLS + AUTH LOGIN): base64 body, RFC 2047 headers, envelope addresses from the config only.
-- The SMTP credentials live in `mail-config.php` on the Pi: `/var/www/bullesenvalais/shared/mail-config.php` (constant `MAIL_CONFIG_FILE`, outside the releases; a missing file → 500 and a log line); a copy also remains in the old docroot `/var/www/html/dive/api/` until it is archived: **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
+- The SMTP credentials live in `mail-config.php` on the Pi: `/var/www/bullesenvalais/shared/mail-config.php` (constant `MAIL_CONFIG_FILE`, outside the releases; a missing file → 500 and a log line); 640 root:bulles-php, read only by the PHP pool of the site (the old copy in `/var/www/html/dive/api/` was removed on 2026-10-16): **never read, print, commit or sync it**. Any local copy is gitignored (`api/mail-config.php`, `public/api/mail-config.php`) and useless: the tests use `tests/php/test-config.php`. A copy in `public/api/` would end up in `dist/`.
 
 ## Production (Raspberry Pi)
 
-`ssh pi@bullesenvalais.ch`: Debian, nginx 1.22.1, PHP-FPM 7.4 (the default of every site on the Pi; `php8.2` passes the unit tests of `contact.php` but its FPM pool is stopped: switching dive to it is a separate, tested step). Any action on the Pi (ssh writes, nginx, deploy) needs Nicholas's agreement in the session, with a dry run first.
+`ssh pi@bullesenvalais.ch`: Debian, nginx 1.22.1. Any action on the Pi (ssh writes, nginx, deploy) needs Nicholas's agreement in the session, with a dry run first.
 
 ```
 /var/www/bullesenvalais/
-├── releases/<YYYYMMDD-HHMMSS>/   one build of dist/ each (UTC, root:root, read by www-data)
+├── releases/<YYYYMMDD-HHMMSS>/   one build of dist/ each (UTC, root:root, world-readable)
 ├── current -> releases/…         served by the dive block
 ├── staging -> releases/…         pre-production release (served by no nginx block)
-├── shared/                       750 root:www-data: mail-config.php (640), state/contact-quota (dir 700 www-data)
+├── shared/                       750 root:bulles-php: mail-config.php (640), state/contact-quota* (dir 700 bulles-php)
 └── deploy.log
 ```
 
@@ -122,12 +122,18 @@ tests/                     e2e/ · visual/ · a11y/ (Playwright) · php/ (contac
 
 ```bash
 ops/deploy.sh production --dry-run   # npm ci, tests, build, pre-flight on the Pi, rsync -n
-ops/deploy.sh production             # new release, smoke test (files, php7.4 -l), atomic switch, HTTP check; asks y/N
+ops/deploy.sh production             # new release, smoke test (files, php8.5 -l as bulles-php), atomic switch, HTTP check; asks y/N
 ops/deploy.sh staging                # same, on the staging link
 ops/rollback.sh --list | previous | <release>   # production by default; `staging previous` for staging
 ```
 
 A clean git tree is required. A release that fails before the switch is removed; if `/` stops answering after the switch, the previous release is put back. The last 5 releases are kept (never the ones `current` or `staging` point to). `--skip-build` reuses `dist/` (trusted to match HEAD).
+
+### PHP
+
+- The Pi keeps **PHP-FPM 7.4** as the default of every other site (pool `www`, `www-data`, `/run/php/php7.4-fpm.sock`, named explicitly by their nginx blocks); `php` (CLI) stays on 8.2 and the `php-fpm.sock` alternative on 7.4, both set to **manual** so that installing a PHP never moves them. PHP comes from packages.sury.org, which unattended-upgrades does not cover: `sudo apt-get update && sudo apt-get install --only-upgrade php8.5-fpm php8.5-cli php8.5-common php8.5-opcache php8.5-readline` by hand (security fixes of 8.5 until the end of 2029).
+- `contact.php` runs in the **PHP-FPM 8.5 pool `dive`** (`/etc/php/8.5/fpm/pool.d/dive.conf` = `ops/php/dive-pool.conf`): system user `bulles-php`, socket `/run/php/php8.5-fpm-dive.sock` (0660 www-data, for nginx), `pm = ondemand`, `open_basedir` = releases + shared. The pool `www` of 8.5 is set aside (`www.conf.disabled`), so nothing else runs on 8.5. Only `bulles-php` reads `mail-config.php`: the code of the other sites (www-data) cannot. `error_log()` goes to `dive.error_log` through FastCGI.
+- Back to PHP-FPM 7.4 (valid only while `contact.php` uses nothing specific to 8.x): `sudo chown root:www-data /var/www/bullesenvalais/shared /var/www/bullesenvalais/shared/mail-config.php && sudo chown -R www-data:www-data /var/www/bullesenvalais/shared/state`, then the dive `fastcgi_pass` back to `unix:/run/php/php7.4-fpm.sock`, `sudo nginx -t && sudo systemctl reload nginx`, and in `ops/lib/common.sh` `PHP_BIN=php7.4`, `PHP_USER=www-data`.
 
 ### nginx
 
@@ -142,4 +148,4 @@ A clean git tree is required. A release that fails before the switch is removed;
 
 ### Rollback to the old site (until the old docroot is archived, J+14)
 
-The old React site is intact in `/var/www/html/dive`. Last resort: restore `/etc/nginx/sites-available/bullesenvalais.bak-20261002-155459-s13`, then `sudo nginx -t && sudo systemctl reload nginx`. Prefer `ops/rollback.sh previous`.
+The old React site is intact in `/var/www/html/dive`, but its copy of `mail-config.php` was removed on 2026-10-16 (D57): its form would no longer send. Last resort: restore `/etc/nginx/sites-available/bullesenvalais.bak-20261002-155459-s13`, then `sudo nginx -t && sudo systemctl reload nginx`. Prefer `ops/rollback.sh previous`.
