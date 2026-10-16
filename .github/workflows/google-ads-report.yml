@@ -13,15 +13,16 @@ permissions:
 jobs:
   send-report:
     name: Extraire GA4 et Envoyer le Rapport
-    runs-on: ubuntu-latest
+    # Image fixée : ubuntu-latest passe à Ubuntu 26 dès le 19.10.2026, à valider avant d'y aller.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
       - name: Récupérer le code source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Configurer Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.11'
           cache: 'pip'
