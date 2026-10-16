@@ -33,7 +33,11 @@ const links = [
 ] as const;
 ---
 
-<header class="site-header" data-controller="nav" data-tone="deep">
+<header
+  class:list={['site-header', { 'has-hero': route === 'home' }]}
+  data-controller="nav"
+  data-tone="deep"
+>
   <div class="wrap site-header-inner">
     <a class="brand" href={anchor('top')} aria-label={t.a11y.home}>
       <Logo class="brand-logo" aria-hidden="true" focusable="false" />
@@ -158,20 +162,19 @@ const links = [
     margin-inline-end: auto;
   }
 
-  /* Larger over the hero, back to its box in the glass bar: scale only, so the bar keeps its
-     height (--nav-block-size, measured by nav.ts, places the pinned tracks). The hero leaves room
-     for it (Hero.astro). */
+  /* Larger over the home hero only (has-hero), back to its box in the glass bar: scale only, so
+     the bar keeps its height (--nav-block-size, measured by nav.ts, places the pinned tracks). The
+     home hero leaves room for it (Hero.astro); the other pages keep the logo in its box. */
   .brand :global(.brand-logo) {
     inline-size: auto;
     block-size: var(--logo-masthead);
-    scale: var(--logo-hero-scale);
     transform-origin: left top;
     filter: drop-shadow(0 0 0.4rem var(--logo-halo));
     transition: scale var(--dur-base) var(--ease-surface);
   }
 
-  .site-header:global(.is-glass) .brand :global(.brand-logo) {
-    scale: 1;
+  .site-header.has-hero:not(:global(.is-glass)) .brand :global(.brand-logo) {
+    scale: var(--logo-hero-scale);
   }
 
   .nav-links {

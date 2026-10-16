@@ -9,6 +9,12 @@ const PAGES = [
   '/en/privacy/',
   '/en/legal-notice/',
   '/404.html',
+  '/bapteme-plongee-valais/',
+  '/combinaison-etanche-valais/',
+  '/cours-open-water-valais/',
+  '/en/try-scuba-diving-valais/',
+  '/en/dry-suit-diving-valais/',
+  '/en/open-water-diver-valais/',
 ];
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const BLOCKING = new Set(['serious', 'critical']);

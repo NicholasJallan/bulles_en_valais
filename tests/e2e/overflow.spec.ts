@@ -1,6 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-const PAGES = ['/', '/en/', '/confidentialite/', '/en/legal-notice/', '/404.html'];
+const PAGES = [
+  '/',
+  '/en/',
+  '/confidentialite/',
+  '/en/legal-notice/',
+  '/404.html',
+  '/bapteme-plongee-valais/',
+  '/combinaison-etanche-valais/',
+  '/cours-open-water-valais/',
+  '/en/try-scuba-diving-valais/',
+  '/en/dry-suit-diving-valais/',
+  '/en/open-water-diver-valais/',
+];
 
 test.use({ viewport: { width: 320, height: 640 } });
 

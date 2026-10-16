@@ -56,7 +56,9 @@ const teaching = CREDENTIALS.filter((credential) =>
     <a href={spotlightHref} class="hero-spotlight">
       <span class="hero-spotlight-badge">{localize(spotlight.badge, locale)}</span>
       <span class="hero-spotlight-title">{localize(spotlight.title, locale)}</span>
-      <span class="hero-spotlight-arrow" aria-hidden="true">&rarr;</span>
+      <span class="hero-spotlight-arrow" aria-hidden="true">
+        &rarr;
+      </span>
     </a>
     <div class="hero-actions">
       <Button href="#contact" icon="arrow-down">
@@ -257,14 +259,11 @@ const teaching = CREDENTIALS.filter((credential) =>
     text-decoration: none;
     color: var(--fg);
     backdrop-filter: blur(8px);
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    transition:
+      background-color var(--dur-fast) var(--ease-surface),
+      border-color var(--dur-fast) var(--ease-surface),
+      translate var(--dur-fast) var(--ease-surface);
     max-inline-size: 100%;
-  }
-
-  .hero-spotlight:hover {
-    background-color: color-mix(in oklch, var(--fg) 14%, transparent);
-    border-color: color-mix(in oklch, var(--fg) 32%, transparent);
-    transform: translateY(-1px);
   }
 
   .hero-spotlight-badge {
@@ -279,12 +278,29 @@ const teaching = CREDENTIALS.filter((credential) =>
   .hero-spotlight-arrow {
     font-family: var(--font-sans);
     color: var(--fg-soft);
-    transition: transform 0.2s ease;
+    transition:
+      translate var(--dur-fast) var(--ease-surface),
+      color var(--dur-fast) var(--ease-surface);
   }
 
-  .hero-spotlight:hover .hero-spotlight-arrow {
-    transform: translateX(2px);
-    color: var(--fg);
+  @media (hover: hover) {
+    .hero-spotlight:hover {
+      background-color: color-mix(in oklch, var(--fg) 14%, transparent);
+      border-color: color-mix(in oklch, var(--fg) 32%, transparent);
+    }
+
+    .hero-spotlight:hover .hero-spotlight-arrow {
+      color: var(--fg);
+    }
+
+    /* The nudges are motion: not under reduced motion nor in calm mode (no html.motion-ok). */
+    :global(html.motion-ok) .hero-spotlight:hover {
+      translate: 0 -1px;
+    }
+
+    :global(html.motion-ok) .hero-spotlight:hover .hero-spotlight-arrow {
+      translate: 2px 0;
+    }
   }
 
   .hero-actions {

@@ -1,19 +1,21 @@
 import { expect, test } from '@playwright/test';
 import { getDictionary } from '../../src/i18n/index.ts';
+import { alternates, type RouteId } from '../../src/i18n/routes.ts';
 import type { Locale } from '../../src/i18n/types.ts';
 
 const SITE = 'https://dive.bullesenvalais.ch';
-const PAGES: ReadonlyArray<{ path: string; locale: Locale; lang: string }> = [
-  { path: '/', locale: 'fr', lang: 'fr-CH' },
-  { path: '/en/', locale: 'en', lang: 'en' },
-];
-const ALTERNATES = [
-  { hreflang: 'fr-CH', href: `${SITE}/` },
-  { hreflang: 'en', href: `${SITE}/en/` },
-  { hreflang: 'x-default', href: `${SITE}/` },
+const PAGES: ReadonlyArray<{ path: string; locale: Locale; lang: string; route: RouteId }> = [
+  { path: '/', locale: 'fr', lang: 'fr-CH', route: 'home' },
+  { path: '/en/', locale: 'en', lang: 'en', route: 'home' },
+  { path: '/bapteme-plongee-valais/', locale: 'fr', lang: 'fr-CH', route: 'baptism' },
+  { path: '/combinaison-etanche-valais/', locale: 'fr', lang: 'fr-CH', route: 'drysuit' },
+  { path: '/cours-open-water-valais/', locale: 'fr', lang: 'fr-CH', route: 'openwater' },
+  { path: '/en/try-scuba-diving-valais/', locale: 'en', lang: 'en', route: 'baptism' },
+  { path: '/en/dry-suit-diving-valais/', locale: 'en', lang: 'en', route: 'drysuit' },
+  { path: '/en/open-water-diver-valais/', locale: 'en', lang: 'en', route: 'openwater' },
 ];
 
-for (const { path, locale, lang } of PAGES) {
+for (const { path, locale, lang, route } of PAGES) {
   test.describe(`page ${path}`, () => {
     test('answers with its heading, in its language, without console errors', async ({ page }) => {
       const errors: string[] = [];
@@ -26,11 +28,15 @@ for (const { path, locale, lang } of PAGES) {
       expect(response?.status()).toBe(200);
       await expect(page.locator('html')).toHaveAttribute('lang', lang);
 
-      const { before, em, after } = getDictionary(locale).hero.title;
       const heading = page.getByRole('heading', { level: 1 });
       await expect(heading).toBeVisible();
-      // Astro 7 (compressHTML: 'jsx') drops implicit spaces around <em>: they must survive.
-      await expect(heading).toHaveText([before, em, after].filter(Boolean).join(' '));
+      if (route === 'home') {
+        const { before, em, after } = getDictionary(locale).hero.title;
+        // Astro 7 (compressHTML: 'jsx') drops implicit spaces around <em>: they must survive.
+        await expect(heading).toHaveText([before, em, after].filter(Boolean).join(' '));
+      } else {
+        expect(await heading.textContent()).toBeTruthy();
+      }
       await expect(page.locator('html')).toHaveClass(/\bjs\b/);
       expect(errors).toEqual([]);
     });
@@ -38,10 +44,10 @@ for (const { path, locale, lang } of PAGES) {
     test('declares its canonical URL and the hreflang alternates', async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${SITE}${path}`);
-      for (const { hreflang, href } of ALTERNATES) {
+      for (const { hreflang, path: alternatePath } of alternates(route)) {
         await expect(page.locator(`link[rel="alternate"][hreflang="${hreflang}"]`)).toHaveAttribute(
           'href',
-          href,
+          `${SITE}${alternatePath}`,
         );
       }
     });

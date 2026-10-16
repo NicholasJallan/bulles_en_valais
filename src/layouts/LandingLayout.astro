@@ -125,16 +125,14 @@ const contactChannels = [
   ogDescription={ogDescription}
 >
   <script type="application/ld+json" is:inline slot="head" set:html={jsonLd} />
-
   <!-- En-tête avec Navigation -->
   <Nav locale={locale} route={landing.route} />
 
   <main id="content" class="landing-main">
-    
     <!-- HERO SECTION -->
-    <section class="landing-hero" data-tone="deep">
+    <section class="landing-hero" id="top" data-tone="deep">
       <div class="wrap landing-hero-content">
-        <span class="landing-eyebrow">{localize(landing.hero.eyebrow, locale)}</span>
+        <span class="eyebrow landing-eyebrow">{localize(landing.hero.eyebrow, locale)}</span>
         <h1 class="landing-title">
           <EmphasisText
             value={{
@@ -177,7 +175,9 @@ const contactChannels = [
     <section data-tone="surface" class="landing-highlights-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Avantages & Sécurité' : 'Benefits & Safety'}</span>
+          <span class="eyebrow landing-section-eyebrow">
+            {locale === 'fr' ? 'Avantages & Sécurité' : 'Benefits & Safety'}
+          </span>
           <h2 class="landing-section-title">
             <em>{localize(landing.highlightsTitle, locale)}</em>
           </h2>
@@ -200,7 +200,9 @@ const contactChannels = [
     <section data-tone="lagoon" class="landing-steps-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Progression & Méthode' : 'Progression & Method'}</span>
+          <span class="eyebrow landing-section-eyebrow">
+            {locale === 'fr' ? 'Progression & Méthode' : 'Progression & Method'}
+          </span>
           <h2 class="landing-section-title">
             <em>{localize(landing.stepsTitle, locale)}</em>
           </h2>
@@ -227,7 +229,9 @@ const contactChannels = [
     <section data-tone="deep" class="landing-faq-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Questions & Réponses' : 'Questions & Answers'}</span>
+          <span class="eyebrow landing-section-eyebrow">
+            {locale === 'fr' ? 'Questions & Réponses' : 'Questions & Answers'}
+          </span>
           <h2 class="landing-section-title">
             <em>{localize(landing.faqTitle, locale)}</em>
           </h2>
@@ -252,18 +256,18 @@ const contactChannels = [
     <section id="reserver" data-tone="surface" class="landing-contact-section landing-section">
       <div class="wrap">
         <header class="landing-section-header">
-          <span class="landing-section-eyebrow">{locale === 'fr' ? 'Contact & Réservation' : 'Booking & Contact'}</span>
+          <span class="eyebrow landing-section-eyebrow">
+            {locale === 'fr' ? 'Contact & Réservation' : 'Booking & Contact'}
+          </span>
           <h2 class="landing-section-title">
             {locale === 'fr' ? 'Planifions votre ' : 'Let’s plan your '}
             <em>{locale === 'fr' ? 'immersion' : 'session'}</em>
             {locale === 'fr' ? ' ensemble.' : ' together.'}
           </h2>
           <p class="landing-section-lead">
-            {
-              locale === 'fr'
-                ? 'Remplissez le formulaire ci-dessous ou écrivez-moi directement par WhatsApp. Dates flexibles selon vos disponibilités.'
-                : 'Fill out the form below or message me directly on WhatsApp. Flexible scheduling around your calendar.'
-            }
+            {locale === 'fr'
+              ? 'Remplissez le formulaire ci-dessous ou écrivez-moi directement par WhatsApp. Dates flexibles selon vos disponibilités.'
+              : 'Fill out the form below or message me directly on WhatsApp. Flexible scheduling around your calendar.'}
           </p>
         </header>
 
@@ -302,15 +306,16 @@ const contactChannels = [
     <!-- PASSERELLE VERS LA DESCENTE (LE MONO-PAGE ARTISTIQUE) -->
     <section class="landing-descent-teaser" data-tone="abyss">
       <div class="wrap landing-teaser-inner">
-        <span class="landing-teaser-eyebrow">{localize(landing.descentTeaser.eyebrow, locale)}</span>
+        <span class="eyebrow landing-teaser-eyebrow">
+          {localize(landing.descentTeaser.eyebrow, locale)}
+        </span>
         <h2 class="landing-teaser-title">{localize(landing.descentTeaser.title, locale)}</h2>
         <p class="landing-teaser-lead">{localize(landing.descentTeaser.lead, locale)}</p>
-        <a href={homeUrl} class="landing-teaser-btn">
+        <Button href={homeUrl} variant="secondary">
           {localize(landing.descentTeaser.cta, locale)}
-        </a>
+        </Button>
       </div>
     </section>
-
   </main>
 
   <Footer locale={locale} route={landing.route} />
@@ -327,14 +332,11 @@ const contactChannels = [
     color: var(--fg);
   }
 
+  /* Eyebrows take the site's .eyebrow (typography.css: --fg-soft, AA in every tone), centred. */
   .landing-eyebrow,
-  .landing-section-eyebrow {
-    font-size: var(--step--2);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent-deco);
-    font-weight: var(--text-strong);
-    display: block;
+  .landing-section-eyebrow,
+  .landing-teaser-eyebrow {
+    justify-content: center;
     margin-block-end: var(--space-2xs);
   }
 
@@ -352,11 +354,6 @@ const contactChannels = [
     letter-spacing: var(--display-tracking);
   }
 
-  .landing-section-title :global(em) {
-    color: var(--c-deco-emerald);
-    font-style: italic;
-  }
-
   .landing-section-lead {
     font-size: var(--step-0);
     color: var(--fg-soft);
@@ -366,7 +363,7 @@ const contactChannels = [
 
   .landing-hero {
     padding-block: var(--space-3xl) var(--space-2xl);
-    background: radial-gradient(circle at 50% 20%, oklch(24% 0.05 240) 0%, oklch(14% 0.03 245) 100%);
+    background: radial-gradient(circle at 50% 20%, var(--c-deep) 0%, var(--c-abyss) 100%);
     border-block-end: 1px solid var(--line);
     text-align: center;
   }
@@ -384,11 +381,6 @@ const contactChannels = [
     line-height: var(--leading-tight);
     font-weight: var(--display-weight);
     letter-spacing: var(--display-tracking);
-  }
-
-  .landing-title :global(em) {
-    color: var(--c-deco-emerald);
-    font-style: italic;
   }
 
   .landing-lead {
@@ -418,7 +410,7 @@ const contactChannels = [
     display: block;
     font-size: var(--step--2);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--tracking-label);
     color: var(--fg-soft);
   }
 
@@ -454,17 +446,25 @@ const contactChannels = [
     display: grid;
     gap: var(--space-xs);
     align-content: start;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition:
+      translate var(--dur-fast) var(--ease-surface),
+      border-color var(--dur-fast) var(--ease-surface);
   }
 
-  .landing-highlight-card:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+  @media (hover: hover) {
+    .landing-highlight-card:hover {
+      border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+    }
+
+    /* The lift is motion: not under reduced motion nor in calm mode (no html.motion-ok). */
+    :global(html.motion-ok) .landing-highlight-card:hover {
+      translate: 0 -2px;
+    }
   }
 
   .landing-card-icon {
-    width: 2.5rem;
-    height: 2.5rem;
+    inline-size: var(--space-l);
+    block-size: var(--space-l);
     border-radius: var(--radius-sharp);
     background-color: color-mix(in oklch, var(--action) 12%, transparent);
     color: var(--action);
@@ -527,7 +527,8 @@ const contactChannels = [
   .landing-step-duration {
     font-size: var(--step--2);
     color: var(--fg-soft);
-    font-family: monospace;
+    font-family: var(--font-hud);
+    font-variant-numeric: tabular-nums;
   }
 
   .landing-step-description {
@@ -565,12 +566,13 @@ const contactChannels = [
     display: none;
   }
 
-  .landing-faq-arrow {
-    transition: transform 0.2s ease;
+  .landing-faq-question :global(.landing-faq-arrow) {
+    flex: none;
+    transition: rotate var(--dur-fast) var(--ease-surface);
   }
 
-  .landing-faq-details[open] .landing-faq-arrow {
-    transform: rotate(180deg);
+  .landing-faq-details[open] :global(.landing-faq-arrow) {
+    rotate: 180deg;
   }
 
   .landing-faq-answer {
@@ -619,11 +621,13 @@ const contactChannels = [
     border-radius: var(--radius-soft);
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s ease;
+    transition: border-color var(--dur-fast) var(--ease-surface);
   }
 
-  .landing-channel-link:hover {
-    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+  @media (hover: hover) {
+    .landing-channel-link:hover {
+      border-color: color-mix(in oklch, var(--fg) 30%, transparent);
+    }
   }
 
   .landing-channel-label {
@@ -639,7 +643,7 @@ const contactChannels = [
   /* Descent Teaser */
   .landing-descent-teaser {
     padding-block: var(--space-3xl);
-    background: linear-gradient(180deg, oklch(14% 0.03 245) 0%, oklch(8% 0.02 245) 100%);
+    background: linear-gradient(180deg, var(--c-abyss-raised) 0%, var(--c-abyss) 100%);
     border-block-start: 1px solid var(--line);
     text-align: center;
   }
@@ -649,13 +653,6 @@ const contactChannels = [
     display: grid;
     gap: var(--space-m);
     justify-items: center;
-  }
-
-  .landing-teaser-eyebrow {
-    font-size: var(--step--2);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent-deco);
   }
 
   .landing-teaser-title {
@@ -669,25 +666,5 @@ const contactChannels = [
     color: var(--fg-soft);
     font-size: var(--step-0);
     line-height: var(--leading-lead);
-  }
-
-  .landing-teaser-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    padding: var(--space-s) var(--space-l);
-    background-color: color-mix(in oklch, var(--fg) 10%, transparent);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sharp);
-    color: var(--fg);
-    text-decoration: none;
-    font-weight: var(--text-strong);
-    backdrop-filter: blur(8px);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-  }
-
-  .landing-teaser-btn:hover {
-    background-color: color-mix(in oklch, var(--fg) 18%, transparent);
-    border-color: color-mix(in oklch, var(--fg) 30%, transparent);
   }
 </style>
